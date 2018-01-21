@@ -2,22 +2,49 @@
 
 :focus {outline:0 !important;}
 
+body {
+    width: 95vw;
+    height: 95vh;
+}
+#webview {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    display: inline-flex !important;
+}
 
+html {
+    margin: 0;
+}
+.ui-widget.ui-widget-content{
+    border: none;
+}
+
+#tabs {
+    display: none;
+}
+
+.ui-tabs{
+    padding: 0;
+    height: 100%;
+    width: 100%;
+}
 .ui-tabs-vertical .ui-tabs-nav {
     padding: .2em .1em .2em .2em;
     float: left;
     width: 10em;
-    min-height: 500px;
     height: 100%;
     }
 
 .ui-tabs-vertical .ui-tabs-nav li {
     clear: left;
     width: 100%;
-    border-bottom-width: 1px !important;
+    /*border-bottom-width: 1px !important;*/
     border-right-width: 0 !important;
-    margin: 0 -1px .2em 0;
-    height: 100px;
+    /*margin: 0 -1px .2em 0;*/
+    height: 120px;
     }
 
 .ui-tabs-vertical .ui-tabs-nav li a {
@@ -26,6 +53,11 @@
     height: 100px;
     }
 
+.ui-tabs .ui-tabs-nav .ui-tabs-anchor{
+    padding-top: 50px;
+    padding-bottom: 50px;
+    padding-left: 1em;
+}
 
 .ui-tabs-vertical .ui-tabs-nav li.ui-tabs-active {
     padding-bottom: 0;
@@ -35,6 +67,6 @@
 
 .ui-tabs-vertical .ui-tabs-panel {
     padding: 1em;
-    float: right;
-    min-height: 600px;
+    overflow: hidden;
+    height: 100%;
     }

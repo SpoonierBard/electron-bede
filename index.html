@@ -7,15 +7,16 @@
     <script>if (typeof module === 'object') {window.module = module; module = undefined;}</script>
     <script type=text/javascript src="js/jquery-ui-1.12.1.custom/external/jquery/jquery.js"></script>
     <script type=text/javascript src="js/jquery-ui-1.12.1.custom/jquery-ui.js"></script>
-    <script>
-        $( function() {
-            $( "#tabs" ).tabs().addClass( "ui-tabs-vertical ui-helper-clearfix" );
-            $( "#tabs li" ).removeClass( "ui-corner-top" ).addClass( "ui-corner-left" );
-        } );
-    </script>
+    <script type=text/javascript src="index.js"></script>
     <script>if (window.module) module = window.module;</script>
 </head>
 <body>
+<div id="file-upload">
+    <form>
+        <input type="file" id="json-file">
+        <input type="button" id="upload" value="Upload" onclick="loadFile();">
+    </form>
+</div>
 <div id="tabs">
     <ul>
         <li><a href="#tab-1">Metadata</a></li>
@@ -25,6 +26,15 @@
     </ul>
     <div id="tab-1">
         <h2>Metadata</h2>
+        <div>
+            <label><strong>Dataset: </strong></label> <label id="dataset"></label><br>
+            <label><strong>Topics: </strong></label> <label id="topics"></label><br>
+            <label><strong>Iterations: </strong></label> <label id="iterations"></label>
+        </div>
+        <div>
+            <label><strong>α : </strong></label> <label id="alpha"></label><br>
+            <label><strong>β : </strong></label> <label id="beta"></label>
+        </div>
     </div>
     <div id="tab-2">
         <h2>Heat Map</h2>
