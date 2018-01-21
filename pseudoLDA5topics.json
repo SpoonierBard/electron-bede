@@ -1,0 +1,190 @@
+{
+    "dataset": "pseudoLDA.csv",
+    "topics": 5,
+    "iterations": 200,
+    "alpha": 0.8,
+    "beta": 0.8,
+    "wordsByLocation": [
+        [
+            "for",
+            "for",
+            "of",
+            "topic",
+            "topic",
+            "is",
+            "of",
+            "is",
+            "topic"
+        ],
+        [
+            "for",
+            "for",
+            "for",
+            "for",
+            "topic",
+            "is",
+            "topic",
+            "topic",
+            "topic",
+            "for",
+            "topic"
+        ],
+        [
+            "of",
+            "for",
+            "for"
+        ],
+        [
+            "is",
+            "topic",
+            "of"
+        ]
+    ],
+    "topicsByLocation": [
+        [
+            1,
+            1,
+            1,
+            4,
+            1,
+            4,
+            1,
+            4,
+            4
+        ],
+        [
+            0,
+            0,
+            0,
+            0,
+            0,
+            2,
+            0,
+            0,
+            0,
+            0,
+            0
+        ],
+        [
+            3,
+            0,
+            1
+        ],
+        [
+            2,
+            2,
+            1
+        ]
+    ],
+    "wordCounts": {
+        "for": 9,
+        "of": 4,
+        "topic": 9,
+        "is": 4
+    },
+    "wordTopicCounts": {
+        "for": [
+            1,
+            2,
+            3,
+            2,
+            1
+        ],
+        "of": [
+            0,
+            2,
+            1,
+            1,
+            0
+        ],
+        "topic": [
+            3,
+            1,
+            1,
+            1,
+            3
+        ],
+        "is": [
+            1,
+            1,
+            0,
+            1,
+            1
+        ]
+    },
+    "topicList": [
+        {
+            "for": 6,
+            "of": 0,
+            "topic": 5,
+            "is": 0
+        },
+        {
+            "for": 3,
+            "of": 3,
+            "topic": 1,
+            "is": 0
+        },
+        {
+            "for": 0,
+            "of": 0,
+            "topic": 1,
+            "is": 2
+        },
+        {
+            "for": 0,
+            "of": 1,
+            "topic": 0,
+            "is": 0
+        },
+        {
+            "for": 0,
+            "of": 0,
+            "topic": 2,
+            "is": 2
+        }
+    ],
+    "topicWordCounts": [
+        11,
+        7,
+        3,
+        1,
+        4
+    ],
+    "docList": [
+        [
+            0,
+            5,
+            0,
+            0,
+            4
+        ],
+        [
+            10,
+            0,
+            1,
+            0,
+            0
+        ],
+        [
+            1,
+            1,
+            0,
+            1,
+            0
+        ],
+        [
+            0,
+            1,
+            2,
+            0,
+            0
+        ]
+    ],
+    "docWordCounts": [
+        101,
+        111,
+        32,
+        20
+    ]
+}
