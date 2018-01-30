@@ -28,6 +28,15 @@ function loadFile() {
     document.getElementById("iterations").innerHTML = model["iterations"];
     document.getElementById("alpha").innerHTML = model["alpha"];
     document.getElementById("beta").innerHTML = model["beta"];
+    //document.getElementById("topicsByLocWithStopwords").innerHTML = model["topicsByLocationWithStopwords"];
+    let fullText = '';
+    for (docInText in model.wordsByLocationWithStopwords) {
+        console.log(docInText)
+        for (word in model.wordsByLocationWithStopwords[docInText]) {
+            fullText += model.wordsByLocationWithStopwords[docInText][word] + "<br>";
+        }
+    }
+    document.getElementById("fullText").innerHTML = fullText;
 }
 
 //Progress from welcome screen to data visualization tabs
@@ -44,3 +53,9 @@ $( function() {
     $( "#tabs li" ).removeClass( "ui-corner-top" ).addClass( "ui-corner-left" );
 } );
 
+function createAnnotatedText() {
+    for (word in "wordByLocWithStopwords") {
+        fullText += word + "<br>";
+    }
+    document.getElementById("fullText").innerHTML = fullText;
+}
