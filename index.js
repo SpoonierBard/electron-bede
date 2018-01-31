@@ -1,6 +1,6 @@
 //TODO: add drag/drop capability for file upload
 
-let model;
+var model;
 //Function to read data from uploaded json file. Called on button click. Saves data to localstorage as a string.
 function loadFile() {
     hideUploadScreen();
