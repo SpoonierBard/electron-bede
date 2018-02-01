@@ -30,8 +30,7 @@ function loadFile() {
     document.getElementById("beta").innerHTML = model["beta"];
     
     //testing stuff
-    createPrevalenceArray(0);
-    createHeatmap(prevalenceArray[4])
+    buildFullHeatmap(10);
 
 }
 
