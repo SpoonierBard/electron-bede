@@ -26,6 +26,10 @@ html {
     display: none;
 }
 
+#tab-3 {
+    font-family: monospace;
+}
+
 .ui-tabs{
     padding: 0;
     height: 100%;
@@ -67,6 +71,7 @@ html {
 
 .ui-tabs-vertical .ui-tabs-panel {
     padding: 1em;
-    overflow: hidden;
+    overflow: scroll;
     height: 100%;
     }
+

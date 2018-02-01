@@ -28,15 +28,16 @@ function loadFile() {
     document.getElementById("iterations").innerHTML = model["iterations"];
     document.getElementById("alpha").innerHTML = model["alpha"];
     document.getElementById("beta").innerHTML = model["beta"];
+    //document.getElementById("fullText").innerHTML = model["wordsByLocationWithStopwords"];
     //document.getElementById("topicsByLocWithStopwords").innerHTML = model["topicsByLocationWithStopwords"];
-    let fullText = '';
-    for (docInText in model.wordsByLocationWithStopwords) {
+    //let fullText = '';
+    /*for (docInText in model.wordsByLocationWithStopwords) {
         console.log(docInText)
         for (word in model.wordsByLocationWithStopwords[docInText]) {
-            fullText += model.wordsByLocationWithStopwords[docInText][word] + "<br>";
+            fullText += model.wordsByLocationWithStopwords[docInText][word] + " ";
         }
     }
-    document.getElementById("fullText").innerHTML = fullText;
+    document.getElementById("fullText").innerHTML = fullText;*/
 }
 
 //Progress from welcome screen to data visualization tabs
@@ -54,8 +55,29 @@ $( function() {
 } );
 
 function createAnnotatedText() {
-    for (word in "wordByLocWithStopwords") {
-        fullText += word + "<br>";
+    model = JSON.parse(localStorage.getItem("model"));
+    boxHeight = 25;
+    lineLength = 0;
+    for (docInText in model.wordsByLocationWithStopwords) {
+        for (word in model.wordsByLocationWithStopwords[docInText]) {
+            wordLength = model.wordsByLocationWithStopwords[docInText][word].length;
+            boxWidth = wordLength * 10 + 10;
+            /*d3.select("svg")
+                .append('rect')
+                .attr('x', lineLength % 500)
+                .attr('y', boxHeight * Math.floor(lineLength / 500))
+                .attr('width', boxWidth + 'px')
+                .attr('height', boxHeight + 'px')
+                .attr('fill-opacity', '0');*/
+            d3.select("svg")
+                .append("text")
+                .attr('x', lineLength % 700)
+                .attr('y', boxHeight * Math.floor(lineLength / 700) + 30)
+                .attr('width', boxWidth + 'px')
+                .attr('height', boxHeight + 'px')
+                .text(model.wordsByLocationWithStopwords[docInText][word]);
+            lineLength += boxWidth;
+            //fullText += model.wordsByLocationWithStopwords[docInText][word] + " ";
+        }
     }
-    document.getElementById("fullText").innerHTML = fullText;
 }
