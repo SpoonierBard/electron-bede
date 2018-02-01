@@ -28,6 +28,11 @@ function loadFile() {
     document.getElementById("iterations").innerHTML = model["iterations"];
     document.getElementById("alpha").innerHTML = model["alpha"];
     document.getElementById("beta").innerHTML = model["beta"];
+    
+    //testing stuff
+    createPrevalenceArray(0);
+    createHeatmap(prevalenceArray[4])
+
 }
 
 //Progress from welcome screen to data visualization tabs
