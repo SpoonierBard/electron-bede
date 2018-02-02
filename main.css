@@ -75,3 +75,26 @@ html {
     height: 100%;
     }
 
+span {
+    fill-opacity: 20;
+    }
+
+.topic-0 {
+    background-color: #cd0a0a;
+}
+
+.topic-1 {
+    background-color: aqua;
+}
+
+.topic-2 {
+    background-color: blueviolet;
+}
+
+.topic-3 {
+    background-color: chartreuse;
+}
+
+.topic-4 {
+    background-color: darkorange;
+}

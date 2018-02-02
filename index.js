@@ -56,28 +56,12 @@ $( function() {
 
 function createAnnotatedText() {
     model = JSON.parse(localStorage.getItem("model"));
-    boxHeight = 25;
-    lineLength = 0;
     for (docInText in model.wordsByLocationWithStopwords) {
         for (word in model.wordsByLocationWithStopwords[docInText]) {
-            wordLength = model.wordsByLocationWithStopwords[docInText][word].length;
-            boxWidth = wordLength * 10 + 10;
-            /*d3.select("svg")
-                .append('rect')
-                .attr('x', lineLength % 500)
-                .attr('y', boxHeight * Math.floor(lineLength / 500))
-                .attr('width', boxWidth + 'px')
-                .attr('height', boxHeight + 'px')
-                .attr('fill-opacity', '0');*/
-            d3.select("svg")
-                .append("text")
-                .attr('x', lineLength % 700)
-                .attr('y', boxHeight * Math.floor(lineLength / 700) + 30)
-                .attr('width', boxWidth + 'px')
-                .attr('height', boxHeight + 'px')
-                .text(model.wordsByLocationWithStopwords[docInText][word]);
-            lineLength += boxWidth;
-            //fullText += model.wordsByLocationWithStopwords[docInText][word] + " ";
+            d3.select("#tab-3")
+                .append("span")
+                .text(model.wordsByLocationWithStopwords[docInText][word]+ " ")
+                .attr("class", "topic-" + model.topicsByLocationWithStopwords[docInText][word]);
         }
     }
 }
