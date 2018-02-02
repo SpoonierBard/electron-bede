@@ -61,7 +61,16 @@ function createAnnotatedText() {
             d3.select("#tab-3")
                 .append("span")
                 .text(model.wordsByLocationWithStopwords[docInText][word]+ " ")
-                .attr("class", "topic-" + model.topicsByLocationWithStopwords[docInText][word]);
+                .attr("class", "topic-" + model.topicsByLocationWithStopwords[docInText][word])
+                .attr("onmousover", "highlightTopic(model.topicsByLocationWithStopwords[docInText][word])");
         }
     }
 }
+
+function highlightTopic(topicName) {
+    topic = "topic-"+topicName;
+    d3.selectAll("#" + topic)
+        .style("background-color", blue);
+}
+
+
