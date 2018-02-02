@@ -1,6 +1,6 @@
 //TODO: add drag/drop capability for file upload
 
-let model;
+let model = {};
 //Function to read data from uploaded json file. Called on button click. Saves data to localstorage as a string.
 function loadFile() {
     hideUploadScreen();
@@ -12,32 +12,12 @@ function loadFile() {
     }
     else {
         reader.onload = (function() {
-            data = reader.result;
-            try {
-                localStorage.setItem("model", data);
-            }
-            catch (e) {
-                console.log("Storage failed: " + e);
-            }});
+            model = JSON.parse(reader.result);
+            createMetadata();
+            createAnnotatedText();
+        });
         reader.readAsText(input.files[0]);
     }
-    model = JSON.parse(localStorage.getItem("model"));
-    //load all the data directly into the metadata tab or as universally accessible json objects
-    document.getElementById("dataset").innerHTML = model["dataset"];
-    document.getElementById("topics").innerHTML = model["topics"];
-    document.getElementById("iterations").innerHTML = model["iterations"];
-    document.getElementById("alpha").innerHTML = model["alpha"];
-    document.getElementById("beta").innerHTML = model["beta"];
-    //document.getElementById("fullText").innerHTML = model["wordsByLocationWithStopwords"];
-    //document.getElementById("topicsByLocWithStopwords").innerHTML = model["topicsByLocationWithStopwords"];
-    //let fullText = '';
-    /*for (docInText in model.wordsByLocationWithStopwords) {
-        console.log(docInText)
-        for (word in model.wordsByLocationWithStopwords[docInText]) {
-            fullText += model.wordsByLocationWithStopwords[docInText][word] + " ";
-        }
-    }
-    document.getElementById("fullText").innerHTML = fullText;*/
 }
 
 //Progress from welcome screen to data visualization tabs
@@ -54,8 +34,15 @@ $( function() {
     $( "#tabs li" ).removeClass( "ui-corner-top" ).addClass( "ui-corner-left" );
 } );
 
+function createMetadata(){
+    document.getElementById("dataset").innerHTML = model["dataset"];
+    document.getElementById("topics").innerHTML = model["topics"];
+    document.getElementById("iterations").innerHTML = model["iterations"];
+    document.getElementById("alpha").innerHTML = model["alpha"];
+    document.getElementById("beta").innerHTML = model["beta"];
+}
+
 function createAnnotatedText() {
-    model = JSON.parse(localStorage.getItem("model"));
     for (docInText in model.wordsByLocationWithStopwords) {
         for (word in model.wordsByLocationWithStopwords[docInText]) {
             d3.select("#tab-3")
