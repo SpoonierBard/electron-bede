@@ -62,15 +62,21 @@ function createAnnotatedText() {
                 .append("span")
                 .text(model.wordsByLocationWithStopwords[docInText][word]+ " ")
                 .attr("class", "topic-" + model.topicsByLocationWithStopwords[docInText][word])
-                .attr("onmousover", "highlightTopic(model.topicsByLocationWithStopwords[docInText][word])");
+                .on("mouseover", highlightTopic)
+                .on("mouseout", unhighlightTopic);
         }
     }
 }
 
-function highlightTopic(topicName) {
-    topic = "topic-"+topicName;
-    d3.selectAll("#" + topic)
-        .style("background-color", blue);
+function highlightTopic() {
+    topic = "." + this.className;
+    d3.selectAll(topic)
+        .style("background-color", "blue");
 }
 
+function unhighlightTopic() {
+    topic = "." + this.className;
+    d3.selectAll(topic)
+        .style("background-color", "white");
+}
 
