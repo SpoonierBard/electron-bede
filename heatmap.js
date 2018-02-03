@@ -1,10 +1,12 @@
 var prevalenceArray = [];
-//var binnedArray;
-var heatmapWidth = 500
+var heatmapWidthPx = 500;
+var heatmapResPx = 1;
+var heatmapSmoothing = 10;
 
 //calls other functions to create the heatmap and surrounding info
 function buildFullHeatmap(topic) {
     var binnedArray = createPrevalenceArray(topic);
+	binnedArray = smoothArray(binnedArray, heatmapSmoothing);
     //create a label to show the top 5 topics
     var topicWords = Object.keys(model.topicList[topic]);
     var sortedWords = topicWords.sort(function(a,b){
@@ -17,7 +19,7 @@ function buildFullHeatmap(topic) {
     
     d3.select("#heatmap").append("h4")
         .text(top5Words)
-    createHeatmap(binnedArray);
+    drawHeatmap(binnedArray);
 }
 
 function createPrevalenceArray(topic) {
@@ -39,7 +41,7 @@ function createPrevalenceArray(topic) {
     for (i=0; i<prevalenceArray.length; i++) {
         totalLength += prevalenceArray[i].length;
     }
-    var binSize = Math.floor(totalLength/(heatmapWidth/2));
+    var binSize = Math.floor(totalLength/(heatmapWidthPx/heatmapResPx));
     
     var countDown = binSize;
     var curIndex = 0;
@@ -58,7 +60,24 @@ function createPrevalenceArray(topic) {
     return binnedArray;
 }
 
-function createHeatmap(dataset) {
+function smoothArray(originalArray, smoothingRadius) {
+	var smoothedArray = 
+		Array.apply(null, Array(originalArray.length)).map(Number.prototype.valueOf,0);
+	console.log(smoothedArray);
+	for (i=0; i<originalArray.length; i++) {
+		if (originalArray[i] != 0) {
+			for (j=(i-smoothingRadius+1); j<i+smoothingRadius; j++) {
+				if ((j >= 0)&&(j < originalArray.length)) {
+					smoothedArray[j] += 
+						originalArray[i]*(smoothingRadius-(i-j));
+				}
+			}
+		}
+	}
+	return smoothedArray;
+}
+
+function drawHeatmap(dataset) {
     var colorScale = d3.scaleLinear()
         .domain([d3.min(dataset),
                  d3.max(dataset)])
@@ -66,16 +85,16 @@ function createHeatmap(dataset) {
     
     var svg = d3.select("#heatmap").append("svg");
     svg.style("width", function(){
-        return heatmapWidth*1.5 + "px"
+        return heatmapWidthPx*1.5 + "px"
     })
     
     svg.selectAll("rect")
         .data(dataset)
         .enter()
         .append("rect")
-        .attr("width", 2)
-        .attr("height", 30)
+        .attr("width", function() {return heatmapResPx})
+        .attr("height", 50)
         .attr("y", function(d) {return 0})
-        .attr("x", function(d,i) {return i * 2})
+        .attr("x", function(d,i) {return i * heatmapResPx})
         .style("fill", function(d) {return colorScale(d);})
 }
