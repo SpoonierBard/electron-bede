@@ -15,6 +15,7 @@ function loadFile() {
             model = JSON.parse(reader.result);
             createMetadata();
             createAnnotatedText();
+            //create wordcloud here
         });
         reader.readAsText(input.files[0]);
     }
