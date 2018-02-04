@@ -4,7 +4,7 @@ let model = {};
 //Function to read data from uploaded json file. Called on button click. Saves data to localstorage as a string.
 function loadFile() {
     hideUploadScreen();
-    let input, reader, data;
+    let input, reader;
     reader = new FileReader();
     input = document.getElementById("json-file");
     if (!input.files[0]) {
