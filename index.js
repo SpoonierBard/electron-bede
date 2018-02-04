@@ -15,6 +15,7 @@ function loadFile() {
             model = JSON.parse(reader.result);
             createMetadata();
             createAnnotatedText();
+            createWordCloud();
         });
         reader.readAsText(input.files[0]);
     }
@@ -67,3 +68,51 @@ function unhighlightTopic() {
         .style("background-color", "white");
 }
 
+function createWordCloud() {
+    let svg_location = "#word-cloud";
+
+    const width = $(document).width();
+    const height = $(document).height();
+
+    let fill = d3.schemeCategory20;
+    let word_entries = d3.entries(model.topicWordInstancesDict[0]);
+    let xScale = d3.scaleLinear()
+        .domain([0, d3.max(word_entries, function(d) {
+            return d.value;
+        })
+        ])
+        .range([10,100]);
+
+    d3.layout.cloud()
+        .size([width, height])
+        .timeInterval(20)
+        .words(word_entries)
+        .fontSize(function(d) { return xScale(+d.value); })
+        .text(function(d) { return d.key; })
+        .rotate(function() { return ~~(Math.random() * 2) * 90; })
+        .font("Impact")
+        .on("end", draw)
+        .start();
+
+    function draw(words) {
+        d3.select(svg_location).append("svg")
+            .attr("width", width)
+            .attr("height", height)
+            .append("g")
+            .attr("transform", "translate(" + [width >> 1, height >> 1] + ")")
+            .selectAll("text")
+            .data(words)
+            .enter().append("text")
+            .style("font-size", function(d) { return xScale(d.value) + "px"; })
+            .style("font-family", "Impact")
+            .style("fill", function(d, i) { return fill[i]; })
+            .attr("text-anchor", "middle")
+            .attr("transform", function(d) {
+                return "translate(" + [d.x, d.y] + ")rotate(" + d.rotate + ")";
+            })
+            .text(function(d) { return d.key; });
+    }
+
+    d3.layout.cloud().stop();
+
+}
