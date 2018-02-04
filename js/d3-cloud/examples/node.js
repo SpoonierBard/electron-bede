@@ -1,6 +1,6 @@
 var Canvas = require("canvas");
 
-var cloud = require("../");
+var cloud = require("../index");
 
 var words = ["Hello", "world", "normally", "you", "want", "more", "words", "than", "this"]
     .map(function(d) {

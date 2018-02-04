@@ -1,5 +1,5 @@
 var d3 = require("d3"),
-    cloud = require("../");
+    cloud = require("../index");
 
 var fill = d3.scale.category20();
 
