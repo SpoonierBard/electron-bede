@@ -75,6 +75,10 @@ html {
     height: 100%;
     }
 
+select {
+    overflow: scroll;
+}
+
 /*.topic-0 {*/
     /*background-color: #cd0a0a;*/
 /*}*/

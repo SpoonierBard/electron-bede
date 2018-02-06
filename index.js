@@ -23,6 +23,7 @@ function loadFile() {
 
 //Progress from welcome screen to data visualization tabs
 function hideUploadScreen() {
+    //TODO: progressbar (jquery-ui download dialog example)
     let uploadbox= document.getElementById("file-upload");
     let tabs = document.getElementById("tabs");
     uploadbox.style.display = "none";
@@ -35,12 +36,48 @@ $( function() {
     $( "#tabs li" ).removeClass( "ui-corner-top" ).addClass( "ui-corner-left" );
 } );
 
+$( function() {
+    $("#metadata-topic-select").selectmenu({
+        change: function(event, data) {
+            let topicWordList = Object.keys(model.topicWordInstancesDict[data.item.value]);
+            topicWordList = topicWordList.sort(function (a,b) {
+                return model.topicWordInstancesDict[data.item.value][b] -
+                       model.topicWordInstancesDict[data.item.value][a];
+            });
+            if (model.nicknames[data.item.value] === "") {
+                document.getElementById("metadata-topic-preview-title").innerHTML = "Topic " + (parseInt(data.item.value) + 1);
+            } else {
+                document.getElementById("metadata-topic-preview-title").innerHTML = model.nicknames[data.item.value];
+            }
+            document.getElementById("metadata-topic-preview-text").innerHTML = topicWordList.join(", ");
+        }
+    })
+});
+
+function addNickname(topic, nickname){
+    model.nicknames[topic] = nickname;
+    document.getElementById("metadata-select-topic-" + topic).innerHTML = nickname;
+}
+
 function createMetadata(){
     document.getElementById("dataset").innerHTML = model["dataset"];
     document.getElementById("topics").innerHTML = model["topics"];
     document.getElementById("iterations").innerHTML = model["iterations"];
     document.getElementById("alpha").innerHTML = model["alpha"];
     document.getElementById("beta").innerHTML = model["beta"];
+
+    // TODO: add nicknaming button + dialog form
+    model["nicknames"] = [];
+    for (i = 0; i < model.topicWordInstancesDict.length; i++) {
+        model.nicknames.push("");
+    }
+
+    let topicDropdownHTML = "<option disabled selected>Select Topic</option>";
+
+    for (i = 0; i < model.topicWordInstancesDict.length; i++) {
+        topicDropdownHTML = topicDropdownHTML + "<option id=\"metadata-select-topic-" + i + "\" value=\"" + i + "\">Topic " + (i + 1) + "</option>";
+    }
+    document.getElementById("metadata-topic-select").innerHTML = topicDropdownHTML;
 }
 
 function createAnnotatedText() {
@@ -85,13 +122,13 @@ function unhighlightTopic() {
 }
 
 function createWordCloud() {
-    let svg_location = "#word-cloud";
+    let svg_location = "#word-cloud", topic = 0;
 
     const width = $(document).width();
     const height = $(document).height();
 
     let fill = d3.schemeCategory20;
-    let word_entries = d3.entries(model.topicWordInstancesDict[0]);
+    let word_entries = d3.entries(model.topicWordInstancesDict[topic]);
     let xScale = d3.scaleLinear()
         .domain([0, d3.max(word_entries, function(d) {
             return d.value;
