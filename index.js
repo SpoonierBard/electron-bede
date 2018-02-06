@@ -44,6 +44,14 @@ function createMetadata(){
 }
 
 function createAnnotatedText() {
+    for (i = 0; i < model.topics; i++) {
+        d3.select("#tab-3-buttons")
+            .append("input")
+            .attr("type", "button")
+            .attr("name", "toggle")
+            .attr("value", "Topic " + String(i+1))
+            .on("click", togglePressed);
+    }
     for (docInText in model.wordsByLocationWithStopwords) {
         for (word in model.wordsByLocationWithStopwords[docInText]) {
             d3.select("#tab-3")
@@ -56,10 +64,18 @@ function createAnnotatedText() {
     }
 }
 
+function togglePressed() {
+    topicNum = this.value.slice(-1);
+    topic = ".topic-" + topicNum;
+    // add toggle!
+    d3.selectAll(topic)
+        .style("background-color", "orange");
+}
+
 function highlightTopic() {
     topic = "." + this.className;
     d3.selectAll(topic)
-        .style("background-color", "blue");
+        .style("background-color", "aqua");
 }
 
 function unhighlightTopic() {
