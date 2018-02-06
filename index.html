@@ -37,6 +37,14 @@
             <label><strong>α : </strong></label> <label id="alpha"></label><br>
             <label><strong>β : </strong></label> <label id="beta"></label>
         </div>
+        <div id="metadata-topic-preview">
+            <select name="metadata-topic-select" id="metadata-topic-select">
+                <option disabled selected>Select Topic</option>
+                <option value="Topic1">Topic 1</option>
+            </select>
+            <h2 id="metadata-topic-preview-title"></h2>
+            <p id="metadata-topic-preview-text"></p>
+        </div>
     </div>
     <div id="tab-2">
         <h2>Heat Map</h2>
@@ -44,15 +52,17 @@
     <div id="tab-3">
         <h2>Annotated Text</h2>
             <div>
-                <!-- <label id = "fullText"></label> -->
-                <!--<svg width="800" height="600"></svg>-->
+                Click a topic to highlight it. You may highlight a maximum of 5 topics at once.<br><br>
+                <button type="button">Show topics</button><br><br>
+                <div id="tab-3-buttons">
+                    <!--topics as buttons-->
+                </div>
             </div>
     </div>
     <div id="tab-4">
         <h2>Word Cloud</h2>
-            <div>
-                <p>hi i'm sam</p>
-            </div>
+        <div id="word-cloud">
+        </div>
     </div>
 </div>
 </body>
