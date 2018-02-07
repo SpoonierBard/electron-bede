@@ -26,6 +26,10 @@ html {
     display: none;
 }
 
+#progressbar {
+    display: none;
+}
+
 #tab-3 {
     font-family: monospace;
 }

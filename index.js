@@ -1,7 +1,14 @@
 //TODO: add drag/drop capability for file upload
 
+//This variable is global because it will contain all our data
 let model = {};
-//Function to read data from uploaded json file. Called on button click. Saves data to localstorage as a string.
+
+
+
+
+
+
+//Function to read data from uploaded json file.
 function loadFile() {
     hideUploadScreen();
     let input, reader;
@@ -11,53 +18,43 @@ function loadFile() {
         console.log("Please select a file before clicking upload");
     }
     else {
+        //Onload called when file is finished uploading
+        //Call tab setup code here so that model is already  filled with data from file
         reader.onload = (function() {
             model = JSON.parse(reader.result);
             createMetadata();
             createAnnotatedText();
             createWordCloud();
+            loadTabs();
         });
         reader.readAsText(input.files[0]);
     }
 }
 
-//Progress from welcome screen to data visualization tabs
+//Progress from welcome screen to progressbar
 function hideUploadScreen() {
-    //TODO: progressbar (jquery-ui download dialog example)
-    let uploadbox= document.getElementById("file-upload");
-    let tabs = document.getElementById("tabs");
+    let uploadbox = document.getElementById("file-upload");
     uploadbox.style.display = "none";
+    document.getElementById("progressbar").style.display = "block";
+}
+
+//Progress from progressbar to fully loaded tabs
+function loadTabs() {
+    let tabs = document.getElementById("tabs");
+    document.getElementById("progressbar").style.display = "none";
     tabs.style.display = "block";
 }
 
-//Tab switching function
-$( function() {
-    $( "#tabs" ).tabs().addClass( "ui-tabs-vertical ui-helper-clearfix" );
-    $( "#tabs li" ).removeClass( "ui-corner-top" ).addClass( "ui-corner-left" );
-} );
 
-$( function() {
-    $("#metadata-topic-select").selectmenu({
-        change: function(event, data) {
-            let topicWordList = Object.keys(model.topicWordInstancesDict[data.item.value]);
-            topicWordList = topicWordList.sort(function (a,b) {
-                return model.topicWordInstancesDict[data.item.value][b] -
-                       model.topicWordInstancesDict[data.item.value][a];
-            });
-            if (model.nicknames[data.item.value] === "") {
-                document.getElementById("metadata-topic-preview-title").innerHTML = "Topic " + (parseInt(data.item.value) + 1);
-            } else {
-                document.getElementById("metadata-topic-preview-title").innerHTML = model.nicknames[data.item.value];
-            }
-            document.getElementById("metadata-topic-preview-text").innerHTML = topicWordList.join(", ");
-        }
-    })
-});
 
-function addNickname(topic, nickname){
-    model.nicknames[topic] = nickname;
-    document.getElementById("metadata-select-topic-" + topic).innerHTML = nickname;
-}
+
+
+
+
+
+
+
+//METADATA TAB
 
 function createMetadata(){
     document.getElementById("dataset").innerHTML = model["dataset"];
@@ -65,20 +62,50 @@ function createMetadata(){
     document.getElementById("iterations").innerHTML = model["iterations"];
     document.getElementById("alpha").innerHTML = model["alpha"];
     document.getElementById("beta").innerHTML = model["beta"];
+    document.getElementById("stopwords-dialog").innerHTML = "<p>" + model.stopwords.join(", ") + "</p>";
 
-    // TODO: add nicknaming button + dialog form
+    //create nicknames data structure
     model["nicknames"] = [];
     for (i = 0; i < model.topicWordInstancesDict.length; i++) {
         model.nicknames.push("");
     }
 
-    let topicDropdownHTML = "<option disabled selected>Select Topic</option>";
+    //dynamically create injectable HTML with dropdown options for each topic
+    let topicDropdownHTMLmetadata = "<option disabled selected='selected' value='-1'>Select topic to display</option>";
+    let topicDropdownHTMLnickname = "<option disabled selected>Select topic to nickname</option>";
 
     for (i = 0; i < model.topicWordInstancesDict.length; i++) {
-        topicDropdownHTML = topicDropdownHTML + "<option id=\"metadata-select-topic-" + i + "\" value=\"" + i + "\">Topic " + (i + 1) + "</option>";
+        topicDropdownHTMLmetadata = topicDropdownHTMLmetadata + "<option id=\"metadata-select-topic-" + i + "\" value=\"" + i + "\">Topic " + (i + 1) + "</option>";
+        topicDropdownHTMLnickname = topicDropdownHTMLnickname + "<option id=\"nickname-select-topic-" + i + "\" value=\"" + i + "\">Topic " + (i + 1) + "</option>";
     }
-    document.getElementById("metadata-topic-select").innerHTML = topicDropdownHTML;
+    document.getElementById("metadata-topic-select").innerHTML = topicDropdownHTMLmetadata;
+    document.getElementById("nickname-topic-select").innerHTML = topicDropdownHTMLnickname;
 }
+
+//Metadata selectmenu setup (with onchange function)
+$(document).ready(function() {
+    $("#metadata-topic-select").change(function () {
+        let value = $("#metadata-topic-select option:selected").val();
+        value = parseInt(value);
+        console.log(value);
+        let topicWordList = Object.keys(model.topicWordInstancesDict[value]);
+        topicWordList = topicWordList.sort(function (a, b) {
+            return model.topicWordInstancesDict[value][b] -
+                model.topicWordInstancesDict[value][a];
+        });
+        document.getElementById("metadata-topic-preview-text").textContent = topicWordList.join(", ");
+    });
+});
+
+
+
+
+
+
+
+
+
+//ANNOTATED TEXT TAB
 
 function createAnnotatedText() {
     for (i = 0; i < model.topics; i++) {
@@ -120,6 +147,17 @@ function unhighlightTopic() {
     d3.selectAll(topic)
         .style("background-color", "white");
 }
+
+
+
+
+
+
+
+
+
+
+//WORD CLOUD TAB
 
 function createWordCloud() {
     let svg_location = "#word-cloud", topic = 0;
@@ -167,5 +205,78 @@ function createWordCloud() {
     }
 
     d3.layout.cloud().stop();
-
 }
+
+
+//Popup/Dialog setup
+
+//Stopwords dialog setup
+$( function() {
+    let dialog = $( "#stopwords-dialog");
+    dialog.dialog({
+            autoOpen: false,
+            height: 400,
+            width: 350,
+            overflow: scroll
+        }
+    );
+
+    $( "#view-stopwords").button().on( "click", function() {
+        dialog.dialog("open");
+    });
+});
+
+//Nickname dialog setup
+$( function() {
+    let dialog, form,
+        topic = $( "#nickname-topic-select"),
+        nickname = $( "#nickname-input" );
+
+    dialog = $( "#nickname-dialog-form" ).dialog({
+        autoOpen: false,
+        height: 250,
+        width: 350,
+        modal: true,
+        buttons: {
+            "Nickname topic": addNickname,
+            Cancel: function() {
+                dialog.dialog( "close");
+            }
+        },
+        close: function() {
+            form[ 0 ].reset();
+        }
+    });
+
+    form = dialog.find( "form" ).on( "submit", function (event) {
+        event.preventDefault();
+        addNickname();
+    });
+
+    $( "#create-nickname").button().on( "click", function() {
+        dialog.dialog("open");
+    });
+
+    function addNickname() {
+        model.nicknames[topic.val()] = nickname.val();
+        document.getElementById("nickname-select-topic-" + topic.val()).innerText = model.nicknames[topic.val()];
+        document.getElementById("metadata-select-topic-" + topic.val()).innerText = model.nicknames[topic.val()];
+        dialog.dialog("close");
+    }
+});
+
+
+//JQuery-UI functions
+
+
+//Progressbar function
+$(function() {
+    $( "#progressbar" ).progressbar({
+        value: false
+    });
+});
+//Tab switching function
+$( function() {
+    $( "#tabs" ).tabs().addClass( "ui-tabs-vertical ui-helper-clearfix" );
+    $( "#tabs li" ).removeClass( "ui-corner-top" ).addClass( "ui-corner-left" );
+} );
