@@ -218,6 +218,7 @@ function createWordCloud(topicNum) {
     document.getElementById("word-cloud-topic-select").innerHTML = topicDropdownHTMLWordCloud;
     let fill = d3.schemeCategory20;
     // let word_entries = d3.entries(model.topicWordInstancesDict[topic]);
+    // let word_entries = d3.entries(model.topicWordInstancesDict[topic]).slice(0,Math.min(model.topicWordInstancesDict.length, 600));
     let word_entries = d3.entries(model.topicWordInstancesDict[topic]).slice(0,600);
     let xScale = d3.scaleLinear()
         .domain([0, d3.max(word_entries, function(d) {
