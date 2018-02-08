@@ -1,5 +1,4 @@
 //TODO: add drag/drop capability for file upload
-
 //This variable is global because it will contain all our data
 let model = {};
 
@@ -49,6 +48,9 @@ function createMetadata(){
     document.getElementById("iterations").innerHTML = model["iterations"];
     document.getElementById("alpha").innerHTML = model["alpha"];
     document.getElementById("beta").innerHTML = model["beta"];
+    
+    //testing stuff
+    initializeHeatmaps();
     document.getElementById("stopwords-dialog").innerHTML = "<p>" + model.stopwords.join(", ") + "</p>";
 
     //create nicknames data structure
