@@ -165,6 +165,11 @@ function createWordCloud() {
     const width = $(document).width();
     const height = $(document).height();
 
+    let topicDropdownHTMLWordCloud = "<option disabled selected='selected' value='-1'>Select topic for wordcloud</option>";
+    for (i = 0; i < model.topicWordInstancesDict.length; i++) {
+        topicDropdownHTMLWordCloud = topicDropdownHTMLWordCloud + "<option id=\"metadata-select-topic-" + i + "\" value=\"" + i + "\">Topic " + (i + 1) + "</option>";
+    }
+    document.getElementById("word-cloud-topic-select").innerHTML = topicDropdownHTMLWordCloud;
     let fill = d3.schemeCategory20;
     let word_entries = d3.entries(model.topicWordInstancesDict[topic]);
     let xScale = d3.scaleLinear()
