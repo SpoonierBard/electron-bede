@@ -1,4 +1,19 @@
 //initializes dropdowns
+$(document).ready(function() {
+    $( "#heatmap1Menu" ).change(function () {
+        let heatmapTopic1 = $("#heatmap1Menu option:selected").val();
+        replaceHeatmap(1, heatmapTopic1);
+    });
+    $( "#heatmap2Menu" ).change(function () {
+        let heatmapTopic2 = $("#heatmap2Menu option:selected").val();
+        replaceHeatmap(2, heatmapTopic2);
+    });
+    $( "#heatmap3Menu" ).change(function () {
+        let heatmapTopic3 = $("#heatmap3Menu option:selected").val();
+        replaceHeatmap(3, heatmapTopic3);
+    });
+});
+/*
 $( function() {
     $( "#heatmap1Menu" ).selectmenu({
         change: function( event, ui ) {
@@ -22,7 +37,7 @@ $( function() {
         }
     });
 } );
-
+*/
 //$( "#heatmap1Menu" ).on( "selectmenuchange", function( event, ui ) {} );
 
 var prevalenceArray = [];
@@ -94,10 +109,18 @@ function initializeHeatmaps() {
 //    .data(model.topicList).enter()
 //    .append("option")
 //        .text(function (d) {return d})
+    let topicDropdownHTML = "<option disabled selected>Select Topic</option>";
+    for (i = 0; i < model.topicWordInstancesDict.length; i++) {
+        topicDropdownHTML = topicDropdownHTML + "<option class=\"select-topic-" + i + "\" value=\"" + i + "\">Topic " + (i + 1) + "</option>";
+    }
+    document.getElementById("heatmap1Menu").innerHTML = topicDropdownHTML;
+    document.getElementById("heatmap2Menu").innerHTML = topicDropdownHTML;
+    document.getElementById("heatmap3Menu").innerHTML = topicDropdownHTML;
+
     for (iter=1; iter<4; iter++){
         topic = eval("heatmapTopic" + iter);
-        
-        changeTop5Words(iter);
+
+        changeTop5Words(iter, (iter - 1));
 
         var svg = d3.select("#heatmapSVG" + iter);
         svg.style("width", function(){
@@ -113,13 +136,13 @@ function initializeHeatmaps() {
     }
 }
 
-function changeTop5Words(heatmapNum) {
-    var topic = eval("heatmapTopic" + heatmapNum);
+function changeTop5Words(heatmapNum, topic) {
+    //var topic = eval("heatmapTopic" + heatmapNum);
     var topicWords = Object.keys(model.topicWordInstancesDict[topic]);
     var sortedWords = topicWords.sort(function(a,b){
         return model.topicWordInstancesDict[topic][b] - model.topicWordInstancesDict[topic][a];
     });
-    var top5Words = "Topic " + topic + ": ";
+    var top5Words = "Topic " + (parseInt(topic) + 1) + ": ";
     for (j=0; j<5; j++) {
         top5Words = top5Words + sortedWords[j] + ", ";
     }
@@ -149,7 +172,7 @@ function replaceHeatmap(heatmapNum, topic) {
     var binnedArray = createPrevalenceArray(topic);
     binnedArray = smoothArray(binnedArray, heatmapSmoothing);
     drawRectangles(svg, binnedArray);
-    changeTop5Words(heatmapNum);
+    changeTop5Words(heatmapNum, topic);
 }
 
 
