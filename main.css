@@ -27,7 +27,8 @@ html {
 }
 
 #tab-3 {
-    font-family: monospace;
+    /*font-family: monospace;*/
+    /*padding: 2%;*/
 }
 
 .ui-tabs{
@@ -79,22 +80,30 @@ select {
     overflow: scroll;
 }
 
-/*.topic-0 {*/
-    /*background-color: #cd0a0a;*/
-/*}*/
+#selector-div.fixed {
+    position: fixed;
+    display: block;
+    width: 100%;
+}
 
-/*.topic-1 {*/
-    /*background-color: aqua;*/
-/*}*/
+.d3-tip {
+    line-height: 1;
+    font-weight: bold;
+    padding: 12px;
+    background: rgba(0, 0, 0, 0.8);
+    color: #fff;
+    border-radius: 2px;
+}
 
-/*.topic-2 {*/
-    /*background-color: blueviolet;*/
-/*}*/
-
-/*.topic-3 {*/
-    /*background-color: chartreuse;*/
-/*}*/
-
-/*.topic-4 {*/
-    /*background-color: darkorange;*/
-/*}*/
+/* Creates a small triangle extender for the tooltip */
+.d3-tip:after {
+    box-sizing: border-box;
+    display: inline;
+    font-size: 10px;
+    width: 100%;
+    line-height: 1;
+    color: rgba(0, 0, 0, 0.8);
+    content: "\25BC";
+    position: absolute;
+    text-align: center;
+}

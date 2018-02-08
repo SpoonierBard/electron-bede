@@ -1,6 +1,8 @@
 //TODO: add drag/drop capability for file upload
 
 let model = {};
+
+var colors  = ["#66c2a5", "#fc8d62", "#8da0cb"];
 //Function to read data from uploaded json file. Called on button click. Saves data to localstorage as a string.
 function loadFile() {
     hideUploadScreen();
@@ -81,25 +83,61 @@ function createMetadata(){
 }
 
 function createAnnotatedText() {
-    for (i = 0; i < model.topics; i++) {
-        d3.select("#tab-3-buttons")
-            .append("input")
-            .attr("type", "button")
-            .attr("name", "toggle")
-            .attr("value", "Topic " + String(i+1))
-            .on("click", togglePressed);
+    // for (i = 0; i < model.topics; i++) {
+    //     d3.select("#tab-3-buttons")
+    //         .append("input")
+    //         .attr("type", "button")
+    //         .attr("name", "toggle")
+    //         .attr("value", "Topic " + String(i+1))
+    //         .on("click", togglePressed);
+    // }
+
+    let topicDropdownHTML = "<option disabled selected>Select Topic</option>";
+
+    for (i = 0; i < model.topicWordInstancesDict.length; i++) {
+        topicDropdownHTML = topicDropdownHTML + "<option id=\"metadata-select-topic-" + i + "\" value=\"" + i + "\">Topic " + (i + 1) + "</option>";
     }
+    document.getElementById("an-text-topic-select-1").innerHTML = topicDropdownHTML;
+    document.getElementById("an-text-topic-select-2").innerHTML = topicDropdownHTML;
+    document.getElementById("an-text-topic-select-3").innerHTML = topicDropdownHTML;
+
+
+    //TODO: figure out how to reconcile d3.tip with new verion of d3
+    // var tip = d3.tip()
+    //     .attr('class', 'd3-tip')
+    //     .html(function(d) {
+    //         return "<strong>Topic:</strong> <span style='color:white'>" + d.className + "</span>";
+    //     });
+    //
+    // d3.select('#tab-3').call(tip);
+
     for (docInText in model.wordsByLocationWithStopwords) {
         for (word in model.wordsByLocationWithStopwords[docInText]) {
             d3.select("#tab-3")
                 .append("span")
                 .text(model.wordsByLocationWithStopwords[docInText][word]+ " ")
                 .attr("class", "topic-" + model.topicsByLocationWithStopwords[docInText][word])
-                .on("mouseover", highlightTopic)
-                .on("mouseout", unhighlightTopic);
+                .on("mouseover", onHover)
+                .on("mouseover", tip.show)
+                .on("mouseout", tip.hide)
+                .on("mouseout", offHover);
         }
     }
+
+
 }
+
+//TODO: figure out how to make selectors sticky on reaching top of window
+// $(document).ready(function() {
+//     $(window).scroll(function() {
+//         var distanceFromTop = $(this).scrollTop();
+//         if (distanceFromTop >= $('#an-text-title').height()) {
+//             $('#selector-div').addClass('fixed');
+//         } else {
+//             $('#selector-div').removeClass('fixed');
+//         }
+//     });
+// });
 
 function togglePressed() {
     topicNum = this.value.slice(-1);
@@ -109,16 +147,38 @@ function togglePressed() {
         .style("background-color", "orange");
 }
 
-function highlightTopic() {
+function onHover() {
     topic = "." + this.className;
-    d3.selectAll(topic)
-        .style("background-color", "aqua");
+    selectedOne = "topic-" + document.getElementById("an-text-topic-select-1").value;
+    selectedTwo = "topic-" + document.getElementById("an-text-topic-select-2").value;
+    selectedThree = "topic-" + document.getElementById("an-text-topic-select-3").value;
+    if ((selectedOne != this.className) && (selectedTwo != this.className) && (selectedThree != this.className)) {
+        d3.selectAll(topic)
+            .style("background-color", "yellow")
+    }
 }
 
-function unhighlightTopic() {
+function offHover() {
     topic = "." + this.className;
-    d3.selectAll(topic)
+    selectedOne = "topic-" + document.getElementById("an-text-topic-select-1").value;
+    selectedTwo = "topic-" + document.getElementById("an-text-topic-select-2").value;
+    selectedThree = "topic-" + document.getElementById("an-text-topic-select-3").value;
+    if ((selectedOne != this.className) && (selectedTwo != this.className) && (selectedThree != this.className)) {
+        d3.selectAll(topic)
+            .style("background-color", "white");
+    }
+}
+
+function onSelect() {
+    d3.selectAll("span")
         .style("background-color", "white");
+
+    for (i = 0; i < 3; i++) {
+        selector = "an-text-topic-select-" + (i + 1);
+        topic = ".topic-" + document.getElementById(selector).value;
+        d3.selectAll(topic)
+            .style("background-color", function() { return colors[i]; });
+    }
 }
 
 function createWordCloud() {

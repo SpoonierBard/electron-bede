@@ -8,6 +8,7 @@
     <script type=text/javascript src="js/jquery-ui-1.12.1.custom/external/jquery/jquery.js"></script>
     <script type=text/javascript src="js/jquery-ui-1.12.1.custom/jquery-ui.js"></script>
     <script type=text/javascript src="js/d3/d3.js"></script>
+    <script type=text/javascript src="http://labratrevenge.com/d3-tip/javascripts/d3.tip.v0.6.3.js"></script>
     <script type=text/javascript src="js/d3-cloud/build/d3.layout.cloud.js"></script>
     <script type=text/javascript src="index.js"></script>
     <script>if (window.module) module = window.module;</script>
@@ -50,14 +51,28 @@
         <h2>Heat Map</h2>
     </div>
     <div id="tab-3">
-        <h2>Annotated Text</h2>
-            <div>
-                Click a topic to highlight it. You may highlight a maximum of 5 topics at once.<br><br>
-                <button type="button">Show topics</button><br><br>
-                <div id="tab-3-buttons">
-                    <!--topics as buttons-->
-                </div>
-            </div>
+        <div id = "an-text-title">
+         <h2>Annotated Text</h2>
+        </div>
+        <div id = "selector-div">
+            <!--Click a topic to highlight it. You may highlight a maximum of 5 topics at once.<br><br>-->
+            <!--<button type="button">Show topics</button><br><br>-->
+            <!--<div id="tab-3-buttons">-->
+                <!--&lt;!&ndash;topics as buttons&ndash;&gt;-->
+            <!--</div>-->
+            <select name="an-text-topic-select" id="an-text-topic-select-1" onchange="onSelect()">
+                <option disabled selected>Select Topic</option>
+                <option value="Topic1">Topic 1</option>
+            </select>
+            <select name="an-text-topic-select" id="an-text-topic-select-2" onchange="onSelect()">
+                <option disabled selected>Select Topic</option>
+                <option value="Topic1">Topic 1</option>
+            </select>
+            <select name="an-text-topic-select" id="an-text-topic-select-3" onchange="onSelect()">
+                <option disabled selected>Select Topic</option>
+                <option value="Topic1">Topic 1</option>
+            </select>
+        </div>
     </div>
     <div id="tab-4">
         <h2>Word Cloud</h2>
