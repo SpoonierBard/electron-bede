@@ -62,8 +62,8 @@ function createMetadata(){
     let topicDropdownHTMLnickname = "<option disabled selected>Select topic to nickname</option>";
 
     for (i = 0; i < model.topicWordInstancesDict.length; i++) {
-        topicDropdownHTMLmetadata = topicDropdownHTMLmetadata + "<option id=\"metadata-select-topic-" + i + "\" value=\"" + i + "\">Topic " + (i + 1) + "</option>";
-        topicDropdownHTMLnickname = topicDropdownHTMLnickname + "<option id=\"nickname-select-topic-" + i + "\" value=\"" + i + "\">Topic " + (i + 1) + "</option>";
+        topicDropdownHTMLmetadata = topicDropdownHTMLmetadata + "<option class=\"select-topic-" + i + "\" value=\"" + i + "\">Topic " + (i + 1) + "</option>";
+        topicDropdownHTMLnickname = topicDropdownHTMLnickname + "<option class=\"select-topic-" + i + "\" value=\"" + i + "\">Topic " + (i + 1) + "</option>";
     }
     document.getElementById("metadata-topic-select").innerHTML = topicDropdownHTMLmetadata;
     document.getElementById("nickname-topic-select").innerHTML = topicDropdownHTMLnickname;
@@ -106,7 +106,7 @@ function createAnnotatedText() {
 
     //create three identical selectors for three possible topic comparisons
     for (i = 0; i < model.topicWordInstancesDict.length; i++) {
-        topicDropdownHTML = topicDropdownHTML + "<option id=\"metadata-select-topic-" + i + "\" value=\"" + i + "\">Topic " + (i + 1) + "</option>";
+        topicDropdownHTML = topicDropdownHTML + "<option class=\"select-topic-" + i + "\" value=\"" + i + "\">Topic " + (i + 1) + "</option>";
     }
     document.getElementById("an-text-topic-select-1").innerHTML = topicDropdownHTML;
     document.getElementById("an-text-topic-select-2").innerHTML = topicDropdownHTML;
@@ -213,7 +213,7 @@ function createWordCloud(topicNum) {
         topicDropdownHTMLWordCloud = "<option disabled selected=''selected value="+topic+">Topic " + String(parseInt(topic) + 1) + "</option>";
     }
     for (i = 0; i < model.topicWordInstancesDict.length; i++) {
-        topicDropdownHTMLWordCloud = topicDropdownHTMLWordCloud + "<option id=\"word-cloud-select-topic-" + i + "\" value=\"" + i + "\">Topic " + (i + 1) + "</option>";
+        topicDropdownHTMLWordCloud = topicDropdownHTMLWordCloud + "<option class=\"select-topic-" + i + "\" value=\"" + i + "\">Topic " + (i + 1) + "</option>";
     }
     document.getElementById("word-cloud-topic-select").innerHTML = topicDropdownHTMLWordCloud;
     let fill = d3.schemeCategory20;
@@ -310,8 +310,10 @@ $( function() {
 
     function addNickname() {
         model.nicknames[topic.val()] = nickname.val();
-        document.getElementById("nickname-select-topic-" + topic.val()).innerText = model.nicknames[topic.val()];
-        document.getElementById("metadata-select-topic-" + topic.val()).innerText = model.nicknames[topic.val()];
+        let toUpdate = document.getElementsByClassName("select-topic-" + topic.val());
+        for (i = 0; i < toUpdate.length; i++){
+            toUpdate[i].innerText = model.nicknames[topic.val()];
+        }
         dialog.dialog("close");
     }
 });
