@@ -20,6 +20,7 @@
         <input type="button" id="upload" value="Upload" onclick="loadFile();">
     </form>
 </div>
+<div id="progressbar"></div>
 <div id="tabs">
     <ul>
         <li><a href="#tab-1">Metadata</a></li>
@@ -37,13 +38,13 @@
         <div>
             <label><strong>α : </strong></label> <label id="alpha"></label><br>
             <label><strong>β : </strong></label> <label id="beta"></label>
+            <button id="create-nickname">Nickname a topic</button>
+            <button id="view-stopwords">View stopwords</button>
         </div>
         <div id="metadata-topic-preview">
-            <select name="metadata-topic-select" id="metadata-topic-select">
-                <option disabled selected>Select Topic</option>
-                <option value="Topic1">Topic 1</option>
+            <select id="metadata-topic-select">
+                <!-- this select tag will be filled with an <option> for each topic-->
             </select>
-            <h2 id="metadata-topic-preview-title"></h2>
             <p id="metadata-topic-preview-text"></p>
         </div>
     </div>
@@ -79,6 +80,21 @@
         <div id="word-cloud">
         </div>
     </div>
+</div>
+
+<div id="nickname-dialog-form" title="Nickname">
+    <form>
+        <fieldset>
+            <select id="nickname-topic-select">
+            </select>
+            <label for="nickname-input">Nickname</label>
+            <input type="text" name="nickname" id="nickname-input" value="" class="text ui-widget-content ui-corner-all">
+            <!-- Allow form submission with keyboard without duplicating the dialog button -->
+            <input type="submit" tabindex="-1" style="position:absolute; top:-1000px">
+        </fieldset>
+    </form>
+</div>
+<div id="stopwords-dialog" title="Stopwords">
 </div>
 </body>
 </html>
