@@ -15,7 +15,7 @@ function loadFile() {
     }
     else {
         //Onload called when file is finished uploading
-        //Call tab setup code here so that model is already  filled with data from file
+        //Call tab setup code here so that model is already filled with data from file
         reader.onload = (function() {
             model = JSON.parse(reader.result);
             createMetadata();
@@ -289,10 +289,10 @@ $( function() {
         width: 350,
         modal: true,
         buttons: {
-            "Nickname topic": addNickname,
             Cancel: function() {
                 dialog.dialog( "close");
-            }
+            },
+            "Nickname topic": addNickname
         },
         close: function() {
             form[ 0 ].reset();
