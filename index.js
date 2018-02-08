@@ -19,7 +19,7 @@ function loadFile() {
             model = JSON.parse(reader.result);
             createMetadata();
             createAnnotatedText();
-            createWordCloud(0);
+            createWordCloud(-1);
             loadTabs();
         });
         reader.readAsText(input.files[0]);
@@ -81,10 +81,10 @@ $(document).ready(function() {
         });
         document.getElementById("metadata-topic-preview-text").textContent = topicWordList.join(", ");
     });
+    //changing the wordcloud
     $("#word-cloud-topic-select").change(function () {
         let topic = $("#word-cloud-topic-select option:selected").val();
-        let words = Object.keys(model.topicWordInstancesDict[topic]);
-        console.log(words)
+        console.log(topic)
         createWordCloud(topic)
     });
 });
@@ -140,15 +140,21 @@ function createWordCloud(topicNum) {
     let svg_location = "#word-cloud", topic = topicNum;
     const width = $(document).width();
     const height = $(document).height();
-
-    let topicDropdownHTMLWordCloud = "<option disabled selected='selected' value='-1'>Select topic for wordcloud</option>";
+    //this needs to not run every time
+    let topicDropdownHTMLWordCloud = ""
+    if (topicNum == -1) {
+        topicDropdownHTMLWordCloud = "<option disabled selected='selected' value='-1'>Select topic for wordcloud</option>";
+        topic = 0
+    } else {
+        topicDropdownHTMLWordCloud = "<option disabled selected=''selected value="+topic+">Topic " + String(parseInt(topic) + 1) + "</option>";
+    }
     for (i = 0; i < model.topicWordInstancesDict.length; i++) {
         topicDropdownHTMLWordCloud = topicDropdownHTMLWordCloud + "<option id=\"word-cloud-select-topic-" + i + "\" value=\"" + i + "\">Topic " + (i + 1) + "</option>";
     }
     document.getElementById("word-cloud-topic-select").innerHTML = topicDropdownHTMLWordCloud;
     let fill = d3.schemeCategory20;
-    let word_entries = d3.entries(model.topicWordInstancesDict[topic]);
-    console.log(word_entries);
+    // let word_entries = d3.entries(model.topicWordInstancesDict[topic]);
+    let word_entries = d3.entries(model.topicWordInstancesDict[topic]).slice(0,600);
     let xScale = d3.scaleLinear()
         .domain([0, d3.max(word_entries, function(d) {
             return d.value;
