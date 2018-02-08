@@ -3,11 +3,6 @@
 //This variable is global because it will contain all our data
 let model = {};
 
-
-
-
-
-
 //Function to read data from uploaded json file.
 function loadFile() {
     hideUploadScreen();
@@ -24,7 +19,7 @@ function loadFile() {
             model = JSON.parse(reader.result);
             createMetadata();
             createAnnotatedText();
-            createWordCloud();
+            createWordCloud(0);
             loadTabs();
         });
         reader.readAsText(input.files[0]);
@@ -44,15 +39,6 @@ function loadTabs() {
     document.getElementById("progressbar").style.display = "none";
     tabs.style.display = "block";
 }
-
-
-
-
-
-
-
-
-
 
 //METADATA TAB
 
@@ -95,15 +81,13 @@ $(document).ready(function() {
         });
         document.getElementById("metadata-topic-preview-text").textContent = topicWordList.join(", ");
     });
+    $("#word-cloud-topic-select").change(function () {
+        let topic = $("#word-cloud-topic-select option:selected").val();
+        let words = Object.keys(model.topicWordInstancesDict[topic]);
+        console.log(words)
+        createWordCloud(topic)
+    });
 });
-
-
-
-
-
-
-
-
 
 //ANNOTATED TEXT TAB
 
@@ -149,29 +133,22 @@ function unhighlightTopic() {
 }
 
 
-
-
-
-
-
-
-
-
 //WORD CLOUD TAB
 
-function createWordCloud() {
-    let svg_location = "#word-cloud", topic = 0;
-
+function createWordCloud(topicNum) {
+    $("#word-cloud").empty();
+    let svg_location = "#word-cloud", topic = topicNum;
     const width = $(document).width();
     const height = $(document).height();
 
     let topicDropdownHTMLWordCloud = "<option disabled selected='selected' value='-1'>Select topic for wordcloud</option>";
     for (i = 0; i < model.topicWordInstancesDict.length; i++) {
-        topicDropdownHTMLWordCloud = topicDropdownHTMLWordCloud + "<option id=\"metadata-select-topic-" + i + "\" value=\"" + i + "\">Topic " + (i + 1) + "</option>";
+        topicDropdownHTMLWordCloud = topicDropdownHTMLWordCloud + "<option id=\"word-cloud-select-topic-" + i + "\" value=\"" + i + "\">Topic " + (i + 1) + "</option>";
     }
     document.getElementById("word-cloud-topic-select").innerHTML = topicDropdownHTMLWordCloud;
     let fill = d3.schemeCategory20;
     let word_entries = d3.entries(model.topicWordInstancesDict[topic]);
+    console.log(word_entries);
     let xScale = d3.scaleLinear()
         .domain([0, d3.max(word_entries, function(d) {
             return d.value;
@@ -211,7 +188,6 @@ function createWordCloud() {
 
     d3.layout.cloud().stop();
 }
-
 
 //Popup/Dialog setup
 
@@ -270,9 +246,7 @@ $( function() {
     }
 });
 
-
 //JQuery-UI functions
-
 
 //Progressbar function
 $(function() {
