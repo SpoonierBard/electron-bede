@@ -30,8 +30,7 @@ function loadFile() {
     document.getElementById("beta").innerHTML = model["beta"];
     
     //testing stuff
-    buildFullHeatmap(10);
-
+    initializeHeatmaps();
 }
 
 //Progress from welcome screen to data visualization tabs

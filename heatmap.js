@@ -1,26 +1,38 @@
+//initializes dropdowns
+$( function() {
+    $( "#heatmap1Menu" ).selectmenu({
+        change: function( event, ui ) {
+            heatmapTopic1 = $('#heatmap1Menu').find(":selected").text();
+            //console.log(heatmapTopic1);
+            replaceHeatmap(1, heatmapTopic1);
+        }
+    });
+    $( "#heatmap2Menu" ).selectmenu({
+        change: function( event, ui ) {
+            heatmapTopic2 = $('#heatmap2Menu').find(":selected").text();
+            //console.log(heatmapTopic1);
+            replaceHeatmap(2, heatmapTopic2);
+        }
+    });
+    $( "#heatmap3Menu" ).selectmenu({
+        change: function( event, ui ) {
+            heatmapTopic3 = $('#heatmap3Menu').find(":selected").text();
+            //console.log(heatmapTopic1);
+            replaceHeatmap(3, heatmapTopic3);
+        }
+    });
+} );
+
+//$( "#heatmap1Menu" ).on( "selectmenuchange", function( event, ui ) {} );
+
 var prevalenceArray = [];
 var heatmapWidthPx = 500;
 var heatmapResPx = 1;
 var heatmapSmoothing = 10;
 
-//calls other functions to create the heatmap and surrounding info
-function buildFullHeatmap(topic) {
-    var binnedArray = createPrevalenceArray(topic);
-	binnedArray = smoothArray(binnedArray, heatmapSmoothing);
-    //create a label to show the top 5 topics
-    var topicWords = Object.keys(model.topicList[topic]);
-    var sortedWords = topicWords.sort(function(a,b){
-        return model.topicList[topic][b] - model.topicList[topic][a];
-    });
-    var top5Words = "Topic " + topic + ": ";
-    for (i=0; i<5; i++) {
-        top5Words = top5Words + sortedWords[i] + ", ";
-    }
-    
-    d3.select("#heatmap").append("h4")
-        .text(top5Words)
-    drawHeatmap(binnedArray);
-}
+var heatmapTopic1 = 0;
+var heatmapTopic2 = 1;
+var heatmapTopic3 = 2;
 
 function createPrevalenceArray(topic) {
      var innerArray = [];
@@ -57,13 +69,13 @@ function createPrevalenceArray(topic) {
             }
         }
     }
+    prevalenceArray = [];
     return binnedArray;
 }
 
 function smoothArray(originalArray, smoothingRadius) {
 	var smoothedArray = 
 		Array.apply(null, Array(originalArray.length)).map(Number.prototype.valueOf,0);
-	console.log(smoothedArray);
 	for (i=0; i<originalArray.length; i++) {
 		if (originalArray[i] != 0) {
 			for (j=(i-smoothingRadius+1); j<i+smoothingRadius; j++) {
@@ -77,16 +89,48 @@ function smoothArray(originalArray, smoothingRadius) {
 	return smoothedArray;
 }
 
-function drawHeatmap(dataset) {
+function initializeHeatmaps() {
+//    d3.select("#heatmap1Menu").selectAll("option")
+//    .data(model.topicList).enter()
+//    .append("option")
+//        .text(function (d) {return d})
+    for (iter=1; iter<4; iter++){
+        topic = eval("heatmapTopic" + iter);
+        
+        changeTop5Words(iter);
+
+        var svg = d3.select("#heatmapSVG" + iter);
+        svg.style("width", function(){
+            return heatmapWidthPx*1.5 + "px"
+        })
+        svg.style("height", 50)
+        
+        var binnedArray = createPrevalenceArray(topic);
+        binnedArray = smoothArray(binnedArray, heatmapSmoothing);
+        
+        drawRectangles(svg, binnedArray);
+        console.log(iter);
+    }
+}
+
+function changeTop5Words(heatmapNum) {
+    var topic = eval("heatmapTopic" + heatmapNum);
+    var topicWords = Object.keys(model.topicList[topic]);
+    var sortedWords = topicWords.sort(function(a,b){
+        return model.topicList[topic][b] - model.topicList[topic][a];
+    });
+    var top5Words = "Topic " + topic + ": ";
+    for (j=0; j<5; j++) {
+        top5Words = top5Words + sortedWords[j] + ", ";
+    }
+    d3.select("#topicLabel" + heatmapNum).text(top5Words)
+}
+
+function drawRectangles(svg, dataset) {
     var colorScale = d3.scaleLinear()
         .domain([d3.min(dataset),
                  d3.max(dataset)])
         .range(["lightblue", "darkblue"])
-    
-    var svg = d3.select("#heatmap").append("svg");
-    svg.style("width", function(){
-        return heatmapWidthPx*1.5 + "px"
-    })
     
     svg.selectAll("rect")
         .data(dataset)
@@ -98,3 +142,14 @@ function drawHeatmap(dataset) {
         .attr("x", function(d,i) {return i * heatmapResPx})
         .style("fill", function(d) {return colorScale(d);})
 }
+
+function replaceHeatmap(heatmapNum, topic) {
+    var svg = d3.select("#heatmapSVG" + heatmapNum);   
+    svg.html("");
+    var binnedArray = createPrevalenceArray(topic);
+    binnedArray = smoothArray(binnedArray, heatmapSmoothing);
+    drawRectangles(svg, binnedArray);
+    changeTop5Words(heatmapNum);
+}
+
+
