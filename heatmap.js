@@ -36,9 +36,9 @@ var heatmapTopic3 = 2;
 
 function createPrevalenceArray(topic) {
      var innerArray = [];
-     for (i=0; i<model.wordsByLocation.length; i++) {
-             for (j=0; j<model.wordsByLocation[i].length; j++) {
-                     if (model.topicsByLocation[i][j] == topic) {
+     for (i=0; i<model.wordsByLocationWithStopwords.length; i++) {
+             for (j=0; j<model.wordsByLocationWithStopwords[i].length; j++) {
+                     if (model.topicsByLocationWithStopwords[i][j] == topic) {
                              innerArray.push(1);
                      } else {
                              innerArray.push(0);
@@ -115,9 +115,9 @@ function initializeHeatmaps() {
 
 function changeTop5Words(heatmapNum) {
     var topic = eval("heatmapTopic" + heatmapNum);
-    var topicWords = Object.keys(model.topicList[topic]);
+    var topicWords = Object.keys(model.topicWordInstancesDict[topic]);
     var sortedWords = topicWords.sort(function(a,b){
-        return model.topicList[topic][b] - model.topicList[topic][a];
+        return model.topicWordInstancesDict[topic][b] - model.topicWordInstancesDict[topic][a];
     });
     var top5Words = "Topic " + topic + ": ";
     for (j=0; j<5; j++) {
