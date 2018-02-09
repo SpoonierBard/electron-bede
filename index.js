@@ -86,7 +86,6 @@ $(document).ready(function() {
     //changing the wordcloud
     $("#word-cloud-topic-select").change(function () {
         let topic = $("#word-cloud-topic-select option:selected").val();
-        console.log(topic)
         createWordCloud(topic)
     });
 });
@@ -213,22 +212,23 @@ function createWordCloud(topicNum) {
     let svg_location = "#word-cloud", topic = topicNum;
     const width = $(document).width();
     const height = $(document).height();
-    //this needs to not run every time
     let fill = d3.schemeCategory20;
-    // let word_entries = d3.entries(model.topicWordInstancesDict[topic]);
-    // let word_entries = d3.entries(model.topicWordInstancesDict[topic]).slice(0,Math.min(model.topicWordInstancesDict.length, 600));
-    let word_entries = d3.entries(model.topicWordInstancesDict[topic]).slice(0,600);
+    let word_entries = model.topicWordInstancesDict[topic];
+    //filtered_entries contains every element of word_entries witha count greater than 1
+    let filtered_entries = d3.entries(Object.keys(word_entries).reduce(function (new_dict, key) {
+        if (word_entries[key] > 1) new_dict[key] = word_entries[key];
+        return new_dict;
+    }, {}));
     let xScale = d3.scaleLinear()
-        .domain([0, d3.max(word_entries, function(d) {
+        .domain([0, d3.max(filtered_entries, function(d) {
             return d.value;
         })
         ])
         .range([10,100]);
-
     d3.layout.cloud()
         .size([width, height])
         .timeInterval(20)
-        .words(word_entries)
+        .words(filtered_entries)
         .fontSize(function(d) { return xScale(+d.value); })
         .text(function(d) { return d.key; })
         .rotate(function() { return ~~(Math.random() * 2) * 90; })

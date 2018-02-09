@@ -132,7 +132,6 @@ function initializeHeatmaps() {
         binnedArray = smoothArray(binnedArray, heatmapSmoothing);
         
         drawRectangles(svg, binnedArray);
-        console.log(iter);
     }
 }
 
