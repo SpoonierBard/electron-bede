@@ -19,7 +19,7 @@ function loadFile() {
             model = JSON.parse(reader.result);
             createMetadata();
             createAnnotatedText();
-            createWordCloud(-1);
+            initializeWordCloudTab();
             loadTabs();
         });
         reader.readAsText(input.files[0]);
@@ -76,7 +76,6 @@ $(document).ready(function() {
     $("#metadata-topic-select").change(function () {
         let value = $("#metadata-topic-select option:selected").val();
         value = parseInt(value);
-        console.log(value);
         let topicWordList = Object.keys(model.topicWordInstancesDict[value]);
         topicWordList = topicWordList.sort(function (a, b) {
             return model.topicWordInstancesDict[value][b] -
@@ -201,23 +200,20 @@ function onSelect() {
 
 //WORD CLOUD TAB
 
+function initializeWordCloudTab() {
+    topicDropdownHTMLWordCloud = "<option disabled selected='selected' value='-1'>Select topic for wordcloud</option>";
+    for (i = 0; i < model.topicWordInstancesDict.length; i++) {
+        topicDropdownHTMLWordCloud = topicDropdownHTMLWordCloud + "<option class=\"select-topic-" + i + "\" value=\"" + i + "\">Topic " + (i + 1) + "</option>";
+    }
+    document.getElementById("word-cloud-topic-select").innerHTML = topicDropdownHTMLWordCloud;
+    createWordCloud(0);
+}
 function createWordCloud(topicNum) {
     $("#word-cloud").empty();
     let svg_location = "#word-cloud", topic = topicNum;
     const width = $(document).width();
     const height = $(document).height();
     //this needs to not run every time
-    let topicDropdownHTMLWordCloud = ""
-    if (topicNum == -1) {
-        topicDropdownHTMLWordCloud = "<option disabled selected='selected' value='-1'>Select topic for wordcloud</option>";
-        topic = 0
-    } else {
-        topicDropdownHTMLWordCloud = "<option disabled selected=''selected value="+topic+">Topic " + String(parseInt(topic) + 1) + "</option>";
-    }
-    for (i = 0; i < model.topicWordInstancesDict.length; i++) {
-        topicDropdownHTMLWordCloud = topicDropdownHTMLWordCloud + "<option class=\"select-topic-" + i + "\" value=\"" + i + "\">Topic " + (i + 1) + "</option>";
-    }
-    document.getElementById("word-cloud-topic-select").innerHTML = topicDropdownHTMLWordCloud;
     let fill = d3.schemeCategory20;
     // let word_entries = d3.entries(model.topicWordInstancesDict[topic]);
     // let word_entries = d3.entries(model.topicWordInstancesDict[topic]).slice(0,Math.min(model.topicWordInstancesDict.length, 600));
