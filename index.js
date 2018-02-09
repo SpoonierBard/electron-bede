@@ -216,7 +216,7 @@ function createWordCloud(topicNum) {
     let word_entries = model.topicWordInstancesDict[topic];
     //filtered_entries contains every element of word_entries witha count greater than 1
     let filtered_entries = d3.entries(Object.keys(word_entries).reduce(function (new_dict, key) {
-        if (word_entries[key] > 1) new_dict[key] = word_entries[key];
+        if (word_entries[key] > 1 && key.length > 2) new_dict[key] = word_entries[key];
         return new_dict;
     }, {}));
     let xScale = d3.scaleLinear()
