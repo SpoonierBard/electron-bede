@@ -111,3 +111,16 @@ select {
     position: absolute;
     text-align: center;
 }
+
+.inline {
+    display:inline;
+}
+
+.bottomMargin {
+    margin-top: 20px;
+    margin-bottom: 10px
+}
+
+.padLeft50 {
+    padding-left: 50px !important;
+}
