@@ -1,16 +1,50 @@
+var prevalenceArray = [];
+var heatmapWidthPx = 500;
+var heatmapResPx = 1;
+var heatmapSmoothing = 10;
+
+var heatmapTopic1 = 0;
+var heatmapTopic2 = 1;
+var heatmapTopic3 = 2;
+
+var scaledColors = ["hsl(161, 30%, 90%)", "hsl(17, 30%, 90%)", "hsl(222, 30%, 90%)", "hsl(161, 63%, 38%)", "hsl(17, 86%, 49%)", "hsl(222, 57%, 47%)"];
+//var scaledColors = ["#B3E1D2", "#FEC6B1", "#C6D0E5", "#336153", "#7E4731", "#475066"];
+
+
 //initializes dropdowns
 $(document).ready(function() {
     $( "#heatmap1Menu" ).change(function () {
-        let heatmapTopic1 = $("#heatmap1Menu option:selected").val();
+        heatmapTopic1 = $("#heatmap1Menu option:selected").val();
         replaceHeatmap(1, heatmapTopic1);
     });
     $( "#heatmap2Menu" ).change(function () {
-        let heatmapTopic2 = $("#heatmap2Menu option:selected").val();
+        heatmapTopic2 = $("#heatmap2Menu option:selected").val();
         replaceHeatmap(2, heatmapTopic2);
     });
     $( "#heatmap3Menu" ).change(function () {
-        let heatmapTopic3 = $("#heatmap3Menu option:selected").val();
+        heatmapTopic3 = $("#heatmap3Menu option:selected").val();
         replaceHeatmap(3, heatmapTopic3);
+    });
+    $("#smoothingBox").change(
+    function(){
+        if ($(this).is(':checked')) {
+            heatmapSmoothing = parseInt($("#smoothingSelect").val());
+            replaceHeatmap(1,heatmapTopic1);
+            replaceHeatmap(2,heatmapTopic2);
+            replaceHeatmap(3,heatmapTopic3);
+        }
+        else {
+            heatmapSmoothing = 1;
+            replaceHeatmap(1,heatmapTopic1);
+            replaceHeatmap(2,heatmapTopic2);
+            replaceHeatmap(3,heatmapTopic3);
+        }
+    });
+    $("#smoothingSelect").change(function () {
+        heatmapSmoothing = parseInt($("#smoothingSelect").val());
+        replaceHeatmap(1,heatmapTopic1);
+        replaceHeatmap(2,heatmapTopic2);
+        replaceHeatmap(3,heatmapTopic3);
     });
 });
 /*
@@ -39,18 +73,6 @@ $( function() {
 } );
 */
 //$( "#heatmap1Menu" ).on( "selectmenuchange", function( event, ui ) {} );
-
-var prevalenceArray = [];
-var heatmapWidthPx = 500;
-var heatmapResPx = 1;
-var heatmapSmoothing = 10;
-
-var heatmapTopic1 = 0;
-var heatmapTopic2 = 1;
-var heatmapTopic3 = 2;
-
-var scaledColors = ["hsl(161, 30%, 90%)", "hsl(17, 30%, 90%)", "hsl(222, 30%, 90%)", "hsl(161, 63%, 38%)", "hsl(17, 86%, 49%)", "hsl(222, 57%, 47%)"];
-//var scaledColors = ["#B3E1D2", "#FEC6B1", "#C6D0E5", "#336153", "#7E4731", "#475066"];
 
 function createPrevalenceArray(topic) {
      var innerArray = [];
@@ -97,10 +119,14 @@ function smoothArray(originalArray, smoothingRadius) {
 	for (i=0; i<originalArray.length; i++) {
 		if (originalArray[i] != 0) {
 			for (j=(i-smoothingRadius+1); j<i+smoothingRadius; j++) {
-				if ((j >= 0)&&(j < originalArray.length)) {
+				if ((j >= 0)&&(j <= i)) {
 					smoothedArray[j] += 
 						originalArray[i]*(smoothingRadius-(i-j));
 				}
+                if ((j > i)&&(j < originalArray.length)) {
+                    smoothedArray[j] += 
+						originalArray[i]*(smoothingRadius+(i-j));
+                }
 			}
 		}
 	}
