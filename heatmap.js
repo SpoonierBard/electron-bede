@@ -1,16 +1,50 @@
+var prevalenceArray = [];
+var heatmapWidthPx = 500;
+var heatmapResPx = 1;
+var heatmapSmoothing = 10;
+
+var heatmapTopic1 = 0;
+var heatmapTopic2 = 1;
+var heatmapTopic3 = 2;
+
+var scaledColors = ["hsl(161, 30%, 90%)", "hsl(17, 30%, 90%)", "hsl(222, 30%, 90%)", "hsl(161, 63%, 38%)", "hsl(17, 86%, 49%)", "hsl(222, 57%, 47%)"];
+//var scaledColors = ["#B3E1D2", "#FEC6B1", "#C6D0E5", "#336153", "#7E4731", "#475066"];
+
+
 //initializes dropdowns
 $(document).ready(function() {
     $( "#heatmap1Menu" ).change(function () {
-        let heatmapTopic1 = $("#heatmap1Menu option:selected").val();
+        heatmapTopic1 = $("#heatmap1Menu option:selected").val();
         replaceHeatmap(1, heatmapTopic1);
     });
     $( "#heatmap2Menu" ).change(function () {
-        let heatmapTopic2 = $("#heatmap2Menu option:selected").val();
+        heatmapTopic2 = $("#heatmap2Menu option:selected").val();
         replaceHeatmap(2, heatmapTopic2);
     });
     $( "#heatmap3Menu" ).change(function () {
-        let heatmapTopic3 = $("#heatmap3Menu option:selected").val();
+        heatmapTopic3 = $("#heatmap3Menu option:selected").val();
         replaceHeatmap(3, heatmapTopic3);
+    });
+    $("#smoothingBox").change(
+    function(){
+        if ($(this).is(':checked')) {
+            heatmapSmoothing = parseInt($("#smoothingSelect").val());
+            replaceHeatmap(1,heatmapTopic1);
+            replaceHeatmap(2,heatmapTopic2);
+            replaceHeatmap(3,heatmapTopic3);
+        }
+        else {
+            heatmapSmoothing = 1;
+            replaceHeatmap(1,heatmapTopic1);
+            replaceHeatmap(2,heatmapTopic2);
+            replaceHeatmap(3,heatmapTopic3);
+        }
+    });
+    $("#smoothingSelect").change(function () {
+        heatmapSmoothing = parseInt($("#smoothingSelect").val());
+        replaceHeatmap(1,heatmapTopic1);
+        replaceHeatmap(2,heatmapTopic2);
+        replaceHeatmap(3,heatmapTopic3);
     });
 });
 /*
@@ -39,15 +73,6 @@ $( function() {
 } );
 */
 //$( "#heatmap1Menu" ).on( "selectmenuchange", function( event, ui ) {} );
-
-var prevalenceArray = [];
-var heatmapWidthPx = 500;
-var heatmapResPx = 1;
-var heatmapSmoothing = 10;
-
-var heatmapTopic1 = 0;
-var heatmapTopic2 = 1;
-var heatmapTopic3 = 2;
 
 function createPrevalenceArray(topic) {
      var innerArray = [];
@@ -94,10 +119,14 @@ function smoothArray(originalArray, smoothingRadius) {
 	for (i=0; i<originalArray.length; i++) {
 		if (originalArray[i] != 0) {
 			for (j=(i-smoothingRadius+1); j<i+smoothingRadius; j++) {
-				if ((j >= 0)&&(j < originalArray.length)) {
+				if ((j >= 0)&&(j <= i)) {
 					smoothedArray[j] += 
 						originalArray[i]*(smoothingRadius-(i-j));
 				}
+                if ((j > i)&&(j < originalArray.length)) {
+                    smoothedArray[j] += 
+						originalArray[i]*(smoothingRadius+(i-j));
+                }
 			}
 		}
 	}
@@ -109,14 +138,17 @@ function initializeHeatmaps() {
 //    .data(model.topicList).enter()
 //    .append("option")
 //        .text(function (d) {return d})
-    let topicDropdownHTML = "<option disabled selected>Select Topic</option>";
+    let topicDropdownHTML = "<option disabled>Select Topic</option>";
     for (i = 0; i < model.topicWordInstancesDict.length; i++) {
         topicDropdownHTML = topicDropdownHTML + "<option class=\"select-topic-" + i + "\" value=\"" + i + "\">Topic " + (i + 1) + "</option>";
     }
     document.getElementById("heatmap1Menu").innerHTML = topicDropdownHTML;
+    $('#heatmap1Menu option')[1].selected = true;
     document.getElementById("heatmap2Menu").innerHTML = topicDropdownHTML;
+    $('#heatmap2Menu option')[2].selected = true;
     document.getElementById("heatmap3Menu").innerHTML = topicDropdownHTML;
-
+    $('#heatmap3Menu option')[3].selected = true;
+    
     for (iter=1; iter<4; iter++){
         topic = eval("heatmapTopic" + iter);
 
@@ -131,7 +163,7 @@ function initializeHeatmaps() {
         var binnedArray = createPrevalenceArray(topic);
         binnedArray = smoothArray(binnedArray, heatmapSmoothing);
         
-        drawRectangles(svg, binnedArray);
+        drawRectangles(svg, binnedArray, iter);
     }
 }
 
@@ -141,18 +173,19 @@ function changeTop5Words(heatmapNum, topic) {
     var sortedWords = topicWords.sort(function(a,b){
         return model.topicWordInstancesDict[topic][b] - model.topicWordInstancesDict[topic][a];
     });
-    var top5Words = "Topic " + (parseInt(topic) + 1) + ": ";
-    for (j=0; j<5; j++) {
+    var top5Words = ": ";
+    for (j=0; j<4; j++) {
         top5Words = top5Words + sortedWords[j] + ", ";
     }
+    top5Words = top5Words + sortedWords[4];
     d3.select("#topicLabel" + heatmapNum).text(top5Words)
 }
 
-function drawRectangles(svg, dataset) {
+function drawRectangles(svg, dataset, heatmapNum) {
     var colorScale = d3.scaleLinear()
         .domain([d3.min(dataset),
                  d3.max(dataset)])
-        .range(["lightblue", "darkblue"])
+        .range([scaledColors[heatmapNum - 1], scaledColors[heatmapNum + 2]])
     
     svg.selectAll("rect")
         .data(dataset)
@@ -160,9 +193,19 @@ function drawRectangles(svg, dataset) {
         .append("rect")
         .attr("width", function() {return heatmapResPx})
         .attr("height", 50)
-        .attr("y", function(d) {return 0})
+        .attr("y", 0)
         .attr("x", function(d,i) {return i * heatmapResPx})
         .style("fill", function(d) {return colorScale(d);})
+        .on("mouseover", function(d){
+            d3.select(this).style("fill", "black");
+        })
+        .on("mouseout", function(d){
+            d3.select(this).style("fill", function(d) {return colorScale(d);
+            })
+        })
+        .on("click", function(d, i){
+            console.log(i/dataset.length);
+        })
 }
 
 function replaceHeatmap(heatmapNum, topic) {
@@ -170,7 +213,7 @@ function replaceHeatmap(heatmapNum, topic) {
     svg.html("");
     var binnedArray = createPrevalenceArray(topic);
     binnedArray = smoothArray(binnedArray, heatmapSmoothing);
-    drawRectangles(svg, binnedArray);
+    drawRectangles(svg, binnedArray, heatmapNum);
     changeTop5Words(heatmapNum, topic);
 }
 
