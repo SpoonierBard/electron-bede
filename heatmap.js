@@ -140,7 +140,7 @@ function initializeHeatmaps() {
 //        .text(function (d) {return d})
     let topicDropdownHTML = "<option disabled>Select Topic</option>";
     for (i = 0; i < model.topicWordInstancesDict.length; i++) {
-        topicDropdownHTML = topicDropdownHTML + "<option class=\"select-topic-" + i + "\" value=\"" + i + "\">Topic " + (i + 1) + "</option>";
+        topicDropdownHTML = topicDropdownHTML + "<option class=\"select-topic-" + i + "\" value=\"" + i + "\">" + model.nicknames[i] + "</option>";
     }
     document.getElementById("heatmap1Menu").innerHTML = topicDropdownHTML;
     $('#heatmap1Menu option')[1].selected = true;
