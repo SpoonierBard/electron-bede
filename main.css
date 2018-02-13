@@ -30,6 +30,16 @@ html {
     display: none;
 }
 
+#welcome-page {
+    display: block;
+}
+
+#file-upload {
+    display: none;
+}
+#create-file-form {
+    display: none;
+}
 #tab-3 {
     /*font-family: monospace;*/
     /*padding: 2%;*/

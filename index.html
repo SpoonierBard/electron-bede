@@ -14,6 +14,65 @@
     <script>if (window.module) module = window.module;</script>
 </head>
 <body>
+<div id="welcome-page">
+    <input type="button" id="upload-file-button" value="Upload JSON File" onclick="loadFileChoice();">
+    <input type="button" id="create-file-button" value="Create Config File" onclick="loadConfigForm();">
+</div>
+<div id="create-file-form">
+    <form>
+        <h5>Required Parameters</h5>
+        <label for="create-file-source">Source</label>
+        <input type="text" id="create-file-source"><br>
+        <label for="create-file-iterations">Iterations</label>
+        <input type="number" id="create-file-iterations" min="1" value="50"><br>
+        <label for="create-file-topics">Topics</label>
+        <input type="number" id="create-file-topics" min="1" value="10"><br>
+        <label for="create-file-output">Output Name</label>
+        <input type="text" id="create-file-output"><br>
+
+        <h5>Stopword Options</h5>
+        <h6>Range Limits</h6>
+        <label for="create-file-upperlimit">Remove words that appear in more than</label>
+        <input type="number" id="create-file-upperlimit" min="0" max="100" value="90">
+        % of documents<br>
+        <label for="create-file-lowerlimit">Remove words that appear in fewer than</label>
+        <input type="number" id="create-file-lowerlimit" min="0" max="100" value="5">
+        % of documents
+        <h6>Whitelist and Blacklist</h6>
+        <label for="create-file-whitelist">Whitelist</label><br>
+        <textarea id="create-file-whitelist"></textarea><br>
+        <label for="create-file-blacklist">Blacklist</label><br>
+        <textarea id="create-file-blacklist"></textarea><br>
+        <input type="checkbox" id="create-file-default-english-stopwords" value="true">Add default English stopwords<br>
+        <input type="checkbox" id="create-file-default-latin-stopwords" value="true">Add default Latin stopwords
+
+        <h5>Chunking Options</h5>
+        <input type="radio" name="chunking" value="number" id="chunking-number"
+               onclick="document.getElementById('create-file-number-documents').disabled = false;
+                        document.getElementById('create-file-length-documents').disabled = true;
+                        document.getElementById('create-file-split-string').disabled = true;"
+               checked>Number of documents
+        <input type="number" id="create-file-number-documents" min="1" value="20"><br>
+        <input type="radio" name="chunking" value="length" id="chunking-length"
+               onclick="document.getElementById('create-file-number-documents').disabled = true;
+                        document.getElementById('create-file-length-documents').disabled = false;
+                        document.getElementById('create-file-split-string').disabled = true;">Length of documents
+        <input type="number" id="create-file-length-documents" min="1" disabled><br>
+        <input type="radio" name="chunking" value="splitstring" id="chunking-splitstring"
+               onclick="document.getElementById('create-file-number-documents').disabled = true;
+                        document.getElementById('create-file-length-documents').disabled = true;
+                        document.getElementById('create-file-split-string').disabled = false;">Split string
+        <input type="text" id="create-file-split-string" disabled><br>
+
+        <h5>Hyperparameters</h5>
+        <label for="create-file-alpha">Alpha</label>
+        <input type="number" id="create-file-alpha" min="0" max="1" step="0.1" value="0.8"><br>
+        <label for="create-file-beta">Beta</label>
+        <input type="number" id="create-file-beta" min="0" max="1" step="0.1" value="0.8"><br>
+
+        <input type="submit" value="Create config file" onclick="createConfigFile();">
+    </form>
+</div>
 <div id="file-upload">
     <form>
         <input type="file" id="json-file">
