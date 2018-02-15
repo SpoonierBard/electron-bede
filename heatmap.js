@@ -100,7 +100,7 @@ function createPrevalenceArray(topic) {
     for (i=0; i<prevalenceArray.length; i++) {
         for (j=0; j<prevalenceArray[i].length; j++) {
             countDown--;
-            binnedArray[curIndex] += prevalenceArray[i][j]
+            binnedArray[curIndex] += prevalenceArray[i][j];
             
             if (countDown<=0) {
                 countDown = binSize;
@@ -157,8 +157,8 @@ function initializeHeatmaps() {
         var svg = d3.select("#heatmapSVG" + iter);
         svg.style("width", function(){
             return heatmapWidthPx*1.5 + "px"
-        })
-        svg.style("height", 50)
+        });
+        svg.style("height", 50);
         
         var binnedArray = createPrevalenceArray(topic);
         binnedArray = smoothArray(binnedArray, heatmapSmoothing);
@@ -185,7 +185,7 @@ function drawRectangles(svg, dataset, heatmapNum) {
     var colorScale = d3.scaleLinear()
         .domain([d3.min(dataset),
                  d3.max(dataset)])
-        .range([scaledColors[heatmapNum - 1], scaledColors[heatmapNum + 2]])
+        .range([scaledColors[heatmapNum - 1], scaledColors[heatmapNum + 2]]);
     
     svg.selectAll("rect")
         .data(dataset)

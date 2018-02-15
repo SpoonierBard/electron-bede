@@ -246,62 +246,53 @@ function createAnnotatedText() {
     document.getElementById("an-text-topic-select-2").innerHTML = topicDropdownHTML;
     document.getElementById("an-text-topic-select-3").innerHTML = topicDropdownHTML;
 
-
-    //TODO: figure out how to reconcile d3.tip with new verion of d3
-    // var tip = d3.tip()
-    //     .attr('class', 'd3-tip')
-    //     .html(function(d) {
-    //         return "<strong>Topic:</strong> <span style='color:white'>" + d.className + "</span>";
-    //     });
-    //
-    // d3.select('#tab-3').call(tip);
+    for(i = 1; i < 4; i++) {
+        d3.select("#an-text-topic-select-" + i)
+            .style("background", function () {return colors[i - 1]; });
+    }
 
     //iterate through full text and add each word as own span with topic as class
     for (docInText in model.wordsByLocationWithStopwords) {
         for (word in model.wordsByLocationWithStopwords[docInText]) {
-            d3.select("#tab-3")
+            d3.select("#an-text-body")
                 .append("span")
-                .text(model.wordsByLocationWithStopwords[docInText][word]+ " ")
+                .text(model.wordsByLocationWithStopwords[docInText][word])
                 .attr("class", "topic-" + model.topicsByLocationWithStopwords[docInText][word])
                 .on("mouseover", onHover)
-                //.on("mouseover", tip.show)
-                //.on("mouseout", tip.hide)
                 .on("mouseout", offHover);
+             d3.select('#an-text-body')
+                .append("span")
+                .text(" ");
         }
     }
 
 
 }
 
-//TODO: figure out how to make selectors sticky on reaching top of window
-// $(document).ready(function() {
-//     $(window).scroll(function() {
-//         var distanceFromTop = $(this).scrollTop();
-//         if (distanceFromTop >= $('#an-text-title').height()) {
-//             $('#selector-div').addClass('fixed');
-//         } else {
-//             $('#selector-div').removeClass('fixed');
-//         }
-//     });
-// });
-
-function togglePressed() {
-    topicNum = this.value.slice(-1);
-    topic = ".topic-" + topicNum;
-    // add toggle!
-    d3.selectAll(topic)
-        .style("background-color", "orange");
-}
-
 function onHover() {
+    d3.select(this)
+        .attr("data-tooltip", function(){
+            var topicindex = parseInt(this.className.split("-")[1]);
+            if (this.className.split("-").length > 2) {
+                return "stopword";
+            }
+            else if (model.nicknames[topicindex] != "") {
+                return model.nicknames[topicindex];
+            } else {
+                return "topic-" + (topicindex + 1);
+            }
+        });
     topic = "." + this.className;
     selectedOne = "topic-" + document.getElementById("an-text-topic-select-1").value;
     selectedTwo = "topic-" + document.getElementById("an-text-topic-select-2").value;
     selectedThree = "topic-" + document.getElementById("an-text-topic-select-3").value;
     //check to make sure we don't overwrite a selected topic
     if ((selectedOne != this.className) && (selectedTwo != this.className) && (selectedThree != this.className)) {
-        d3.selectAll(topic)
-            .style("background-color", "yellow")
+        //only apply if hover on highlight is checked
+        if (document.getElementById("check-highlight").checked && this.className != "topic--1") {
+            d3.selectAll(topic)
+                .style("background-color", "yellow")
+        }
     }
 }
 
@@ -448,6 +439,7 @@ $( function() {
             toUpdate[i].innerText = model.nicknames[topic.val()];
         }
         dialog.dialog("close");
+
     }
 });
 
