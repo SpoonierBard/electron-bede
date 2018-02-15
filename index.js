@@ -353,8 +353,10 @@ function createWordCloud(topicNum) {
         if (word_entries[key] > 1 && key.length > 2) new_dict[key] = word_entries[key];
         return new_dict;
     }, {}));
+    reduced_entries = filtered_entries.slice(0,Math.min(filtered_entries.length, 600));
+    console.log("length:" + reduced_entries.length);
     let xScale = d3.scaleLinear()
-        .domain([0, d3.max(filtered_entries, function(d) {
+        .domain([0, d3.max(reduced_entries, function(d) {
             return d.value;
         })
         ])
@@ -362,7 +364,7 @@ function createWordCloud(topicNum) {
     d3.layout.cloud()
         .size([width, height])
         .timeInterval(20)
-        .words(filtered_entries)
+        .words(reduced_entries)
         .fontSize(function(d) { return xScale(+d.value); })
         .text(function(d) { return d.key; })
         .rotate(function() { return ~~(Math.random() * 2) * 90; })
