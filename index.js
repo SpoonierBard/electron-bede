@@ -2,6 +2,7 @@
 //This variable is global because it will contain all our data
 let fs = require("fs");
 let model = {};
+let input;
 
 function loadConfigForm(){
     document.getElementById("welcome-page").style.display = "none";
@@ -139,11 +140,11 @@ var colors  = ["#66c2a5", "#fc8d62", "#8da0cb"];
 //Function to read data from uploaded json file. Called on button click.
 function loadFile() {
     hideUploadScreen();
-    let input, reader;
+    let reader;
     reader = new FileReader();
     input = document.getElementById("json-file");
     if (!input.files[0]) {
-        console.log("Please select a file before clicking upload");
+        alert("Please select a file before clicking upload");
     }
     else {
         //Onload called when file is finished uploading
@@ -151,6 +152,7 @@ function loadFile() {
         reader.onload = (function() {
             model = JSON.parse(reader.result);
             createMetadata();
+            initializeHeatmaps();
             createAnnotatedText();
             initializeWordCloudTab();
             loadTabs();
@@ -182,29 +184,36 @@ function createMetadata(){
     document.getElementById("alpha").innerHTML = model["alpha"];
     document.getElementById("beta").innerHTML = model["beta"];
     
-    //testing stuff
-    initializeHeatmaps();
     document.getElementById("stopwords-dialog").innerHTML = "<p>" + model.stopwords.join(", ") + "</p>";
 
     //create nicknames data structure
-    model["nicknames"] = [];
-    for (i = 0; i < model.topicWordInstancesDict.length; i++) {
-        model.nicknames.push("");
+    if (model["nicknames"] === null || model["nicknames"] === undefined) {
+        model["nicknames"] = [];
+        for (i = 0; i < model.topicWordInstancesDict.length; i++) {
+            model.nicknames.push("Topic " + (i + 1));
+        }
     }
-
     //dynamically create injectable HTML with dropdown options for each topic
     let topicDropdownHTMLmetadata = "<option disabled selected='selected' value='-1'>Select topic to display</option>";
     let topicDropdownHTMLnickname = "<option disabled selected>Select topic to nickname</option>";
 
     for (i = 0; i < model.topicWordInstancesDict.length; i++) {
-        topicDropdownHTMLmetadata = topicDropdownHTMLmetadata + "<option class=\"select-topic-" + i + "\" value=\"" + i + "\">Topic " + (i + 1) + "</option>";
-        topicDropdownHTMLnickname = topicDropdownHTMLnickname + "<option class=\"select-topic-" + i + "\" value=\"" + i + "\">Topic " + (i + 1) + "</option>";
+        topicDropdownHTMLmetadata = topicDropdownHTMLmetadata + "<option class=\"select-topic-" + i + "\" value=\"" + i + "\">" + model.nicknames[i] + "</option>";
+        topicDropdownHTMLnickname = topicDropdownHTMLnickname + "<option class=\"select-topic-" + i + "\" value=\"" + i + "\">" + model.nicknames[i] + "</option>";
     }
     document.getElementById("metadata-topic-select").innerHTML = topicDropdownHTMLmetadata;
     document.getElementById("nickname-topic-select").innerHTML = topicDropdownHTMLnickname;
 }
 
-//Metadata selectmenu setup (with onchange function)
+function saveNicknames() {
+    fs.writeFile(input.files[0].path, JSON.stringify(model), (err) => {
+        if (err) {
+            console.error(err);
+        }
+    });
+}
+
+//selectmenu setup (with onchange function)
 $(document).ready(function() {
     $("#metadata-topic-select").change(function () {
         let value = $("#metadata-topic-select option:selected").val();
@@ -240,7 +249,7 @@ function createAnnotatedText() {
 
     //create three identical selectors for three possible topic comparisons
     for (i = 0; i < model.topicWordInstancesDict.length; i++) {
-        topicDropdownHTML = topicDropdownHTML + "<option class=\"select-topic-" + i + "\" value=\"" + i + "\">Topic " + (i + 1) + "</option>";
+        topicDropdownHTML = topicDropdownHTML + "<option class=\"select-topic-" + i + "\" value=\"" + i + "\">" + model.nicknames[i] + "</option>";
     }
     document.getElementById("an-text-topic-select-1").innerHTML = topicDropdownHTML;
     document.getElementById("an-text-topic-select-2").innerHTML = topicDropdownHTML;
@@ -327,7 +336,7 @@ function onSelect() {
 function initializeWordCloudTab() {
     topicDropdownHTMLWordCloud = "<option disabled selected='selected' value='-1'>Select topic for wordcloud</option>";
     for (i = 0; i < model.topicWordInstancesDict.length; i++) {
-        topicDropdownHTMLWordCloud = topicDropdownHTMLWordCloud + "<option class=\"select-topic-" + i + "\" value=\"" + i + "\">Topic " + (i + 1) + "</option>";
+        topicDropdownHTMLWordCloud = topicDropdownHTMLWordCloud + "<option class=\"select-topic-" + i + "\" value=\"" + i + "\">" + model.nicknames[i] + "</option>";
     }
     document.getElementById("word-cloud-topic-select").innerHTML = topicDropdownHTMLWordCloud;
     createWordCloud(0);
