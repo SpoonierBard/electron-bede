@@ -261,21 +261,32 @@ function createAnnotatedText() {
     }
 
     //iterate through full text and add each word as own span with topic as class
+    let puncTracker = 0; //index of punctuation
+    let puncLocation = 0; //index of puncLocation
+    let puncLocTracker = 0; //where in text
+    let wordToApp;
     for (docInText in model.wordsByLocationWithStopwords) {
         for (word in model.wordsByLocationWithStopwords[docInText]) {
+            wordToApp = model.wordsByLocationWithStopwords[docInText][word];
+            if (puncLocTracker == model.puncLocations[puncLocation]) {
+                wordToApp = model.punctuation[puncTracker];
+                puncTracker += 1;
+                puncLocation += 1;
+                puncLocTracker += 1;
+            } else {
+                puncLocTracker += 1;
+            }
             d3.select("#an-text-body")
                 .append("span")
-                .text(model.wordsByLocationWithStopwords[docInText][word])
-                .attr("class", "topic-" + model.topicsByLocationWithStopwords[docInText][word])
+                .text(wordToApp)
+                .attr("class", "topic-" + wordToApp)
                 .on("mouseover", onHover)
                 .on("mouseout", offHover);
-             d3.select('#an-text-body')
+            d3.select('#an-text-body')
                 .append("span")
                 .text(" ");
         }
     }
-
-
 }
 
 function onHover() {
