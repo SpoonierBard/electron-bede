@@ -1,7 +1,8 @@
 //TODO: add drag/drop capability for file upload
 //This variable is global because it will contain all our data
-let fs = require("fs");
+// let fs = require("fs");
 let model = {};
+let input;
 
 function loadConfigForm(){
     document.getElementById("welcome-page").style.display = "none";
@@ -129,21 +130,23 @@ function createConfigFile(){
     config["chunking options"] = choptions;
     config["hyperparameters"] = hyperparameters;
 
-    fs.writeFile("./config.json", JSON.stringify(config), (err) => {
+    let filename = "./" + outputname + "-config.json";
+    fs.writeFile(filename, JSON.stringify(config), (err) => {
         if (err) {
             console.error(err);
         }
     });
 }
-var colors  = ["#66c2a5", "#fc8d62", "#8da0cb"];
+
+const colors  = ["#66c2a5", "#fc8d62", "#8da0cb"];
 //Function to read data from uploaded json file. Called on button click.
 function loadFile() {
     hideUploadScreen();
-    let input, reader;
+    let reader;
     reader = new FileReader();
     input = document.getElementById("json-file");
     if (!input.files[0]) {
-        console.log("Please select a file before clicking upload");
+        alert("Please select a file before clicking upload");
     }
     else {
         //Onload called when file is finished uploading
@@ -151,6 +154,7 @@ function loadFile() {
         reader.onload = (function() {
             model = JSON.parse(reader.result);
             createMetadata();
+            initializeHeatmaps();
             createAnnotatedText();
             initializeWordCloudTab();
             loadTabs();
@@ -182,29 +186,36 @@ function createMetadata(){
     document.getElementById("alpha").innerHTML = model["alpha"];
     document.getElementById("beta").innerHTML = model["beta"];
     
-    //testing stuff
-    initializeHeatmaps();
     document.getElementById("stopwords-dialog").innerHTML = "<p>" + model.stopwords.join(", ") + "</p>";
 
     //create nicknames data structure
-    model["nicknames"] = [];
-    for (i = 0; i < model.topicWordInstancesDict.length; i++) {
-        model.nicknames.push("");
+    if (model["nicknames"] === null || model["nicknames"] === undefined) {
+        model["nicknames"] = [];
+        for (let i = 0; i < model.topicWordInstancesDict.length; i++) {
+            model.nicknames.push("Topic " + (i + 1));
+        }
     }
-
     //dynamically create injectable HTML with dropdown options for each topic
     let topicDropdownHTMLmetadata = "<option disabled selected='selected' value='-1'>Select topic to display</option>";
     let topicDropdownHTMLnickname = "<option disabled selected>Select topic to nickname</option>";
 
-    for (i = 0; i < model.topicWordInstancesDict.length; i++) {
-        topicDropdownHTMLmetadata = topicDropdownHTMLmetadata + "<option class=\"select-topic-" + i + "\" value=\"" + i + "\">Topic " + (i + 1) + "</option>";
-        topicDropdownHTMLnickname = topicDropdownHTMLnickname + "<option class=\"select-topic-" + i + "\" value=\"" + i + "\">Topic " + (i + 1) + "</option>";
+    for (let i = 0; i < model.topicWordInstancesDict.length; i++) {
+        topicDropdownHTMLmetadata = topicDropdownHTMLmetadata + "<option class=\"select-topic-" + i + "\" value=\"" + i + "\">" + model.nicknames[i] + "</option>";
+        topicDropdownHTMLnickname = topicDropdownHTMLnickname + "<option class=\"select-topic-" + i + "\" value=\"" + i + "\">" + model.nicknames[i] + "</option>";
     }
     document.getElementById("metadata-topic-select").innerHTML = topicDropdownHTMLmetadata;
     document.getElementById("nickname-topic-select").innerHTML = topicDropdownHTMLnickname;
 }
 
-//Metadata selectmenu setup (with onchange function)
+function saveNicknames() {
+    fs.writeFile(input.files[0].path, JSON.stringify(model), (err) => {
+        if (err) {
+            console.error(err);
+        }
+    });
+}
+
+//selectmenu setup (with onchange function)
 $(document).ready(function() {
     $("#metadata-topic-select").change(function () {
         let value = $("#metadata-topic-select option:selected").val();
@@ -239,78 +250,88 @@ function createAnnotatedText() {
     let topicDropdownHTML = "<option disabled selected>Select Topic</option>";
 
     //create three identical selectors for three possible topic comparisons
-    for (i = 0; i < model.topicWordInstancesDict.length; i++) {
-        topicDropdownHTML = topicDropdownHTML + "<option class=\"select-topic-" + i + "\" value=\"" + i + "\">Topic " + (i + 1) + "</option>";
+    for (let i = 0; i < model.topicWordInstancesDict.length; i++) {
+        topicDropdownHTML = topicDropdownHTML + "<option class=\"select-topic-" + i + "\" value=\"" + i + "\">" + model.nicknames[i] + "</option>";
     }
     document.getElementById("an-text-topic-select-1").innerHTML = topicDropdownHTML;
     document.getElementById("an-text-topic-select-2").innerHTML = topicDropdownHTML;
     document.getElementById("an-text-topic-select-3").innerHTML = topicDropdownHTML;
 
-
-    //TODO: figure out how to reconcile d3.tip with new verion of d3
-    // var tip = d3.tip()
-    //     .attr('class', 'd3-tip')
-    //     .html(function(d) {
-    //         return "<strong>Topic:</strong> <span style='color:white'>" + d.className + "</span>";
-    //     });
-    //
-    // d3.select('#tab-3').call(tip);
-
-    //iterate through full text and add each word as own span with topic as class
-    for (docInText in model.wordsByLocationWithStopwords) {
-        for (word in model.wordsByLocationWithStopwords[docInText]) {
-            d3.select("#tab-3")
-                .append("span")
-                .text(model.wordsByLocationWithStopwords[docInText][word]+ " ")
-                .attr("class", "topic-" + model.topicsByLocationWithStopwords[docInText][word])
-                .on("mouseover", onHover)
-                //.on("mouseover", tip.show)
-                //.on("mouseout", tip.hide)
-                .on("mouseout", offHover);
-        }
+    for(i = 1; i < 4; i++) {
+        d3.select("#an-text-topic-select-" + i)
+            .style("background", function () {return colors[i - 1]; });
     }
 
-
+    //iterate through full text and add each word as own span with topic as class
+    let puncTracker = 0; //index of punctuation
+    let puncLocation = 0; //index of puncLocation
+    let puncLocTracker = 0; //where in text
+    let wordToApp;
+    for (let docInText in model.wordsByLocationWithStopwords) {
+        for (let word in model.wordsByLocationWithStopwords[docInText]) {
+            wordToApp = model.wordsByLocationWithStopwords[docInText][word];
+            if (puncLocTracker == model.puncLocations[puncLocation]) {
+                wordToApp = model.punctuation[puncTracker];
+                puncTracker += 1;
+                puncLocation += 1;
+                puncLocTracker += 1;
+            } else {
+                puncLocTracker += 1;
+            }
+            d3.select("#an-text-body")
+                .append("span")
+                .text(wordToApp)
+                .attr("class", "topic-" + wordToApp)
+                .on("mouseover", onHover)
+                .on("mouseout", offHover);
+             d3.select('#an-text-body')
+                .append("span")
+                .text(" ");
+        }
+    }
 }
 
-//TODO: figure out how to make selectors sticky on reaching top of window
-// $(document).ready(function() {
-//     $(window).scroll(function() {
-//         var distanceFromTop = $(this).scrollTop();
-//         if (distanceFromTop >= $('#an-text-title').height()) {
-//             $('#selector-div').addClass('fixed');
-//         } else {
-//             $('#selector-div').removeClass('fixed');
-//         }
-//     });
-// });
-
 function togglePressed() {
-    topicNum = this.value.slice(-1);
-    topic = ".topic-" + topicNum;
+    let topicNum = this.value.slice(-1);
+    let topic = ".topic-" + topicNum;
     // add toggle!
     d3.selectAll(topic)
         .style("background-color", "orange");
 }
 
 function onHover() {
-    topic = "." + this.className;
-    selectedOne = "topic-" + document.getElementById("an-text-topic-select-1").value;
-    selectedTwo = "topic-" + document.getElementById("an-text-topic-select-2").value;
-    selectedThree = "topic-" + document.getElementById("an-text-topic-select-3").value;
+    d3.select(this)
+        .attr("data-tooltip", function(){
+            var topicindex = parseInt(this.className.split("-")[1]);
+            if (this.className.split("-").length > 2) {
+                return "stopword";
+            }
+            else if (model.nicknames[topicindex] != "") {
+                return model.nicknames[topicindex];
+            } else {
+                return "topic-" + (topicindex + 1);
+            }
+        });
+    let topic = "." + this.className,
+        selectedOne = "topic-" + document.getElementById("an-text-topic-select-1").value,
+        selectedTwo = "topic-" + document.getElementById("an-text-topic-select-2").value,
+        selectedThree = "topic-" + document.getElementById("an-text-topic-select-3").value;
     //check to make sure we don't overwrite a selected topic
-    if ((selectedOne != this.className) && (selectedTwo != this.className) && (selectedThree != this.className)) {
-        d3.selectAll(topic)
-            .style("background-color", "yellow")
+    if ((selectedOne !== this.className) && (selectedTwo !== this.className) && (selectedThree !== this.className)) {
+        //only apply if hover on highlight is checked
+        if (document.getElementById("check-highlight").checked && this.className !== "topic--1") {
+            d3.selectAll(topic)
+                .style("background-color", "yellow")
+        }
     }
 }
 
 function offHover() {
-    topic = "." + this.className;
-    selectedOne = "topic-" + document.getElementById("an-text-topic-select-1").value;
-    selectedTwo = "topic-" + document.getElementById("an-text-topic-select-2").value;
-    selectedThree = "topic-" + document.getElementById("an-text-topic-select-3").value;
-    if ((selectedOne != this.className) && (selectedTwo != this.className) && (selectedThree != this.className)) {
+    let topic = "." + this.className,
+        selectedOne = "topic-" + document.getElementById("an-text-topic-select-1").value,
+        selectedTwo = "topic-" + document.getElementById("an-text-topic-select-2").value,
+        selectedThree = "topic-" + document.getElementById("an-text-topic-select-3").value;
+    if ((selectedOne !== this.className) && (selectedTwo !== this.className) && (selectedThree !== this.className)) {
         d3.selectAll(topic)
             .style("background-color", "white");
     }
@@ -322,21 +343,213 @@ function onSelect() {
         .style("background-color", "white");
 
     //iterate through selectors and change background color for all spans with the corresponding class name
-    for (i = 0; i < 3; i++) {
-        selector = "an-text-topic-select-" + (i + 1);
-        topic = ".topic-" + document.getElementById(selector).value;
+    for (let i = 0; i < 3; i++) {
+        let selector = "an-text-topic-select-" + (i + 1);
+        let topic = ".topic-" + document.getElementById(selector).value;
         d3.selectAll(topic)
             .style("background-color", function() { return colors[i]; });
     }
 }
+//HEATMAP TAB
+
+let prevalenceArray = [],
+    heatmapWidthPx = 500,
+    heatmapResPx = 1,
+    heatmapSmoothing = 10,
+    heatmapTopic1 = 0,
+    heatmapTopic2 = 1,
+    heatmapTopic3 = 2;
+
+const scaledColors = ["hsl(161, 30%, 90%)", "hsl(17, 30%, 90%)", "hsl(222, 30%, 90%)", "hsl(161, 63%, 38%)", "hsl(17, 86%, 49%)", "hsl(222, 57%, 47%)"];
+
+//initializes dropdowns
+$(document).ready(function() {
+    $( "#heatmap1Menu" ).change(function () {
+        heatmapTopic1 = $("#heatmap1Menu option:selected").val();
+        replaceHeatmap(1, heatmapTopic1);
+    });
+    $( "#heatmap2Menu" ).change(function () {
+        heatmapTopic2 = $("#heatmap2Menu option:selected").val();
+        replaceHeatmap(2, heatmapTopic2);
+    });
+    $( "#heatmap3Menu" ).change(function () {
+        heatmapTopic3 = $("#heatmap3Menu option:selected").val();
+        replaceHeatmap(3, heatmapTopic3);
+    });
+    $("#smoothingBox").change(
+        function(){
+            if ($(this).is(':checked')) {
+                heatmapSmoothing = parseInt($("#smoothingSelect").val());
+                replaceHeatmap(1,heatmapTopic1);
+                replaceHeatmap(2,heatmapTopic2);
+                replaceHeatmap(3,heatmapTopic3);
+            }
+            else {
+                heatmapSmoothing = 1;
+                replaceHeatmap(1,heatmapTopic1);
+                replaceHeatmap(2,heatmapTopic2);
+                replaceHeatmap(3,heatmapTopic3);
+            }
+        });
+    $("#smoothingSelect").change(function () {
+        heatmapSmoothing = parseInt($("#smoothingSelect").val());
+        replaceHeatmap(1,heatmapTopic1);
+        replaceHeatmap(2,heatmapTopic2);
+        replaceHeatmap(3,heatmapTopic3);
+    });
+});
+
+function createPrevalenceArray(topic) {
+    let innerArray = [];
+    for (let i = 0; i < model.wordsByLocationWithStopwords.length; i++) {
+        for (let j = 0; j < model.wordsByLocationWithStopwords[i].length; j++) {
+            if (model.topicsByLocationWithStopwords[i][j] === topic) {
+                innerArray.push(1);
+            } else {
+                innerArray.push(0);
+            }
+        }
+        prevalenceArray.push(innerArray);
+        innerArray = [];
+    }
+
+    let binnedArray = [0],
+        totalLength = 0;
+    for (let i = 0; i < prevalenceArray.length; i++) {
+        totalLength += prevalenceArray[i].length;
+    }
+    let binSize = Math.floor(totalLength/(heatmapWidthPx/heatmapResPx)),
+        countDown = binSize,
+        curIndex = 0;
+    for (let i = 0; i < prevalenceArray.length; i++) {
+        for (let j = 0; j < prevalenceArray[i].length; j++) {
+            countDown--;
+            binnedArray[curIndex] += prevalenceArray[i][j]
+
+            if (countDown<=0) {
+                countDown = binSize;
+                curIndex++;
+                binnedArray.push(0);
+            }
+        }
+    }
+    prevalenceArray = [];
+    return binnedArray;
+}
+
+function smoothArray(originalArray, smoothingRadius) {
+    let smoothedArray =
+        Array.apply(null, Array(originalArray.length)).map(Number.prototype.valueOf,0);
+    for (let i = 0; i < originalArray.length; i++) {
+        if (originalArray[i] !== 0) {
+            for (let j = (i - smoothingRadius + 1); j < i + smoothingRadius; j++) {
+                if ((j >= 0) && (j <= i)) {
+                    smoothedArray[j] +=
+                        originalArray[i]*(smoothingRadius-(i-j));
+                }
+                if ((j > i)&&(j < originalArray.length)) {
+                    smoothedArray[j] +=
+                        originalArray[i]*(smoothingRadius+(i-j));
+                }
+            }
+        }
+    }
+    return smoothedArray;
+}
+
+function initializeHeatmaps() {
+//    d3.select("#heatmap1Menu").selectAll("option")
+//    .data(model.topicList).enter()
+//    .append("option")
+//        .text(function (d) {return d})
+    let topicDropdownHTML = "<option disabled>Select Topic</option>";
+    for (let i = 0; i < model.topicWordInstancesDict.length; i++) {
+        topicDropdownHTML = topicDropdownHTML + "<option class=\"select-topic-" + i + "\" value=\"" + i + "\">" + model.nicknames[i] + "</option>";
+    }
+    document.getElementById("heatmap1Menu").innerHTML = topicDropdownHTML;
+    $('#heatmap1Menu option')[1].selected = true;
+    document.getElementById("heatmap2Menu").innerHTML = topicDropdownHTML;
+    $('#heatmap2Menu option')[2].selected = true;
+    document.getElementById("heatmap3Menu").innerHTML = topicDropdownHTML;
+    $('#heatmap3Menu option')[3].selected = true;
+
+    for (let iter = 1; iter < 4; iter++){
+        let topic = eval("heatmapTopic" + iter);
+
+        changeTop5Words(iter, (iter - 1));
+
+        let svg = d3.select("#heatmapSVG" + iter);
+        svg.style("width", function(){
+            return heatmapWidthPx*1.5 + "px"
+        });
+        svg.style("height", 50);
+
+        let binnedArray = createPrevalenceArray(topic);
+        binnedArray = smoothArray(binnedArray, heatmapSmoothing);
+
+        drawRectangles(svg, binnedArray, iter);
+    }
+}
+
+function changeTop5Words(heatmapNum, topic) {
+    //var topic = eval("heatmapTopic" + heatmapNum);
+    let topicWords = Object.keys(model.topicWordInstancesDict[topic]),
+        sortedWords = topicWords.sort(function(a,b){
+        return model.topicWordInstancesDict[topic][b] - model.topicWordInstancesDict[topic][a];
+    });
+    let top5Words = ": ";
+    for (let j = 0; j < 4; j++) {
+        top5Words = top5Words + sortedWords[j] + ", ";
+    }
+    top5Words = top5Words + sortedWords[4];
+    d3.select("#topicLabel" + heatmapNum).text(top5Words)
+}
+
+function drawRectangles(svg, dataset, heatmapNum) {
+    let colorScale = d3.scaleLinear()
+        .domain([d3.min(dataset),
+            d3.max(dataset)])
+        .range([scaledColors[heatmapNum - 1], scaledColors[heatmapNum + 2]])
+
+    svg.selectAll("rect")
+        .data(dataset)
+        .enter()
+        .append("rect")
+        .attr("width", function() {return heatmapResPx})
+        .attr("height", 50)
+        .attr("y", 0)
+        .attr("x", function(d,i) {return i * heatmapResPx})
+        .style("fill", function(d) {return colorScale(d);})
+        .on("mouseover", function(d){
+            d3.select(this).style("fill", "black");
+        })
+        .on("mouseout", function(d){
+            d3.select(this).style("fill", function(d) {return colorScale(d);
+            })
+        })
+        .on("click", function(d, i){
+            console.log(i/dataset.length);
+        })
+}
+
+function replaceHeatmap(heatmapNum, topic) {
+    let svg = d3.select("#heatmapSVG" + heatmapNum);
+    svg.html("");
+    let binnedArray = createPrevalenceArray(topic);
+    binnedArray = smoothArray(binnedArray, heatmapSmoothing);
+    drawRectangles(svg, binnedArray, heatmapNum);
+    changeTop5Words(heatmapNum, topic);
+}
+
+
 
 
 //WORD CLOUD TAB
 
 function initializeWordCloudTab() {
-    topicDropdownHTMLWordCloud = "<option disabled selected='selected' value='-1'>Select topic for wordcloud</option>";
-    for (i = 0; i < model.topicWordInstancesDict.length; i++) {
-        topicDropdownHTMLWordCloud = topicDropdownHTMLWordCloud + "<option class=\"select-topic-" + i + "\" value=\"" + i + "\">Topic " + (i + 1) + "</option>";
+    let topicDropdownHTMLWordCloud = "<option disabled selected='selected' value='-1'>Select topic for wordcloud</option>";
+    for (let i = 0; i < model.topicWordInstancesDict.length; i++) {
+        topicDropdownHTMLWordCloud = topicDropdownHTMLWordCloud + "<option class=\"select-topic-" + i + "\" value=\"" + i + "\">" + model.nicknames[i] + "</option>";
     }
     document.getElementById("word-cloud-topic-select").innerHTML = topicDropdownHTMLWordCloud;
     createWordCloud(0);
@@ -446,7 +659,7 @@ $( function() {
     function addNickname() {
         model.nicknames[topic.val()] = nickname.val();
         let toUpdate = document.getElementsByClassName("select-topic-" + topic.val());
-        for (i = 0; i < toUpdate.length; i++){
+        for (let i = 0; i < toUpdate.length; i++){
             toUpdate[i].innerText = model.nicknames[topic.val()];
         }
         dialog.dialog("close");
