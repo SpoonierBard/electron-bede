@@ -266,22 +266,26 @@ function createAnnotatedText() {
     let puncTracker = 0; //index of punctuation
     let puncLocation = 0; //index of puncLocation
     let puncLocTracker = 0; //where in text
+    let newlineTracker = 0; //index of newlines
     let wordToApp;
     for (let docInText in model.wordsByLocationWithStopwords) {
         for (let word in model.wordsByLocationWithStopwords[docInText]) {
             wordToApp = model.wordsByLocationWithStopwords[docInText][word];
-            if (puncLocTracker == model.puncLocations[puncLocation]) {
-                wordToApp = model.punctuation[puncTracker];
+            if (puncLocTracker == model.puncCapLocations[puncLocation]) {
+                wordToApp = model.puncAndCap[puncTracker];
                 puncTracker += 1;
                 puncLocation += 1;
-                puncLocTracker += 1;
-            } else {
-                puncLocTracker += 1;
             }
+            // while (puncLocTracker == model.newlineLocations[newlineTracker]) {
+            //     wordToApp += '<br/>';
+            //     newlineTracker += 1;
+            // }
+            puncLocTracker += 1;
             d3.select("#an-text-body")
                 .append("span")
+                // .html(wordToApp)
                 .text(wordToApp)
-                .attr("class", "topic-" + wordToApp)
+                .attr("class", "topic-" + model.wordsByLocationWithStopwords[docInText][word])
                 .on("mouseover", onHover)
                 .on("mouseout", offHover);
              d3.select('#an-text-body')
