@@ -95,9 +95,15 @@ select {
 }
 
 #fixed-tools {
+    margin-top: 0;
     position: fixed;
     display: block;
     width: 100%;
+    background-color: white;
+}
+
+#an-text-body {
+    margin-top: 125px;
 }
 
 
@@ -162,4 +168,13 @@ select {
     -ms-filter: "progid:DXImageTransform.Microsoft.Alpha(Opacity=100)";
     filter: progid: DXImageTransform.Microsoft.Alpha(Opacity=100);
     opacity: 1;
+}
+
+.inline {
+    display:inline;
+}
+
+.bottomMargin {
+    margin-top: 20px;
+    margin-bottom: 10px;
 }

@@ -1,19 +1,29 @@
-//TODO: add drag/drop capability for file upload
-//This variable is global because it will contain all our data
-// let fs = require("fs");
-let model = {};
-let input;
+let fs = require("fs"),
+    model = {},
+    input;
+const colors  = ["#66c2a5", "#fc8d62", "#8da0cb"],
+    scaledColors = ["hsl(161, 30%, 90%)", "hsl(17, 30%, 90%)", "hsl(222, 30%, 90%)", "hsl(161, 63%, 38%)", "hsl(17, 86%, 49%)", "hsl(222, 57%, 47%)"];
 
+
+/**
+ * Transitions from welcome page to config file creation page on button click
+ */
 function loadConfigForm(){
     document.getElementById("welcome-page").style.display = "none";
     document.getElementById("create-file-form").style.display = "block";
 }
 
+/**
+ * Transitions from welcome page to json file upload page on button click
+ */
 function loadFileChoice() {
     document.getElementById("welcome-page").style.display = "none";
     document.getElementById("file-upload").style.display = "block";
 }
 
+/**
+ * Creates a json file containing configuration parameters for LDA.py based on user choices
+ */
 function createConfigFile(){
     let source, iterations, topics, outputname, upperlimit, lowerlimit,
         whitelist, blacklist, numberofdocuments, lengthofdocuments,
@@ -138,7 +148,9 @@ function createConfigFile(){
     });
 }
 
-const colors  = ["#66c2a5", "#fc8d62", "#8da0cb"];
+/**
+ * Reads model data from json file output from LDA.py
+ */
 //Function to read data from uploaded json file. Called on button click.
 function loadFile() {
     hideUploadScreen();
@@ -149,8 +161,6 @@ function loadFile() {
         alert("Please select a file before clicking upload");
     }
     else {
-        //Onload called when file is finished uploading
-        //Call tab setup code here so that model is already filled with data from file
         reader.onload = (function() {
             model = JSON.parse(reader.result);
             createMetadata();
@@ -163,22 +173,47 @@ function loadFile() {
     }
 }
 
-//Progress from welcome screen to progressbar
+/**
+ * Transitions from json file upload page to progress bar
+ */
 function hideUploadScreen() {
     let uploadbox = document.getElementById("file-upload");
     uploadbox.style.display = "none";
     document.getElementById("progressbar").style.display = "block";
 }
 
-//Progress from progressbar to fully loaded tabs
+/**
+ * Applies JQuery-UI styling and functionality to progress bar
+ */
+$(function() {
+    $( "#progressbar" ).progressbar({
+        value: false
+    });
+});
+
+/**
+ * Transitions from progress bar to tabs once they have finished loading
+ */
 function loadTabs() {
     let tabs = document.getElementById("tabs");
     document.getElementById("progressbar").style.display = "none";
     tabs.style.display = "block";
 }
 
+/**
+ * Applies JQuery-UI styling and functionality to tabs
+ */
+$( function() {
+    $( "#tabs" ).tabs().addClass( "ui-tabs-vertical ui-helper-clearfix" )
+        .find("li" ).removeClass( "ui-corner-top" ).addClass( "ui-corner-left" );
+} );
+
+
 //METADATA TAB
 
+/**
+ * Loads data into metadata tab
+ */
 function createMetadata(){
     document.getElementById("dataset").innerHTML = model["dataset"];
     document.getElementById("topics").innerHTML = model["topics"];
@@ -207,6 +242,9 @@ function createMetadata(){
     document.getElementById("nickname-topic-select").innerHTML = topicDropdownHTMLnickname;
 }
 
+/**
+ * Writes model data including new nicknames to original json file
+ */
 function saveNicknames() {
     fs.writeFile(input.files[0].path, JSON.stringify(model), (err) => {
         if (err) {
@@ -215,10 +253,12 @@ function saveNicknames() {
     });
 }
 
-//selectmenu setup (with onchange function)
+/**
+ * Loads new topic in metadata tab on dropdown change
+ */
 $(document).ready(function() {
     $("#metadata-topic-select").change(function () {
-        let value = $("#metadata-topic-select option:selected").val();
+        let value = $("#metadata-topic-select").find("option:selected").val();
         value = parseInt(value);
         let topicWordList = Object.keys(model.topicWordInstancesDict[value]);
         topicWordList = topicWordList.sort(function (a, b) {
@@ -233,30 +273,82 @@ $(document).ready(function() {
         let size = parseInt($("#cloud-size option:selected").val());
         createWordCloud(topic, size);
     });
-    $("#cloud-size").change(function () {
-        let topic = $("#word-cloud-topic-select option:selected").val();
-        let size = parseInt($("#cloud-size option:selected").val());
-        console.log(topic);
-        if (parseInt(topic) == -1) {
-            createWordCloud(0, size);
-        } else {
-            createWordCloud(topic, size);
+});
+
+//Metadata popup/Dialog setup
+
+/**
+ * Initializes stopwords dialog
+ */
+$( function() {
+    let dialog = $( "#stopwords-dialog");
+    dialog.dialog({
+            autoOpen: false,
+            height: 400,
+            width: 350,
+            overflow: scroll
         }
+    );
+
+    $( "#view-stopwords").button().on( "click", function() {
+        dialog.dialog("open");
     });
 });
 
+/**
+ * Initializes nickname selection dialog
+ */
+$( function() {
+    let dialog, form,
+        topic = $( "#nickname-topic-select"),
+        nickname = $( "#nickname-input" );
+
+    dialog = $( "#nickname-dialog-form" ).dialog({
+        autoOpen: false,
+        height: 250,
+        width: 350,
+        modal: true,
+        buttons: {
+            Cancel: function() {
+                dialog.dialog( "close");
+            },
+            "Nickname topic": addNickname
+        },
+        close: function() {
+            form[ 0 ].reset();
+        }
+    });
+
+    form = dialog.find( "form" ).on( "submit", function (event) {
+        event.preventDefault();
+        addNickname();
+    });
+
+    $( "#create-nickname").button().on( "click", function() {
+        dialog.dialog("open");
+    });
+
+    function addNickname() {
+        model.nicknames[topic.val()] = nickname.val();
+        let toUpdate = document.getElementsByClassName("select-topic-" + topic.val());
+        for (let i = 0; i < toUpdate.length; i++){
+            toUpdate[i].innerText = model.nicknames[topic.val()];
+        }
+        dialog.dialog("close");
+    }
+});
+
+
+
+
+
 //ANNOTATED TEXT TAB
 
-function createAnnotatedText() {
-    // for (i = 0; i < model.topics; i++) {
-    //     d3.select("#tab-3-buttons")
-    //         .append("input")
-    //         .attr("type", "button")
-    //         .attr("name", "toggle")
-    //         .attr("value", "Topic " + String(i+1))
-    //         .on("click", togglePressed);
-    // }
-
+/**
+ * Initializes annotated text tab with no topics selected
+ * @param {number} startIndex -- //TODO: once this is used, say what it does
+ */
+function createAnnotatedText(startIndex) {
     let topicDropdownHTML = "<option disabled selected>Select Topic</option>";
 
     //create three identical selectors for three possible topic comparisons
@@ -267,35 +359,35 @@ function createAnnotatedText() {
     document.getElementById("an-text-topic-select-2").innerHTML = topicDropdownHTML;
     document.getElementById("an-text-topic-select-3").innerHTML = topicDropdownHTML;
 
-    for(i = 1; i < 4; i++) {
+    for(let i = 1; i < 4; i++) {
         d3.select("#an-text-topic-select-" + i)
             .style("background", function () {return colors[i - 1]; });
     }
 
     //iterate through full text and add each word as own span with topic as class
-    let puncTracker = 0; //index of punctuation
-    let puncLocation = 0; //index of puncLocation
-    let puncLocTracker = 0; //where in text
-    let newlineTracker = 0; //index of newlines
-    let wordToApp;
+    let puncTracker = 0, //index of punctuation
+        puncLocation = 0, //index of puncLocation
+        puncLocTracker = 0, //where in text
+        newlineTracker = 0, //index of newlines
+        wordToApp;
     for (let docInText in model.wordsByLocationWithStopwords) {
         for (let word in model.wordsByLocationWithStopwords[docInText]) {
             wordToApp = model.wordsByLocationWithStopwords[docInText][word];
-            if (puncLocTracker == model.puncCapLocations[puncLocation]) {
+            if (puncLocTracker === model.puncCapLocations[puncLocation]) {
                 wordToApp = model.puncAndCap[puncTracker];
                 puncTracker += 1;
                 puncLocation += 1;
             }
-            // while (puncLocTracker == model.newlineLocations[newlineTracker]) {
-            //     wordToApp += '<br/>';
-            //     newlineTracker += 1;
-            // }
+            while (puncLocTracker === model.newlineLocations[newlineTracker]) {
+                wordToApp += '<br/>';
+                newlineTracker += 1;
+            }
             puncLocTracker += 1;
             d3.select("#an-text-body")
                 .append("span")
-                // .html(wordToApp)
-                .text(wordToApp)
-                .attr("class", "topic-" + model.wordsByLocationWithStopwords[docInText][word])
+                .html(wordToApp)
+                // .text(wordToApp)
+                .attr("class", "topic-" + model.topicsByLocationWithStopwords[docInText][word])
                 .on("mouseover", onHover)
                 .on("mouseout", offHover);
              d3.select('#an-text-body')
@@ -305,26 +397,21 @@ function createAnnotatedText() {
     }
 }
 
-function togglePressed() {
-    let topicNum = this.value.slice(-1);
-    let topic = ".topic-" + topicNum;
-    // add toggle!
-    d3.selectAll(topic)
-        .style("background-color", "orange");
-}
-
+/**
+ * Displays tooltip of topic for word on hover; highlights other words in topic if check-highlight is checked
+ */
 function onHover() {
     d3.select(this)
         .attr("data-tooltip", function(){
-            var topicindex = parseInt(this.className.split("-")[1]);
+            let topicindex = parseInt(this.className.split("-")[1]);
             if (this.className.split("-").length > 2) {
                 return "stopword";
             }
-            else if (model.nicknames[topicindex] != "") {
+            else if (model.nicknames[topicindex] !== "") {
                 return model.nicknames[topicindex];
-            } else {
+            } /*else {
                 return "topic-" + (topicindex + 1);
-            }
+            }*/
         });
     let topic = "." + this.className,
         selectedOne = "topic-" + document.getElementById("an-text-topic-select-1").value,
@@ -340,6 +427,9 @@ function onHover() {
     }
 }
 
+/**
+ * Unhighlights previously highlighted words when the mouse stops hovering over a word
+ */
 function offHover() {
     let topic = "." + this.className,
         selectedOne = "topic-" + document.getElementById("an-text-topic-select-1").value,
@@ -351,6 +441,9 @@ function offHover() {
     }
 }
 
+/**
+ * Highlights all words in selected topic with the corresponding color of the dropdown
+ */
 function onSelect() {
     //reset all spans to unselected
     d3.selectAll("span")
@@ -364,32 +457,42 @@ function onSelect() {
             .style("background-color", function() { return colors[i]; });
     }
 }
+
+
+
+
 //HEATMAP TAB
 
+//TODO: @Adam and @Brendan, could you give inline comments on what these constants do?
 let prevalenceArray = [],
-    heatmapWidthPx = 500,
-    heatmapResPx = 1,
+    heatmapWidthPx = 500, //This is a constant that does... something
+    heatmapResPx = 1, //This one too!
     heatmapSmoothing = 10,
     heatmapTopic1 = 0,
     heatmapTopic2 = 1,
     heatmapTopic3 = 2;
 
-const scaledColors = ["hsl(161, 30%, 90%)", "hsl(17, 30%, 90%)", "hsl(222, 30%, 90%)", "hsl(161, 63%, 38%)", "hsl(17, 86%, 49%)", "hsl(222, 57%, 47%)"];
 
-//initializes dropdowns
+
 $(document).ready(function() {
+    /**
+     * Reloads heatmap on corresponding dropdown change
+     */
     $( "#heatmap1Menu" ).change(function () {
-        heatmapTopic1 = $("#heatmap1Menu option:selected").val();
+        heatmapTopic1 = $("#heatmap1Menu").find("option:selected").val();
         replaceHeatmap(1, heatmapTopic1);
     });
     $( "#heatmap2Menu" ).change(function () {
-        heatmapTopic2 = $("#heatmap2Menu option:selected").val();
+        heatmapTopic2 = $("#heatmap2Menu").find("option:selected").val();
         replaceHeatmap(2, heatmapTopic2);
     });
     $( "#heatmap3Menu" ).change(function () {
-        heatmapTopic3 = $("#heatmap3Menu option:selected").val();
+        heatmapTopic3 = $("#heatmap3Menu").find("option:selected").val();
         replaceHeatmap(3, heatmapTopic3);
     });
+    /**
+     * Reloads heatmaps taking into account whether a smoothing constant is being applied on checkbox change
+     */
     $("#smoothingBox").change(
         function(){
             if ($(this).is(':checked')) {
@@ -405,6 +508,9 @@ $(document).ready(function() {
                 replaceHeatmap(3,heatmapTopic3);
             }
         });
+    /**
+     * Reloads heatmaps taking into account the new smoothing constant on dropdown change
+     */
     $("#smoothingSelect").change(function () {
         heatmapSmoothing = parseInt($("#smoothingSelect").val());
         replaceHeatmap(1,heatmapTopic1);
@@ -413,6 +519,11 @@ $(document).ready(function() {
     });
 });
 
+/**
+ * Creates an array representing the distribution of a particular topic across corpus
+ * @param {number} topic -- topic whose distribution array will represent
+ * @returns {number[]} -- array representing topic distribution across corpus
+ */
 function createPrevalenceArray(topic) {
     let innerArray = [];
     for (let i = 0; i < model.wordsByLocationWithStopwords.length; i++) {
@@ -438,7 +549,7 @@ function createPrevalenceArray(topic) {
     for (let i = 0; i < prevalenceArray.length; i++) {
         for (let j = 0; j < prevalenceArray[i].length; j++) {
             countDown--;
-            binnedArray[curIndex] += prevalenceArray[i][j]
+            binnedArray[curIndex] += prevalenceArray[i][j];
 
             if (countDown<=0) {
                 countDown = binSize;
@@ -451,6 +562,12 @@ function createPrevalenceArray(topic) {
     return binnedArray;
 }
 
+/**
+ * Creates an array with smoother prevalence transitions from an original array
+ * @param {number[]} originalArray -- array to be smoothed
+ * @param {number} smoothingRadius -- amount of smoothing
+ * @returns {number[]} -- array after smoothing
+ */
 function smoothArray(originalArray, smoothingRadius) {
     let smoothedArray =
         Array.apply(null, Array(originalArray.length)).map(Number.prototype.valueOf,0);
@@ -459,11 +576,11 @@ function smoothArray(originalArray, smoothingRadius) {
             for (let j = (i - smoothingRadius + 1); j < i + smoothingRadius; j++) {
                 if ((j >= 0) && (j <= i)) {
                     smoothedArray[j] +=
-                        originalArray[i]*(smoothingRadius-(i-j));
+                        originalArray[i]*(smoothingRadius - (i - j));
                 }
                 if ((j > i)&&(j < originalArray.length)) {
                     smoothedArray[j] +=
-                        originalArray[i]*(smoothingRadius+(i-j));
+                        originalArray[i]*(smoothingRadius + (i - j));
                 }
             }
         }
@@ -471,6 +588,9 @@ function smoothArray(originalArray, smoothingRadius) {
     return smoothedArray;
 }
 
+/**
+ * Initializes heatmap tab
+ */
 function initializeHeatmaps() {
 //    d3.select("#heatmap1Menu").selectAll("option")
 //    .data(model.topicList).enter()
@@ -481,11 +601,11 @@ function initializeHeatmaps() {
         topicDropdownHTML = topicDropdownHTML + "<option class=\"select-topic-" + i + "\" value=\"" + i + "\">" + model.nicknames[i] + "</option>";
     }
     document.getElementById("heatmap1Menu").innerHTML = topicDropdownHTML;
-    $('#heatmap1Menu option')[1].selected = true;
+    $('#heatmap1Menu').find('option')[1].selected = true;
     document.getElementById("heatmap2Menu").innerHTML = topicDropdownHTML;
-    $('#heatmap2Menu option')[2].selected = true;
+    $('#heatmap2Menu').find('option')[2].selected = true;
     document.getElementById("heatmap3Menu").innerHTML = topicDropdownHTML;
-    $('#heatmap3Menu option')[3].selected = true;
+    $('#heatmap3Menu').find('option')[3].selected = true;
 
     for (let iter = 1; iter < 4; iter++){
         let topic = eval("heatmapTopic" + iter);
@@ -505,6 +625,11 @@ function initializeHeatmaps() {
     }
 }
 
+/**
+ * Reloads top 5 words of topic
+ * @param {number} heatmapNum -- which heatmap to update
+ * @param {number} topic -- which topic to load
+ */
 function changeTop5Words(heatmapNum, topic) {
     //var topic = eval("heatmapTopic" + heatmapNum);
     let topicWords = Object.keys(model.topicWordInstancesDict[topic]),
@@ -519,6 +644,12 @@ function changeTop5Words(heatmapNum, topic) {
     d3.select("#topicLabel" + heatmapNum).text(top5Words)
 }
 
+/**
+ * Draws rectangles representing the values in an array
+ * @param svg -- where to draw the rectangles
+ * @param {number[]} dataset -- array representing topic distribution
+ * @param {number} heatmapNum -- which heatmap to draw the rectangles in
+ */
 function drawRectangles(svg, dataset, heatmapNum) {
     let colorScale = d3.scaleLinear()
         .domain([d3.min(dataset),
@@ -546,12 +677,17 @@ function drawRectangles(svg, dataset, heatmapNum) {
         })
 }
 
+/**
+ * Reloads a given heatmap with a new topic
+ * @param {number} heatmapNum -- which heatmap to update
+ * @param {number] topic -- which topic to load
+ */
 function replaceHeatmap(heatmapNum, topic) {
-    let svg = d3.select("#heatmapSVG" + heatmapNum);
+    var svg = d3.select("#heatmapSVG" + heatmapNum);
     svg.html("");
-    let binnedArray = createPrevalenceArray(topic);
-    binnedArray = smoothArray(binnedArray, heatmapSmoothing);
-    drawRectangles(svg, binnedArray, heatmapNum);
+    let heatmapArray = createPrevalenceArray(topic);
+    heatmapArray = smoothArray(heatmapArray, heatmapSmoothing);
+    drawRectangles(svg, heatmapArray, heatmapNum);
     changeTop5Words(heatmapNum, topic);
 }
 
@@ -560,6 +696,9 @@ function replaceHeatmap(heatmapNum, topic) {
 
 //WORD CLOUD TAB
 
+/**
+ * Intializes word cloud tab with Topic 1 selected
+ */
 function initializeWordCloudTab() {
     let topicDropdownHTMLWordCloud = "<option disabled selected='selected' value='-1'>Select topic for wordcloud</option>";
     for (let i = 0; i < model.topicWordInstancesDict.length; i++) {
@@ -578,6 +717,10 @@ function initializeWordCloudTab() {
     createWordCloud(0, 1);
 }
 function createWordCloud(topicNum, size) {
+/**
+ * Reloads word cloud based on a new topic
+ * @param {number} topicNum -- topic to be displayed
+ */
     $("#word-cloud").empty();
     let width = 0;
     let height = 0;
@@ -658,75 +801,23 @@ function createWordCloud(topicNum, size) {
     d3.layout.cloud().stop();
 }
 
-//Popup/Dialog setup
-
-//Stopwords dialog setup
-$( function() {
-    let dialog = $( "#stopwords-dialog");
-    dialog.dialog({
-            autoOpen: false,
-            height: 400,
-            width: 350,
-            overflow: scroll
+/**
+ * Loads new word cloud on dropdown change
+ */
+$(document).ready (function () {
+    $("#word-cloud-topic-select").change(function () {
+        let topic = $("#word-cloud-topic-select").find("option:selected").val();
+        createWordCloud(topic)
+    });
+    $("#cloud-size").change(function () {
+        let topic = $("#word-cloud-topic-select option:selected").val();
+        let size = parseInt($("#cloud-size option:selected").val());
+        console.log(topic);
+        if (parseInt(topic) == -1) {
+            createWordCloud(0, size);
+        } else {
+            createWordCloud(topic, size);
         }
-    );
-
-    $( "#view-stopwords").button().on( "click", function() {
-        dialog.dialog("open");
     });
 });
 
-//Nickname dialog setup
-$( function() {
-    let dialog, form,
-        topic = $( "#nickname-topic-select"),
-        nickname = $( "#nickname-input" );
-
-    dialog = $( "#nickname-dialog-form" ).dialog({
-        autoOpen: false,
-        height: 250,
-        width: 350,
-        modal: true,
-        buttons: {
-            Cancel: function() {
-                dialog.dialog( "close");
-            },
-            "Nickname topic": addNickname
-        },
-        close: function() {
-            form[ 0 ].reset();
-        }
-    });
-
-    form = dialog.find( "form" ).on( "submit", function (event) {
-        event.preventDefault();
-        addNickname();
-    });
-
-    $( "#create-nickname").button().on( "click", function() {
-        dialog.dialog("open");
-    });
-
-    function addNickname() {
-        model.nicknames[topic.val()] = nickname.val();
-        let toUpdate = document.getElementsByClassName("select-topic-" + topic.val());
-        for (let i = 0; i < toUpdate.length; i++){
-            toUpdate[i].innerText = model.nicknames[topic.val()];
-        }
-        dialog.dialog("close");
-    }
-});
-
-//JQuery-UI functions
-
-//Progressbar function
-$(function() {
-    $( "#progressbar" ).progressbar({
-        value: false
-    });
-});
-//Tab switching function
-$( function() {
-    $( "#tabs" ).tabs().addClass( "ui-tabs-vertical ui-helper-clearfix" );
-    $( "#tabs li" ).removeClass( "ui-corner-top" ).addClass( "ui-corner-left" );
-} );
