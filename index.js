@@ -1,6 +1,6 @@
 //TODO: add drag/drop capability for file upload
 //This variable is global because it will contain all our data
-let fs = require("fs");
+//let fs = require("fs");
 let model = {};
 let input;
 
@@ -390,7 +390,7 @@ function createPrevalenceArray(topic) {
     let innerArray = [];
     for (let i = 0; i < model.wordsByLocationWithStopwords.length; i++) {
         for (let j = 0; j < model.wordsByLocationWithStopwords[i].length; j++) {
-            if (model.topicsByLocationWithStopwords[i][j] === topic) {
+            if (model.topicsByLocationWithStopwords[i][j] == topic) {
                 innerArray.push(1);
             } else {
                 innerArray.push(0);
@@ -520,11 +520,11 @@ function drawRectangles(svg, dataset, heatmapNum) {
 }
 
 function replaceHeatmap(heatmapNum, topic) {
-    let svg = d3.select("#heatmapSVG" + heatmapNum);
+    var svg = d3.select("#heatmapSVG" + heatmapNum);
     svg.html("");
-    let binnedArray = createPrevalenceArray(topic);
-    binnedArray = smoothArray(binnedArray, heatmapSmoothing);
-    drawRectangles(svg, binnedArray, heatmapNum);
+    let heatmapArray = createPrevalenceArray(topic);
+    heatmapArray = smoothArray(heatmapArray, heatmapSmoothing);
+    drawRectangles(svg, heatmapArray, heatmapNum);
     changeTop5Words(heatmapNum, topic);
 }
 
