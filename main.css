@@ -100,10 +100,11 @@ select {
     display: block;
     width: 100%;
     background-color: white;
+    z-index: 9001;
 }
 
 #an-text-body {
-    margin-top: 125px;
+    margin-top: 150px;
 }
 
 
