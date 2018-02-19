@@ -1,6 +1,6 @@
 //TODO: add drag/drop capability for file upload
 //This variable is global because it will contain all our data
-// let fs = require("fs");
+let fs = require("fs");
 let model = {};
 let input;
 

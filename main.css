@@ -95,9 +95,15 @@ select {
 }
 
 #fixed-tools {
+    margin-top: 0;
     position: fixed;
     display: block;
     width: 100%;
+    background-color: white;
+}
+
+#an-text-body {
+    margin-top: 125px;
 }
 
 
