@@ -230,9 +230,19 @@ $(document).ready(function() {
     //changing the wordcloud
     $("#word-cloud-topic-select").change(function () {
         let topic = $("#word-cloud-topic-select option:selected").val();
-        createWordCloud(topic)
+        let size = parseInt($("#cloud-size option:selected").val());
+        createWordCloud(topic, size);
     });
-
+    $("#cloud-size").change(function () {
+        let topic = $("#word-cloud-topic-select option:selected").val();
+        let size = parseInt($("#cloud-size option:selected").val());
+        console.log(topic);
+        if (parseInt(topic) == -1) {
+            createWordCloud(0, size);
+        } else {
+            createWordCloud(topic, size);
+        }
+    });
 });
 
 //ANNOTATED TEXT TAB
@@ -555,22 +565,59 @@ function initializeWordCloudTab() {
     for (let i = 0; i < model.topicWordInstancesDict.length; i++) {
         topicDropdownHTMLWordCloud = topicDropdownHTMLWordCloud + "<option class=\"select-topic-" + i + "\" value=\"" + i + "\">" + model.nicknames[i] + "</option>";
     }
+    let sizeDropdownHTMLWordCloud = "<option disabled selected='selected' value='-1'>Select wordcloud size</option>";
+    sizeArray = ["Small", "Medium", "Large"];
+    for (let i = 0; i < sizeArray.length; i++) {
+        size = sizeArray[i];
+        sizeDropdownHTMLWordCloud = sizeDropdownHTMLWordCloud + "<option class=\select-size-" + i + "\" value=\"" + i + "\">" + size + "</option>"
+        console.log(i);
+    }
+    console.log(sizeDropdownHTMLWordCloud);
     document.getElementById("word-cloud-topic-select").innerHTML = topicDropdownHTMLWordCloud;
-    createWordCloud(0);
+    document.getElementById("cloud-size").innerHTML = sizeDropdownHTMLWordCloud;
+    createWordCloud(0, 1);
 }
-function createWordCloud(topicNum) {
+function createWordCloud(topicNum, size) {
     $("#word-cloud").empty();
+    let width = 0;
+    let height = 0;
+    let numWords = 0;
+    console.log("size is", size);
+    switch (size) {
+        case 0:
+            width = 500;
+            height = 500;
+            numWords = 400;
+            break;
+        case 1:
+            width = 600;
+            height = 600;
+            numWords = 600;
+            break;
+        case 2:
+            width = 1000;
+            height = 650;
+            numWords = 2000;
+            break;
+        default:
+            console.log("defualt");
+            width = 600;
+            height = 600;
+            numWords = 600;
+    }
+    console.log(width, height, numWords);
     let svg_location = "#word-cloud", topic = topicNum;
-    const width = $(document).width();
-    const height = $(document).height();
+    //const width = 500//$(document).width();
+    //const height = 600//$(document).height();
+
     let fill = d3.schemeCategory20;
     let word_entries = model.topicWordInstancesDict[topic];
-    //filtered_entries contains every element of word_entries witha count greater than 1
+    //filtered_entries contains every element of word_entries with a count greater than 1
     let filtered_entries = d3.entries(Object.keys(word_entries).reduce(function (new_dict, key) {
         if (word_entries[key] > 1 && key.length > 2) new_dict[key] = word_entries[key];
         return new_dict;
     }, {}));
-    reduced_entries = filtered_entries.slice(0,Math.min(filtered_entries.length, 600));
+    reduced_entries = filtered_entries.slice(0,Math.min(filtered_entries.length, numWords));
     console.log("length:" + reduced_entries.length);
     let xScale = d3.scaleLinear()
         .domain([0, d3.max(reduced_entries, function(d) {
