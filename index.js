@@ -1,4 +1,3 @@
-//TODO: add drag/drop capability for file upload
 //This variable is global because it will contain all our data
 //let fs = require("fs");
 let model = {};
@@ -218,7 +217,7 @@ function saveNicknames() {
 //selectmenu setup (with onchange function)
 $(document).ready(function() {
     $("#metadata-topic-select").change(function () {
-        let value = $("#metadata-topic-select option:selected").val();
+        let value = $("#metadata-topic-select").find("option:selected").val();
         value = parseInt(value);
         let topicWordList = Object.keys(model.topicWordInstancesDict[value]);
         topicWordList = topicWordList.sort(function (a, b) {
@@ -229,10 +228,9 @@ $(document).ready(function() {
     });
     //changing the wordcloud
     $("#word-cloud-topic-select").change(function () {
-        let topic = $("#word-cloud-topic-select option:selected").val();
+        let topic = $("#word-cloud-topic-select").find("option:selected").val();
         createWordCloud(topic)
     });
-
 });
 
 //ANNOTATED TEXT TAB
@@ -248,7 +246,7 @@ function createAnnotatedText(startIndex) {
     document.getElementById("an-text-topic-select-2").innerHTML = topicDropdownHTML;
     document.getElementById("an-text-topic-select-3").innerHTML = topicDropdownHTML;
 
-    for(i = 1; i < 4; i++) {
+    for(let i = 1; i < 4; i++) {
         d3.select("#an-text-topic-select-" + i)
             .style("background", function () {return colors[i - 1]; });
     }
@@ -262,12 +260,12 @@ function createAnnotatedText(startIndex) {
     for (let docInText in model.wordsByLocationWithStopwords) {
         for (let word in model.wordsByLocationWithStopwords[docInText]) {
             wordToApp = model.wordsByLocationWithStopwords[docInText][word];
-            if (puncLocTracker == model.puncCapLocations[puncLocation]) {
+            if (puncLocTracker === model.puncCapLocations[puncLocation]) {
                 wordToApp = model.puncAndCap[puncTracker];
                 puncTracker += 1;
                 puncLocation += 1;
             }
-            while (puncLocTracker == model.newlineLocations[newlineTracker]) {
+            while (puncLocTracker === model.newlineLocations[newlineTracker]) {
                 wordToApp += '<br/>';
                 newlineTracker += 1;
             }
@@ -289,11 +287,11 @@ function createAnnotatedText(startIndex) {
 function onHover() {
     d3.select(this)
         .attr("data-tooltip", function(){
-            var topicindex = parseInt(this.className.split("-")[1]);
+            let topicindex = parseInt(this.className.split("-")[1]);
             if (this.className.split("-").length > 2) {
                 return "stopword";
             }
-            else if (model.nicknames[topicindex] != "") {
+            else if (model.nicknames[topicindex] !== "") {
                 return model.nicknames[topicindex];
             } else {
                 return "topic-" + (topicindex + 1);
@@ -352,15 +350,15 @@ const scaledColors = ["hsl(161, 30%, 90%)", "hsl(17, 30%, 90%)", "hsl(222, 30%, 
 //initializes dropdowns
 $(document).ready(function() {
     $( "#heatmap1Menu" ).change(function () {
-        heatmapTopic1 = $("#heatmap1Menu option:selected").val();
+        heatmapTopic1 = $("#heatmap1Menu").find("option:selected").val();
         replaceHeatmap(1, heatmapTopic1);
     });
     $( "#heatmap2Menu" ).change(function () {
-        heatmapTopic2 = $("#heatmap2Menu option:selected").val();
+        heatmapTopic2 = $("#heatmap2Menu").find("option:selected").val();
         replaceHeatmap(2, heatmapTopic2);
     });
     $( "#heatmap3Menu" ).change(function () {
-        heatmapTopic3 = $("#heatmap3Menu option:selected").val();
+        heatmapTopic3 = $("#heatmap3Menu").find("option:selected").val();
         replaceHeatmap(3, heatmapTopic3);
     });
     $("#smoothingBox").change(
@@ -390,7 +388,7 @@ function createPrevalenceArray(topic) {
     let innerArray = [];
     for (let i = 0; i < model.wordsByLocationWithStopwords.length; i++) {
         for (let j = 0; j < model.wordsByLocationWithStopwords[i].length; j++) {
-            if (model.topicsByLocationWithStopwords[i][j] == topic) {
+            if (model.topicsByLocationWithStopwords[i][j] === topic) {
                 innerArray.push(1);
             } else {
                 innerArray.push(0);
@@ -411,7 +409,7 @@ function createPrevalenceArray(topic) {
     for (let i = 0; i < prevalenceArray.length; i++) {
         for (let j = 0; j < prevalenceArray[i].length; j++) {
             countDown--;
-            binnedArray[curIndex] += prevalenceArray[i][j]
+            binnedArray[curIndex] += prevalenceArray[i][j];
 
             if (countDown<=0) {
                 countDown = binSize;
@@ -432,11 +430,11 @@ function smoothArray(originalArray, smoothingRadius) {
             for (let j = (i - smoothingRadius + 1); j < i + smoothingRadius; j++) {
                 if ((j >= 0) && (j <= i)) {
                     smoothedArray[j] +=
-                        originalArray[i]*(smoothingRadius-(i-j));
+                        originalArray[i]*(smoothingRadius - (i - j));
                 }
                 if ((j > i)&&(j < originalArray.length)) {
                     smoothedArray[j] +=
-                        originalArray[i]*(smoothingRadius+(i-j));
+                        originalArray[i]*(smoothingRadius + (i - j));
                 }
             }
         }
@@ -454,11 +452,11 @@ function initializeHeatmaps() {
         topicDropdownHTML = topicDropdownHTML + "<option class=\"select-topic-" + i + "\" value=\"" + i + "\">" + model.nicknames[i] + "</option>";
     }
     document.getElementById("heatmap1Menu").innerHTML = topicDropdownHTML;
-    $('#heatmap1Menu option')[1].selected = true;
+    $('#heatmap1Menu').find('option')[1].selected = true;
     document.getElementById("heatmap2Menu").innerHTML = topicDropdownHTML;
-    $('#heatmap2Menu option')[2].selected = true;
+    $('#heatmap2Menu').find('option')[2].selected = true;
     document.getElementById("heatmap3Menu").innerHTML = topicDropdownHTML;
-    $('#heatmap3Menu option')[3].selected = true;
+    $('#heatmap3Menu').find('option')[3].selected = true;
 
     for (let iter = 1; iter < 4; iter++){
         let topic = eval("heatmapTopic" + iter);
@@ -661,6 +659,6 @@ $(function() {
 });
 //Tab switching function
 $( function() {
-    $( "#tabs" ).tabs().addClass( "ui-tabs-vertical ui-helper-clearfix" );
-    $( "#tabs li" ).removeClass( "ui-corner-top" ).addClass( "ui-corner-left" );
+    $( "#tabs" ).tabs().addClass( "ui-tabs-vertical ui-helper-clearfix" )
+        .find("li" ).removeClass( "ui-corner-top" ).addClass( "ui-corner-left" );
 } );
