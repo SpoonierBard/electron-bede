@@ -267,12 +267,6 @@ $(document).ready(function() {
         });
         document.getElementById("metadata-topic-preview-text").textContent = topicWordList.join(", ");
     });
-    //changing the wordcloud
-    $("#word-cloud-topic-select").change(function () {
-        let topic = $("#word-cloud-topic-select option:selected").val();
-        let size = parseInt($("#cloud-size option:selected").val());
-        createWordCloud(topic, size);
-    });
 });
 
 //Metadata popup/Dialog setup
@@ -337,10 +331,6 @@ $( function() {
         dialog.dialog("close");
     }
 });
-
-
-
-
 
 //ANNOTATED TEXT TAB
 
@@ -711,7 +701,6 @@ function initializeWordCloudTab() {
         sizeDropdownHTMLWordCloud = sizeDropdownHTMLWordCloud + "<option class=\select-size-" + i + "\" value=\"" + i + "\">" + size + "</option>"
         console.log(i);
     }
-    console.log(sizeDropdownHTMLWordCloud);
     document.getElementById("word-cloud-topic-select").innerHTML = topicDropdownHTMLWordCloud;
     document.getElementById("cloud-size").innerHTML = sizeDropdownHTMLWordCloud;
     createWordCloud(0, 1);
@@ -725,7 +714,6 @@ function createWordCloud(topicNum, size) {
     let width = 0;
     let height = 0;
     let numWords = 0;
-    console.log("size is", size);
     switch (size) {
         case 0:
             width = 500;
@@ -748,7 +736,6 @@ function createWordCloud(topicNum, size) {
             height = 600;
             numWords = 600;
     }
-    console.log(width, height, numWords);
     let svg_location = "#word-cloud", topic = topicNum;
     //const width = 500//$(document).width();
     //const height = 600//$(document).height();
@@ -761,7 +748,6 @@ function createWordCloud(topicNum, size) {
         return new_dict;
     }, {}));
     reduced_entries = filtered_entries.slice(0,Math.min(filtered_entries.length, numWords));
-    console.log("length:" + reduced_entries.length);
     let xScale = d3.scaleLinear()
         .domain([0, d3.max(reduced_entries, function(d) {
             return d.value;
@@ -807,7 +793,8 @@ function createWordCloud(topicNum, size) {
 $(document).ready (function () {
     $("#word-cloud-topic-select").change(function () {
         let topic = $("#word-cloud-topic-select").find("option:selected").val();
-        createWordCloud(topic)
+        let size = parseInt($("#cloud-size option:selected").val());
+        createWordCloud(topic, size)
     });
     $("#cloud-size").change(function () {
         let topic = $("#word-cloud-topic-select option:selected").val();
