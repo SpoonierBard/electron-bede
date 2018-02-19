@@ -237,16 +237,7 @@ $(document).ready(function() {
 
 //ANNOTATED TEXT TAB
 
-function createAnnotatedText() {
-    // for (i = 0; i < model.topics; i++) {
-    //     d3.select("#tab-3-buttons")
-    //         .append("input")
-    //         .attr("type", "button")
-    //         .attr("name", "toggle")
-    //         .attr("value", "Topic " + String(i+1))
-    //         .on("click", togglePressed);
-    // }
-
+function createAnnotatedText(startIndex) {
     let topicDropdownHTML = "<option disabled selected>Select Topic</option>";
 
     //create three identical selectors for three possible topic comparisons
@@ -276,16 +267,16 @@ function createAnnotatedText() {
                 puncTracker += 1;
                 puncLocation += 1;
             }
-            // while (puncLocTracker == model.newlineLocations[newlineTracker]) {
-            //     wordToApp += '<br/>';
-            //     newlineTracker += 1;
-            // }
+            while (puncLocTracker == model.newlineLocations[newlineTracker]) {
+                wordToApp += '<br/>';
+                newlineTracker += 1;
+            }
             puncLocTracker += 1;
             d3.select("#an-text-body")
                 .append("span")
-                // .html(wordToApp)
-                .text(wordToApp)
-                .attr("class", "topic-" + model.wordsByLocationWithStopwords[docInText][word])
+                .html(wordToApp)
+                // .text(wordToApp)
+                .attr("class", "topic-" + model.topicsByLocationWithStopwords[docInText][word])
                 .on("mouseover", onHover)
                 .on("mouseout", offHover);
              d3.select('#an-text-body')
@@ -293,14 +284,6 @@ function createAnnotatedText() {
                 .text(" ");
         }
     }
-}
-
-function togglePressed() {
-    let topicNum = this.value.slice(-1);
-    let topic = ".topic-" + topicNum;
-    // add toggle!
-    d3.selectAll(topic)
-        .style("background-color", "orange");
 }
 
 function onHover() {
