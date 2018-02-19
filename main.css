@@ -169,3 +169,12 @@ select {
     filter: progid: DXImageTransform.Microsoft.Alpha(Opacity=100);
     opacity: 1;
 }
+
+.inline {
+    display:inline;
+}
+
+.bottomMargin {
+    margin-top: 20px;
+    margin-bottom: 10px;
+}
