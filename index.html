@@ -13,12 +13,12 @@
     <script>if (window.module) module = window.module;</script>
 </head>
 <body>
-<div id="welcome-page">
-    <input type="button" id="upload-file-button" value="Upload JSON File" onclick="loadFileChoice();">
-    <input type="button" id="create-file-button" value="Create Config File" onclick="loadConfigForm();">
+<div id="welcome-page" class="centered">
+    <input type="button" id="upload-file-button" value="Upload JSON File" onclick="loadFileChoice();" class="ui-button ui-corner-all ui-widget">
+    <input type="button" id="create-file-button" value="Create Config File" onclick="loadConfigForm();" class="ui-button ui-corner-all ui-widget">
 </div>
-<div id="create-file-form">
-    <form>
+<div id="create-file-form" class="grid">
+    <div class="reqparam">
         <h5>Required Parameters</h5>
         <label for="create-file-source">Source</label>
         <input type="text" id="create-file-source"><br>
@@ -27,8 +27,9 @@
         <label for="create-file-topics">Topics</label>
         <input type="number" id="create-file-topics" min="1" value="10"><br>
         <label for="create-file-output">Output Name</label>
-        <input type="text" id="create-file-output"><br>
-
+        <input type="text" id="create-file-output">
+    </div>
+    <div class="stoptions">
         <h5>Stopword Options</h5>
         <h6>Range Limits</h6>
         <label for="create-file-upperlimit">Remove words that appear in more than</label>
@@ -44,7 +45,8 @@
         <textarea id="create-file-blacklist"></textarea><br>
         <input type="checkbox" id="create-file-default-english-stopwords" value="true">Add default English stopwords<br>
         <input type="checkbox" id="create-file-default-latin-stopwords" value="true">Add default Latin stopwords
-
+    </div>
+    <div class="choptions">
         <h5>Chunking Options</h5>
         <input type="radio" name="chunking" value="number" id="chunking-number"
                onclick="document.getElementById('create-file-number-documents').disabled = false;
@@ -62,20 +64,21 @@
                         document.getElementById('create-file-length-documents').disabled = true;
                         document.getElementById('create-file-split-string').disabled = false;">Split string
         <input type="text" id="create-file-split-string" disabled><br>
-
+    </div>
+    <div class="hyperparameters">
         <h5>Hyperparameters</h5>
         <label for="create-file-alpha">Alpha</label>
         <input type="number" id="create-file-alpha" min="0" max="1" step="0.1" value="0.8"><br>
         <label for="create-file-beta">Beta</label>
         <input type="number" id="create-file-beta" min="0" max="1" step="0.1" value="0.8"><br>
-
-        <input type="submit" value="Create config file" onclick="createConfigFile();">
-    </form>
+    </div>
+    <input type="submit" value="Create config file" onclick="createConfigFile();">
 </div>
-<div id="file-upload">
+<div id="file-upload" class="centered">
     <form>
+        <label for="json-file" class="ui-widget ui-corner-all ui-button">Browse</label>
         <input type="file" id="json-file">
-        <input type="button" id="upload" value="Upload" onclick="loadFile();">
+        <input type="button" id="upload" value="Upload" onclick="loadFile();" class="ui-button ui-corner-all ui-widget" disabled>
     </form>
 </div>
 <div id="progressbar"></div>
@@ -98,10 +101,10 @@
             <label><strong>β : </strong></label> <label id="beta"></label>
             <button id="create-nickname">Nickname a topic</button>
             <button id="view-stopwords">View stopwords</button>
-            <button id="save-nicknames" onclick="saveNicknames();">Save nicknames</button>
+            <button id="save-nicknames" class="ui-button ui-corner-all ui-widget" onclick="saveNicknames();">Save nicknames</button>
         </div>
         <div id="metadata-topic-preview">
-            <select id="metadata-topic-select">
+            <select id="metadata-topic-select" class="styled-select slate">
                 <!-- this select tag will be filled with an <option> for each topic-->
             </select>
             <p id="metadata-topic-preview-text"></p>
@@ -112,7 +115,7 @@
         <div id="options">
             <input id="smoothingBox" type="checkbox" checked>
             <p class=inline>Smoothing: </p>
-            <select id="smoothingSelect">
+            <select id="smoothingSelect" class="styled-select slate">
                 <option>5</option>
                 <option selected>10</option>
                 <option>15</option>
@@ -127,19 +130,22 @@
         </div>
         <div id="heatmap">
             <div>
-                <select class="bottomMargin" name="heatmap1Menu" id="heatmap1Menu">
+                <select class="bottomMargin styled-select slate" name="heatmap1Menu" id="heatmap1Menu">
+                    <!-- this select tag will be filled with an <option> for each topic-->
                 </select>
                 <h4 class=inline id="topicLabel1"></h4>
             </div>
             <svg id="heatmapSVG1"></svg>
             <div>
-                <select class="bottomMargin" name="heatmap2Menu" id="heatmap2Menu">
+                <select class="bottomMargin styled-select slate" name="heatmap2Menu" id="heatmap2Menu">
+                    <!-- this select tag will be filled with an <option> for each topic-->
                 </select>
                 <h4 class=inline id="topicLabel2"></h4>
             </div>
             <svg id="heatmapSVG2"></svg>
             <div>
-                <select class="bottomMargin" name="heatmap3Menu" id="heatmap3Menu">
+                <select class="bottomMargin styled-select slate" name="heatmap3Menu" id="heatmap3Menu">
+                    <!-- this select tag will be filled with an <option> for each topic-->
                 </select>
                 <h4 class=inline id="topicLabel3"></h4>
             </div>
@@ -152,20 +158,15 @@
              <h2>Annotated Text</h2>
             </div>
             <div id = "selector-div">
-                <!--Click a topic to highlight it. You may highlight a maximum of 5 topics at once.<br><br>-->
-                <!--<button type="button">Show topics</button><br><br>-->
-                <!--<div id="tab-3-buttons">-->
-                    <!--&lt;!&ndash;topics as buttons&ndash;&gt;-->
-                <!--</div>-->
-                <select name="an-text-topic-select" id="an-text-topic-select-1" onchange="onSelect()">
+                <select name="an-text-topic-select" id="an-text-topic-select-1" onchange="onSelect()" class="styled-select slate">
                     <option disabled selected>Select Topic</option>
                     <option value="Topic1">Topic 1</option>
                 </select>
-                <select name="an-text-topic-select" id="an-text-topic-select-2" onchange="onSelect()">
+                <select name="an-text-topic-select" id="an-text-topic-select-2" onchange="onSelect()" class="styled-select slate">
                     <option disabled selected>Select Topic</option>
                     <option value="Topic1">Topic 1</option>
                 </select>
-                <select name="an-text-topic-select" id="an-text-topic-select-3" onchange="onSelect()">
+                <select name="an-text-topic-select" id="an-text-topic-select-3" onchange="onSelect()" class="styled-select slate">
                     <option disabled selected>Select Topic</option>
                     <option value="Topic1">Topic 1</option>
                 </select>
@@ -176,8 +177,11 @@
     </div>
     <div id="tab-4">
         <h2>Word Cloud</h2>
-        <select id="word-cloud-topic-select"></select>
-        <select id="cloud-size"></select>
+        <select id="word-cloud-topic-select" class="styled-select slate">
+            <!-- this select tag will be filled with an <option> for each topic-->
+        </select>
+        <select id="cloud-size" class="styled-select slate">
+        </select>
         <div id="word-cloud">
         </div>
     </div>
@@ -186,7 +190,8 @@
 <div id="nickname-dialog-form" title="Nickname">
     <form>
         <fieldset>
-            <select id="nickname-topic-select">
+            <select id="nickname-topic-select" class="styled-select slate">
+                <!-- this select tag will be filled with an <option> for each topic-->
             </select>
             <label for="nickname-input">Nickname</label>
             <input type="text" name="nickname" id="nickname-input" value="" class="text ui-widget-content ui-corner-all">
@@ -196,6 +201,7 @@
     </form>
 </div>
 <div id="stopwords-dialog" title="Stopwords">
+    <!-- this div will be filled with the stopword list-->
 </div>
 </body>
 </html>
