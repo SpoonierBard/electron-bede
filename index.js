@@ -25,10 +25,6 @@ function loadFileChoice() {
  * Creates a json file containing configuration parameters for LDA.py based on user choices
  */
 function createConfigFile(){
-    let source, iterations, topics, outputname, upperlimit, lowerlimit,
-        whitelist, blacklist, numberofdocuments, lengthofdocuments,
-        splitstring, alpha, beta;
-
     let englishStopwords = ["a", "a's", "able", "about", "above", "according", "accordingly", "across", "actually", "after", "afterwards",
         "again", "against", "ain't", "all", "allow", "allows", "almost", "alone", "along", "already", "also",
         "although", "always", "am", "among", "amongst", "an", "and", "another", "any", "anybody", "anyhow", "anyone",
@@ -78,24 +74,30 @@ function createConfigFile(){
         "where's", "whereafter", "whereas", "whereby", "wherein", "whereupon", "wherever", "whether", "which",
         "while", "whilst", "whither", "who", "who's", "whoever", "whole", "whom", "whose", "why", "will", "willing",
         "wish", "with", "within", "without", "won't", "wonder", "would", "wouldn't", "x", "y", "yes", "yet", "you",
-        "you'd", "you'll", "you're", "you've", "your", "yours", "yourself", "yourselves", "z", "zero"];
+        "you'd", "you'll", "you're", "you've", "your", "yours", "yourself", "yourselves", "z", "zero"],
 
-    let latinStopwords = ["ab", "ac", "ad", "adhic", "aliqui", "aliquis", "an", "ante", "apud", "at", "atque", "aut", "autem", "cum",
+        latinStopwords = ["ab", "ac", "ad", "adhic", "aliqui", "aliquis", "an", "ante", "apud", "at", "atque", "aut", "autem", "cum",
         "cur", "de", "deinde", "dum", "ego", "enim", "ergo", "es", "est", "et", "etiam", "etsi", "ex", "fio", "haud",
         "hic", "iam", "idem", "igitur", "ille", "in", "infra", "inter", "interim", "ipse", "is", "ita", "magis", "modo",
         "mox", "nam", "ne", "nec", "necque", "neque", "nisi", "non", "nos", "o", "ob", "per", "possum", "post", "pro",
         "quae", "quam", "quare", "qui", "quia", "quicumque", "quidem", "quilibet", "quis", "quisnam", "quisquam",
         "quisque", "quisquis", "quo", "quoniam", "sed", "si", "sic", "sive", "sub", "sui", "sum", "super", "suus",
-        "tam", "tamen", "trans", "tu", "tum", "ubi", "uel", "uero", "unus", "ut"];
+        "tam", "tamen", "trans", "tu", "tum", "ubi", "uel", "uero", "unus", "ut"],
 
-    source = document.getElementById("create-file-source").value;
-    iterations = document.getElementById("create-file-iterations").value;
-    topics = document.getElementById("create-file-topics").value;
-    outputname = document.getElementById("create-file-output").value;
-    upperlimit = parseInt(document.getElementById("create-file-upperlimit").value) / 100;
-    lowerlimit = parseInt(document.getElementById("create-file-lowerlimit").value) / 100;
-    whitelist = document.getElementById("create-file-whitelist").value.split();
-    blacklist = document.getElementById("create-file-blacklist").value.split();
+        source = document.getElementById("create-file-source").value,
+        iterations = document.getElementById("create-file-iterations").value,
+        topics = document.getElementById("create-file-topics").value,
+        outputname = document.getElementById("create-file-output").value,
+        upperlimit = parseInt(document.getElementById("create-file-upperlimit").value) / 100,
+        lowerlimit = parseInt(document.getElementById("create-file-lowerlimit").value) / 100,
+        whitelist = document.getElementById("create-file-whitelist").value.split(),
+        blacklist = document.getElementById("create-file-blacklist").value.split(),
+        numberofdocuments,
+        lengthofdocuments,
+        splitstring,
+        alpha = document.getElementById("create-file-alpha").value,
+        beta = document.getElementById("create-file-beta").value;
+
 
     if (document.getElementById("create-file-default-english-stopwords").value === "true"){
         blacklist.push.apply(blacklist, englishStopwords);
@@ -117,8 +119,6 @@ function createConfigFile(){
         lengthofdocuments = "off";
         splitstring = document.getElementById("create-file-split-string").value;
     }
-    alpha = document.getElementById("create-file-alpha").value;
-    beta = document.getElementById("create-file-beta").value;
 
     let config = {}, reqparam = {}, stoptions = {}, choptions = {}, hyperparameters = {};
     reqparam["source"] = source;
@@ -518,7 +518,7 @@ function createPrevalenceArray(topic) {
     let innerArray = [];
     for (let i = 0; i < model.wordsByLocationWithStopwords.length; i++) {
         for (let j = 0; j < model.wordsByLocationWithStopwords[i].length; j++) {
-            if (model.topicsByLocationWithStopwords[i][j] === topic) {
+            if (model.topicsByLocationWithStopwords[i][j] === parseInt(topic)) {
                 innerArray.push(1);
             } else {
                 innerArray.push(0);
