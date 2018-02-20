@@ -157,6 +157,7 @@ function createConfigFile(){
             console.error(err);
         }
     });
+    reloadMainMenu();
 }
 
 /**
