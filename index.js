@@ -425,6 +425,7 @@ function scrollAnnotatedText() {
         //     d3.select("#an-text-body").select("span").remove();
         //     currentLoaded[0] += 1;
         // }
+        //trying to update martha's code
     } else {
         loadAnnotatedText(currentLoaded[0] - 11, currentLoaded[0] - 1001);
     }
