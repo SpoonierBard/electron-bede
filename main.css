@@ -4,7 +4,7 @@
 
 body {
     width: 95vw;
-    height: 95vh;
+    height: 90vh;
 }
 #webview {
     position: absolute;
@@ -84,12 +84,15 @@ input[type="number"] {
     width: 100%;
 }
 .ui-tabs-vertical .ui-tabs-nav {
-    padding: .2em .1em .2em .2em;
+    padding: .2em .1em 3em .2em;
     float: left;
     width: 10em;
     height: 100%;
     }
 
+#ui-id-4 {
+    padding-bottom: 0;
+}
 .ui-tabs-vertical .ui-tabs-nav li {
     clear: left;
     width: 100%;
