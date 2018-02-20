@@ -4,11 +4,16 @@ let fs = require("fs"),
 const colors  = ["#66c2a5", "#fc8d62", "#8da0cb"],
     scaledColors = ["hsl(161, 30%, 90%)", "hsl(17, 30%, 90%)", "hsl(222, 30%, 90%)", "hsl(161, 63%, 38%)", "hsl(17, 86%, 49%)", "hsl(222, 57%, 47%)"];
 
+/**
+ * Reloads main menu choice on button click; can be called from all other pages
+ */
 function reloadMainMenu(){
     document.getElementById("welcome-page").style.display = "block";
     document.getElementById("create-file-form").style.display = "none";
     document.getElementById("file-upload").style.display = "none";
-
+    document.getElementById("tabs").style.display = "none";
+    document.getElementById("json-file").value="";
+    model = {};
 }
 
 /**
@@ -27,12 +32,6 @@ function loadFileChoice() {
     document.getElementById("file-upload").style.display = "block";
 }
 
-$(document).ready(function(){
-    $("#upload").attr("disabled", "disabled");
-    $("#json-file").change(function() {
-        $("#upload").removeAttr("disabled");
-    })
-});
 /**
  * Creates a json file containing configuration parameters for LDA.py based on user choices
  */
@@ -172,8 +171,8 @@ function loadFile() {
         alert("Please select a file before clicking upload");
     }
     else {
+        hideUploadScreen();
         reader.onload = (function() {
-            hideUploadScreen();
             model = JSON.parse(reader.result);
             createMetadata();
             initializeHeatmaps();
