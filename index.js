@@ -421,13 +421,8 @@ function scrollAnnotatedText() {
     let direction = d3.event.wheelDelta < 0 ? 'down' : 'up';
     if (direction = 'down') {
         loadAnnotatedText(currentLoaded[0] + 11, currentLoaded[1] + 11);
-        // for (let i = 0; i < 500; i++) {
-        //     d3.select("#an-text-body").select("span").remove();
-        //     currentLoaded[0] += 1;
-        // }
-        //trying to update martha's code
     } else {
-        loadAnnotatedText(currentLoaded[0] - 11, currentLoaded[0] - 1001);
+        loadAnnotatedText(currentLoaded[0] - 11, currentLoaded[1] - 11);
     }
 }
 
