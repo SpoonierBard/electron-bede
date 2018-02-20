@@ -1,7 +1,7 @@
 let //fs = require("fs"),
     model = {},
     input,
-    currentLoaded = [0, 0]; //track from which word to which word we've loaded
+    lastLoaded = 16000; //int to track where in the text we've loaded up to
 const colors  = ["#66c2a5", "#fc8d62", "#8da0cb"],
     scaledColors = ["hsl(161, 30%, 90%)", "hsl(17, 30%, 90%)", "hsl(222, 30%, 90%)", "hsl(161, 63%, 38%)", "hsl(17, 86%, 49%)", "hsl(222, 57%, 47%)"];
 
@@ -371,13 +371,12 @@ function createAnnotatedText() {
                 return colors[i - 1];
             });
     }
-    loadAnnotatedText(currentLoaded[0]);
+    loadAnnotatedText(lastLoaded);
     d3.select('#tab-3')
         .on('scroll', scrollAnnotatedText);
 }
 
-function loadAnnotatedText(startIndex, endIndex=(startIndex + 500)) {
-    d3.select("#an-text-body").selectAll("span").remove();
+function loadAnnotatedText(startIndex) {
     //iterate through full text and add each word as own span with topic as class
     let puncTracker = 0, //index of punctuation
         puncLocation = 0, //index of puncLocation
@@ -398,7 +397,7 @@ function loadAnnotatedText(startIndex, endIndex=(startIndex + 500)) {
                 newlineTracker += 1;
             }
             puncLocTracker += 1;
-            if (startIndex <= startTracker && startTracker <= endIndex) {
+            if (startIndex <= startTracker && startTracker <= startIndex + 1000) {
                 d3.select("#an-text-body")
                     .append("span")
                     .html(wordToApp)
@@ -414,19 +413,13 @@ function loadAnnotatedText(startIndex, endIndex=(startIndex + 500)) {
             startTracker += 1;
         }
     }
-    currentLoaded[1] = endIndex;
+    lastLoaded = startIndex + 1000;
 }
 
 function scrollAnnotatedText() {
-    let direction = d3.event.wheelDelta < 0 ? 'down' : 'up';
-    if (direction = 'down') {
-        loadAnnotatedText(currentLoaded[0] + 11, currentLoaded[1] + 11);
-        // for (let i = 0; i < 500; i++) {
-        //     d3.select("#an-text-body").select("span").remove();
-        //     currentLoaded[0] += 1;
-        // }
-    } else {
-        loadAnnotatedText(currentLoaded[0] - 11, currentLoaded[0] - 1001);
+    loadAnnotatedText(lastLoaded + 1);
+    for (let i = 0; i < 100; i++) {
+        d3.select("#an-text-body").select("span").remove();
     }
 }
 
