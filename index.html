@@ -82,7 +82,9 @@
         <input type="button" id="upload" value="Upload" onclick="loadFile();" class="ui-button ui-corner-all ui-widget">
         <button class="ui-button ui-widget ui-corner-all" onclick="reloadMainMenu();">Main Menu</button>
 </div>
-<div id="progressbar"></div>
+<div id="progressbar" class="centered">
+    Loading...
+</div>
 <div id="tabs" style="margin: -.5em;">
     <ul>
         <li><a href="#tab-1">Metadata</a></li>
@@ -113,8 +115,7 @@
             <select id="metadata-topic-select" class="styled-select slate">
                 <!-- this select tag will be filled with an <option> for each topic-->
             </select>
-            <p id="metadata-topic-preview-text"></p>
-        </div>
+            <p id="metadata-topic-preview-text" class="scrollable"></p></div>
     </div>
     <div class="padLeft50" id="tab-2">
         <h2 style="margin-top: 0;">Heat Map</h2>
@@ -190,7 +191,7 @@
             <select id="cloud-size" class="styled-select slate">
             </select>
         </div>
-        <div id="word-cloud">
+        <div id="word-cloud" class="scrollable">
         </div>
     </div>
 </div>

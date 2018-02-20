@@ -122,11 +122,24 @@ input[type="number"] {
 
 .ui-tabs-vertical .ui-tabs-panel {
     padding: 1em;
-    overflow: scroll;
+    margin-left: 11em;
     height: 100%;
+    overflow: hidden;
     }
 
 
+.scrollable {
+    overflow: scroll;
+}
+
+#progressbar {
+    width: 80%;
+}
+
+#word-cloud {
+    height: 80%;
+    width: 100%;
+}
 #fixed-tools {
     margin-top: 0;
     position: fixed;
@@ -139,9 +152,16 @@ input[type="number"] {
 }
 
 #an-text-body {
+    height: 80%;
     margin-top: 150px;
 }
 
+#tab-3 {
+    overflow: scroll;
+}
+#metadata-topic-preview-text {
+    height: 11em;
+}
 
 /* Tooltip styles developed by Chris Bracco*/
 [data-tooltip] {
