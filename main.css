@@ -132,6 +132,10 @@ input[type="number"] {
     overflow: scroll;
 }
 
+#progressbar {
+    width: 80%;
+}
+
 #word-cloud {
     height: 80%;
     width: 100%;
@@ -150,6 +154,10 @@ input[type="number"] {
 #an-text-body {
     height: 80%;
     margin-top: 150px;
+}
+
+#tab-3 {
+    overflow: scroll;
 }
 #metadata-topic-preview-text {
     height: 11em;
