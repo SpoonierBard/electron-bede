@@ -91,18 +91,18 @@ function createConfigFile(){
         "tam", "tamen", "trans", "tu", "tum", "ubi", "uel", "uero", "unus", "ut"],
 
         source = document.getElementById("create-file-source").value,
-        iterations = document.getElementById("create-file-iterations").value,
-        topics = document.getElementById("create-file-topics").value,
+        iterations = parseInt(document.getElementById("create-file-iterations").value),
+        topics = parseInt(document.getElementById("create-file-topics").value),
         outputname = document.getElementById("create-file-output").value,
-        upperlimit = parseInt(document.getElementById("create-file-upperlimit").value) / 100,
-        lowerlimit = parseInt(document.getElementById("create-file-lowerlimit").value) / 100,
+        upperlimit = parseFloat(parseInt(document.getElementById("create-file-upperlimit").value) / 100),
+        lowerlimit = parseFloat(parseInt(document.getElementById("create-file-lowerlimit").value) / 100),
         whitelist = document.getElementById("create-file-whitelist").value.split(),
         blacklist = document.getElementById("create-file-blacklist").value.split(),
         numberofdocuments,
         lengthofdocuments,
         splitstring,
-        alpha = document.getElementById("create-file-alpha").value,
-        beta = document.getElementById("create-file-beta").value;
+        alpha = parseFloat(document.getElementById("create-file-alpha").value),
+        beta = parseFloat(document.getElementById("create-file-beta").value);
 
 
     if (document.getElementById("create-file-default-english-stopwords").value === "true"){
@@ -113,12 +113,12 @@ function createConfigFile(){
     }
 
     if(document.getElementById("chunking-number").checked) {
-        numberofdocuments = document.getElementById("create-file-number-documents").value;
+        numberofdocuments = parseInt(document.getElementById("create-file-number-documents").value);
         lengthofdocuments = "off";
         splitstring = "off";
     } else if (document.getElementById("chunking-length").checked) {
         numberofdocuments = "off";
-        lengthofdocuments = document.getElementById("create-file-length-documents").value;
+        lengthofdocuments = parseInt(document.getElementById("create-file-length-documents").value);
         splitstring = "off";
     } else if (document.getElementById("chunking-splitstring").checked) {
         numberofdocuments = "off";
