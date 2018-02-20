@@ -1,4 +1,4 @@
-let fs = require("fs"),
+let //fs = require("fs"),
     model = {},
     input,
     lastLoaded = 16000; //int to track where in the text we've loaded up to
@@ -159,6 +159,7 @@ function createConfigFile(){
             console.error(err);
         }
     });
+    reloadMainMenu();
 }
 
 /**
@@ -537,10 +538,12 @@ $(document).ready(function() {
      * Reloads heatmaps taking into account the new smoothing constant on dropdown change
      */
     $("#smoothingSelect").change(function () {
-        heatmapSmoothing = parseInt($("#smoothingSelect").val());
-        replaceHeatmap(1,heatmapTopic1);
-        replaceHeatmap(2,heatmapTopic2);
-        replaceHeatmap(3,heatmapTopic3);
+        if ($("#smoothingBox").is(':checked')) {
+            heatmapSmoothing = parseInt($("#smoothingSelect").val());
+            replaceHeatmap(1, heatmapTopic1);
+            replaceHeatmap(2, heatmapTopic2);
+            replaceHeatmap(3, heatmapTopic3);
+        }
     });
 });
 
