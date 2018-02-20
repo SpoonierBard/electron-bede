@@ -15,10 +15,6 @@ body {
     display: inline-flex !important;
 }
 
-h2{
-    padding-top: 0;
-    padding-bottom: 0;
-}
 .ui-widget.ui-widget-content{
     border: none;
 }
@@ -64,6 +60,7 @@ input[type="number"] {
 
 #tabs {
     display: none;
+    position: relative;
 }
 
 #progressbar {
@@ -79,10 +76,6 @@ input[type="number"] {
 }
 #create-file-form {
     display: none;
-}
-#tab-3 {
-    /*font-family: monospace;*/
-    /*padding: 2%;*/
 }
 
 .ui-tabs{
@@ -130,10 +123,6 @@ input[type="number"] {
     height: 100%;
     }
 
-
-select {
-    overflow: scroll;
-}
 
 #fixed-tools {
     margin-top: 0;

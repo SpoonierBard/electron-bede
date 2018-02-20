@@ -70,14 +70,17 @@
         <label for="create-file-beta">Beta</label>
         <input type="number" id="create-file-beta" min="0" max="1" step="0.1" value="0.8"><br>
     </div>
-    <input type="submit" value="Create config file" onclick="createConfigFile();" style="float: right; margin-top: 2em;" class="ui-widget ui-button ui-corner-all">
+    <div style="float: right; margin-top: 2em;">
+        <button class="ui-corner-all ui-widget ui-button" onclick="reloadMainMenu();" >Main Menu</button>
+        <input type="submit" value="Create config file" onclick="createConfigFile();" class="ui-widget ui-button ui-corner-all">
+    </div>
 </div>
 <div id="file-upload" class="centered">
-    <form>
+
         <label for="json-file" class="ui-widget ui-corner-all ui-button">Browse</label>
         <input type="file" id="json-file">
         <input type="button" id="upload" value="Upload" onclick="loadFile();" class="ui-button ui-corner-all ui-widget">
-    </form>
+        <button class="ui-button ui-widget ui-corner-all" onclick="reloadMainMenu();">Main Menu</button>
 </div>
 <div id="progressbar"></div>
 <div id="tabs">
