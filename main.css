@@ -3,7 +3,7 @@
 :focus {outline:0 !important;}
 
 body {
-    width: 100vw;
+    width: 95vw;
     height: 95vh;
 }
 #webview {
@@ -15,6 +15,10 @@ body {
     display: inline-flex !important;
 }
 
+h2{
+    padding-top: 0;
+    padding-bottom: 0;
+}
 .ui-widget.ui-widget-content{
     border: none;
 }
@@ -23,6 +27,9 @@ input[type="file"] {
     display: none;
 }
 
+input[type="number"] {
+    width: 50px;
+}
 .centered {
     position: absolute;
     top: 50%;
@@ -30,6 +37,9 @@ input[type="file"] {
     transform: translate(-50%, -50%);
 }
 
+.ui-button {
+    margin-bottom: 1em;
+}
 .styled-select {
     background: #e6e6e6 url("js/jquery-ui-1.12.1.custom/images/ui-bg_glass_75_e6e6e6_1x400.png") 50% 50% repeat-x;
     height: 29px;
@@ -211,4 +221,9 @@ select {
 .bottomMargin {
     margin-top: 20px;
     margin-bottom: 10px;
+}
+
+.config-form {
+    display: inline-grid;
+    padding: 5px;
 }

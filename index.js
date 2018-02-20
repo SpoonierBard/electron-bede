@@ -159,7 +159,6 @@ function createConfigFile(){
  */
 //Function to read data from uploaded json file. Called on button click.
 function loadFile() {
-    hideUploadScreen();
     let reader;
     reader = new FileReader();
     input = document.getElementById("json-file");
@@ -168,6 +167,7 @@ function loadFile() {
     }
     else {
         reader.onload = (function() {
+            hideUploadScreen();
             model = JSON.parse(reader.result);
             createMetadata();
             initializeHeatmaps();
@@ -285,6 +285,7 @@ $( function() {
     dialog.dialog({
             autoOpen: false,
             height: 400,
+            modal: true,
             width: 350,
             overflow: scroll
         }
