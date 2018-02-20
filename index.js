@@ -21,6 +21,12 @@ function loadFileChoice() {
     document.getElementById("file-upload").style.display = "block";
 }
 
+$(document).ready(function(){
+    $("#upload").attr("disabled", "disabled");
+    $("#json-file").change(function() {
+        $("#upload").removeAttr("disabled");
+    })
+});
 /**
  * Creates a json file containing configuration parameters for LDA.py based on user choices
  */
@@ -793,14 +799,14 @@ function createWordCloud(topicNum, size) {
 $(document).ready (function () {
     $("#word-cloud-topic-select").change(function () {
         let topic = $("#word-cloud-topic-select").find("option:selected").val();
-        let size = parseInt($("#cloud-size option:selected").val());
+        let size = parseInt($("#cloud-size").find("option:selected").val());
         createWordCloud(topic, size)
     });
     $("#cloud-size").change(function () {
-        let topic = $("#word-cloud-topic-select option:selected").val();
-        let size = parseInt($("#cloud-size option:selected").val());
+        let topic = $("#word-cloud-topic-select").find("option:selected").val();
+        let size = parseInt($("#cloud-size").find("option:selected").val());
         console.log(topic);
-        if (parseInt(topic) == -1) {
+        if (parseInt(topic) === -1) {
             createWordCloud(0, size);
         } else {
             createWordCloud(topic, size);
