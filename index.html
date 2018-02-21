@@ -77,10 +77,12 @@
 </div>
 <div id="file-upload" class="centered">
 
-        <label for="json-file" class="ui-widget ui-corner-all ui-button">Browse</label>
-        <input type="file" id="json-file">
-        <input type="button" id="upload" value="Upload" onclick="loadFile();" class="ui-button ui-corner-all ui-widget">
-        <button class="ui-button ui-widget ui-corner-all" onclick="reloadMainMenu();">Main Menu</button>
+        <label id="json-file-label" for="json-file" class="ui-widget ui-corner-all ui-button">Browse</label>
+        <input type="file" id="json-file"><br>
+        <nobr>
+            <button id="json-file-main-menu" class="ui-button ui-widget ui-corner-all" onclick="reloadMainMenu();">Main Menu</button>
+            <input type="button" id="upload" value="Upload" onclick="loadFile();" class="ui-button ui-corner-all ui-widget">
+        </nobr>
 </div>
 <div id="progressbar" class="centered">
     Loading...

@@ -151,6 +151,18 @@ input[type="number"] {
     padding-bottom: 12px;
 }
 
+#json-file-label {
+    width: 279px;
+}
+
+#json-file-main-menu{
+    width: 180px;
+}
+
+#upload {
+    width: 130px;
+    float: right;
+}
 #an-text-body {
     height: 80%;
     margin-top: 150px;
