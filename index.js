@@ -15,6 +15,7 @@ function reloadMainMenu(){
     document.getElementById("file-upload").style.display = "none";
     document.getElementById("tabs").style.display = "none";
     document.getElementById("json-file").value="";
+    document.getElementById("json-file-label").innerText = "Browse";
     model = {};
 }
 
@@ -34,6 +35,15 @@ function loadFileChoice() {
     document.getElementById("file-upload").style.display = "block";
 }
 
+$(document).ready(function () {
+    $("#json-file").change(function (e) {
+        let fileName = '';
+        if (e.target.value)
+            fileName = e.target.value.split('\\').pop();
+        if (fileName)
+            document.getElementById("json-file-label").innerText = fileName;
+    });
+});
 /**
  * Creates a json file containing configuration parameters for LDA.py based on user choices
  */
@@ -421,13 +431,8 @@ function scrollAnnotatedText() {
     let direction = d3.event.wheelDelta < 0 ? 'down' : 'up';
     if (direction = 'down') {
         loadAnnotatedText(currentLoaded[0] + 11, currentLoaded[1] + 11);
-        // for (let i = 0; i < 500; i++) {
-        //     d3.select("#an-text-body").select("span").remove();
-        //     currentLoaded[0] += 1;
-        // }
-        //trying to update martha's code
     } else {
-        loadAnnotatedText(currentLoaded[0] - 11, currentLoaded[0] - 1001);
+        loadAnnotatedText(currentLoaded[0] - 11, currentLoaded[1] - 11);
     }
 }
 
