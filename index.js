@@ -35,6 +35,9 @@ function loadFileChoice() {
     document.getElementById("file-upload").style.display = "block";
 }
 
+/**
+ * Updates browse button with file name
+ */
 $(document).ready(function () {
     $("#json-file").change(function (e) {
         let fileName = '';
