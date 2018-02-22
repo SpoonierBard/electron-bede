@@ -262,15 +262,20 @@ function createMetadata(){
         }
     }
     //dynamically create injectable HTML with dropdown options for each topic
-    let topicDropdownHTMLmetadata = "<option disabled selected='selected' value='-1'>Select topic to display</option>";
-    let topicDropdownHTMLnickname = "<option disabled selected>Select topic to nickname</option>";
+    let topicDropdownHTMLmetadata = "";
 
     for (let i = 0; i < model.topicWordInstancesDict.length; i++) {
         topicDropdownHTMLmetadata = topicDropdownHTMLmetadata + "<option class=\"select-topic-" + i + "\" value=\"" + i + "\">" + model.nicknames[i] + "</option>";
-        topicDropdownHTMLnickname = topicDropdownHTMLnickname + "<option class=\"select-topic-" + i + "\" value=\"" + i + "\">" + model.nicknames[i] + "</option>";
     }
     document.getElementById("metadata-topic-select").innerHTML = topicDropdownHTMLmetadata;
-    document.getElementById("nickname-topic-select").innerHTML = topicDropdownHTMLnickname;
+    $('#metadata-topic-select').find('option')[0].selected = true;
+
+    let topicWordList = Object.keys(model.topicWordInstancesDict[0]);
+    topicWordList = topicWordList.sort(function (a, b) {
+        return model.topicWordInstancesDict[0][b] -
+            model.topicWordInstancesDict[0][a];
+    });
+    document.getElementById("metadata-topic-preview-text").textContent = topicWordList.join(", ");
 }
 
 /**
@@ -326,7 +331,7 @@ $( function() {
  */
 $( function() {
     let dialog, form,
-        topic = $( "#nickname-topic-select"),
+        topic = $( "#metadata-topic-select"),
         nickname = $( "#nickname-input" );
 
     dialog = $( "#nickname-dialog-form" ).dialog({
@@ -743,7 +748,7 @@ function drawRectangles(svg, dataset, binSize, heatmapNum) {
     let colorScale = d3.scaleLinear()
         .domain([d3.min(dataset),
             d3.max(dataset)])
-        .range([scaledColors[heatmapNum - 1], scaledColors[heatmapNum + 3]])
+        .range([scaledColors[heatmapNum - 1], scaledColors[heatmapNum + 3]]);
     if (heatmapNum === 4) {
         svg.selectAll("rect")
             .data(dataset)
@@ -763,6 +768,7 @@ function drawRectangles(svg, dataset, binSize, heatmapNum) {
             })
             .on("click", function(d, i){
                 $("#tabs").tabs("option", "active", 2);
+                console.log(i, i*binSize);
                 loadAnnotatedText(i * binSize);
                 currentLoaded[0] = i * binSize;
             })
