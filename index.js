@@ -1,4 +1,4 @@
-let //fs = require("fs"),
+let fs = require("fs"),
     model = {},
     input,
     currentLoaded = [0, 0]; //track from which word to which word we've loaded
@@ -16,6 +16,7 @@ function reloadMainMenu(){
     document.getElementById("tabs").style.display = "none";
     document.getElementById("json-file").value="";
     document.getElementById("json-file-label").innerText = "Browse";
+    document.getElementById("an-text-body").innerHTML = "";
     model = {};
 }
 
@@ -35,6 +36,9 @@ function loadFileChoice() {
     document.getElementById("file-upload").style.display = "block";
 }
 
+/**
+ * Updates browse button with file name
+ */
 $(document).ready(function () {
     $("#json-file").change(function (e) {
         let fileName = '';
@@ -111,8 +115,8 @@ function createConfigFile(){
         iterations = parseInt(document.getElementById("create-file-iterations").value),
         topics = parseInt(document.getElementById("create-file-topics").value),
         outputname = document.getElementById("create-file-output").value,
-        upperlimit = parseFloat(parseInt(document.getElementById("create-file-upperlimit").value) / 100),
-        lowerlimit = parseFloat(parseInt(document.getElementById("create-file-lowerlimit").value) / 100),
+        upperlimit = parseInt(document.getElementById("create-file-upperlimit").value) / 100,
+        lowerlimit = parseInt(document.getElementById("create-file-lowerlimit").value) / 100,
         whitelist = document.getElementById("create-file-whitelist").value.split(),
         blacklist = document.getElementById("create-file-blacklist").value.split(),
         numberofdocuments,
@@ -121,6 +125,7 @@ function createConfigFile(){
         alpha = parseFloat(document.getElementById("create-file-alpha").value),
         beta = parseFloat(document.getElementById("create-file-beta").value);
 
+    console.log(upperlimit);
 
     if (document.getElementById("create-file-default-english-stopwords").value === "true"){
         blacklist.push.apply(blacklist, englishStopwords);
@@ -361,7 +366,6 @@ $( function() {
 
 /**
  * Initializes annotated text tab with no topics selected
- * @param {number} startIndex -- //TODO: once this is used, say what it does
  */
 
 function createAnnotatedText() {
@@ -429,7 +433,7 @@ function loadAnnotatedText(startIndex, endIndex=(startIndex + 500)) {
 
 function scrollAnnotatedText() {
     let direction = d3.event.wheelDelta < 0 ? 'down' : 'up';
-    if (truth = (direction == 'up')) {
+    if (direction === 'up') {
         loadAnnotatedText(currentLoaded[0] + 11, currentLoaded[1] + 11);
     } else {
         loadAnnotatedText(currentLoaded[0] - 11, currentLoaded[1] - 11);
@@ -564,7 +568,7 @@ $(document).ready(function() {
 /**
  * Creates an array representing the distribution of a particular topic across corpus
  * @param {number} topic -- topic whose distribution array will represent
- * @returns {number[]} -- array representing topic distribution across corpus
+ * @returns {{array: number[], binSize: number}} -- array representing topic distribution across corpus
  */
 function createPrevalenceArray(topic) {
     let innerArray = [];
@@ -601,7 +605,7 @@ function createPrevalenceArray(topic) {
         }
     }
     prevalenceArray = [];
-    return binnedArray;
+    return {"array": binnedArray, "binSize": binSize};
 }
 
 /**
@@ -660,10 +664,12 @@ function initializeHeatmaps() {
         });
         svg.style("height", 50);
 
-        let binnedArray = createPrevalenceArray(topic);
+        let binnedArrayinfo = createPrevalenceArray(topic),
+            binnedArray = binnedArrayinfo["array"],
+            binnedArrayBinSize = binnedArrayinfo["binSize"];
         binnedArray = smoothArray(binnedArray, heatmapSmoothing);
 
-        drawRectangles(svg, binnedArray, iter);
+        drawRectangles(svg, binnedArray, binnedArrayBinSize, iter);
     }
 }
 
@@ -690,9 +696,10 @@ function changeTop5Words(heatmapNum, topic) {
  * Draws rectangles representing the values in an array
  * @param svg -- where to draw the rectangles
  * @param {number[]} dataset -- array representing topic distribution
+ * @param binSize -- size of bins in array
  * @param {number} heatmapNum -- which heatmap to draw the rectangles in
  */
-function drawRectangles(svg, dataset, heatmapNum) {
+function drawRectangles(svg, dataset, binSize, heatmapNum) {
     let colorScale = d3.scaleLinear()
         .domain([d3.min(dataset),
             d3.max(dataset)])
@@ -715,7 +722,9 @@ function drawRectangles(svg, dataset, heatmapNum) {
             })
         })
         .on("click", function(d, i){
-            console.log(i/dataset.length);
+            $("#tabs").tabs("option", "active", 2);
+            loadAnnotatedText(i * binSize);
+            currentLoaded[0] = i * binSize;
         })
 }
 
@@ -727,9 +736,11 @@ function drawRectangles(svg, dataset, heatmapNum) {
 function replaceHeatmap(heatmapNum, topic) {
     var svg = d3.select("#heatmapSVG" + heatmapNum);
     svg.html("");
-    let heatmapArray = createPrevalenceArray(topic);
+    let heatmapArrayinfo = createPrevalenceArray(topic),
+        heatmapArray = heatmapArrayinfo["array"],
+        heatmapBinSize = heatmapArrayinfo["binSize"];
     heatmapArray = smoothArray(heatmapArray, heatmapSmoothing);
-    drawRectangles(svg, heatmapArray, heatmapNum);
+    drawRectangles(svg, heatmapArray, heatmapBinSize, heatmapNum);
     changeTop5Words(heatmapNum, topic);
 }
 
