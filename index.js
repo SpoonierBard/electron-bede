@@ -708,13 +708,10 @@ function initializeWordCloudTab() {
     }
     document.getElementById("word-cloud-topic-select").innerHTML = topicDropdownHTMLWordCloud;
     let width = window.innerWidth - 230;
-    let height = window.innerHeight - 170;
+    let height = window.innerHeight - 160;
     createWordCloud(0, width, height);
 }
 function createWordCloud(topicNum, width, height) {
-    console.log("hi");
-    console.log(width);
-    console.log(height);
 /**
  * Reloads word cloud based on a new topic
  * @param {number} topicNum -- topic to be displayed
@@ -722,6 +719,14 @@ function createWordCloud(topicNum, width, height) {
     $("#word-cloud").empty();
     let svg_location = "#word-cloud", topic = topicNum;
     let fill = d3.schemeCategory20;
+    size = width * height;
+    const mid = 150000;
+    const large = 600000;
+    const biggest = 100000;
+    if (size >= mid) fill = fill.concat(d3.schemeCategory10);
+    if (size >= large) fill = fill.concat(d3.schemeCategory20c);
+    if (size >= biggest) fill = fill.concat(d3.schemeCategory20b);
+    console.log(fill);
     let word_entries = model.topicWordInstancesDict[topic];
     //filtered_entries contains every element of word_entries with a count greater than 1
     let reduced_entries = d3.entries(Object.keys(word_entries).reduce(function (new_dict, key) {
@@ -768,11 +773,8 @@ function createWordCloud(topicNum, width, height) {
 }
 
 function resizeWordCloud() {
-    console.log("resize!!");
     let width = window.innerWidth - 230;
-    let height = window.innerHeight - 170;
-    console.log(width);
-    console.log(height);
+    let height = window.innerHeight - 160;
     let topic = $("#word-cloud-topic-select").find("option:selected").val();
     if (topic == -1) {
         topic = 0;
@@ -788,9 +790,7 @@ $(document).ready (function () {
         let topic = $("#word-cloud-topic-select").find("option:selected").val();
         //let size = parseInt($("#cloud-size").find("option:selected").val());
         let width = window.innerWidth - 230;
-        let height = window.innerHeight - 170;
-        //console.log(width);
-        //console.log(height);
+        let height = window.innerHeight - 160;
         createWordCloud(topic, width, height)
     });
 });
