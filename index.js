@@ -724,6 +724,7 @@ function drawRectangles(svg, dataset, binSize, heatmapNum) {
         .on("click", function(d, i){
             $("#tabs").tabs("option", "active", 2);
             loadAnnotatedText(i * binSize);
+            currentLoaded[0] = i * binSize;
         })
 }
 
