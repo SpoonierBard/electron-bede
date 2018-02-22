@@ -113,6 +113,16 @@ function createConfigFile(){
         "quisque", "quisquis", "quo", "quoniam", "sed", "si", "sic", "sive", "sub", "sui", "sum", "super", "suus",
         "tam", "tamen", "trans", "tu", "tum", "ubi", "uel", "uero", "unus", "ut"],
 
+        bedeLatinStopwords = ["ab", "ac/1", "ad/2", "adhic", "aliqvi", "aliqvis", "an", "ante/2", "apvd", "at/2",
+            "atqve", "avt", "avtem", "cvm/2", "cvm/1", "cvm/3", "cvr/1", "de", "deinde", "dum/2", "ego", "enim/2", 
+            "ergo", "es", "est", "et/2", "etiam", "etsi/2", "ex", "fio", "havd", "hic/1", "iam", "idem", "igitvr",
+            "ille", "in", "infra/2", "inter", "interim", "ipse", "is", "ita", "magis/2", "modo/1", "mox", "nam",
+            "ne/4", "nec", "necqve", "neqve", "nisi", "non", "nos", "o", "ob", "per", "possvm/1", "post/2", "pro/1",
+            "qvae", "qvam/1", "qvare/1", "qvi/1", "qvi/2","quia", "qvicvmqve/1", "qvidem", "qvilibet", "qvis/1",
+            "qvisnam", "qvisquam", "qvisqve/2", "qvisqvis/2", "qvo", "qvoniam", "sed", "si/2", "sic", "sive/1", "svb",
+            "svi/1", "svm/1", "svper/2", "suus", "tam", "tamen", "trans/2", "tv", "tvm", "vbi/1", "vel/1", "vero/2",
+            "vero/3", "vnvs", "vt/4", "#n/a"],
+
         source = document.getElementById("create-file-source").value,
         iterations = parseInt(document.getElementById("create-file-iterations").value),
         topics = parseInt(document.getElementById("create-file-topics").value),
@@ -133,8 +143,11 @@ function createConfigFile(){
     if (document.getElementById("create-file-default-english-stopwords").value === "true"){
         blacklist.push.apply(blacklist, englishStopwords);
     }
-    if (document.getElementById("create-file-default-english-stopwords").value === "true"){
+    if (document.getElementById("create-file-default-latin-stopwords").value === "true"){
         blacklist.push.apply(blacklist, latinStopwords);
+    }
+    if (document.getElementById("create-file-default-bede-stopwords").value === "true"){
+        blacklist.push.apply(blacklist, bedeLatinStopwords);
     }
 
     if(document.getElementById("chunking-number").checked) {
