@@ -718,21 +718,23 @@ function createWordCloud(topicNum, width, height) {
  */
     $("#word-cloud").empty();
     let svg_location = "#word-cloud", topic = topicNum;
-    let fill = d3.schemeCategory20;
-    size = width * height;
-    const mid = 150000;
-    const large = 600000;
-    const biggest = 100000;
-    if (size >= mid) fill = fill.concat(d3.schemeCategory10);
-    if (size >= large) fill = fill.concat(d3.schemeCategory20c);
-    if (size >= biggest) fill = fill.concat(d3.schemeCategory20b);
-    console.log(fill);
     let word_entries = model.topicWordInstancesDict[topic];
     //filtered_entries contains every element of word_entries with a count greater than 1
     let reduced_entries = d3.entries(Object.keys(word_entries).reduce(function (new_dict, key) {
         if (word_entries[key] > 1 && key.length > 2) new_dict[key] = word_entries[key];
         return new_dict;
     }, {}));
+    let fill = d3.schemeCategory20;
+    let size = width * height;
+    let len = reduced_entries.length;
+    console.log("size", size);
+    const mid = (size >= 250000 && len >= 200);
+    const large = (size >= 600000 && len >= 350);
+    const biggest = (size >= 1000000 && len >= 450);
+    if (mid) fill = fill.concat(d3.schemeCategory10);
+    if (large) fill = fill.concat(d3.schemeCategory20c);
+    if (biggest) fill = fill.concat(d3.schemeCategory20b);
+    console.log(fill);
     let xScale = d3.scaleLinear()
         .domain([0, d3.max(reduced_entries, function(d) {
             return d.value;
