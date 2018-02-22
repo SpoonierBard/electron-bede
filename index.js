@@ -1,4 +1,4 @@
-let fs = require("fs"),
+let //fs = require("fs"),
     model = {},
     input,
     currentLoaded = [0, 0]; //track from which word to which word we've loaded
@@ -652,6 +652,9 @@ function initializeHeatmaps() {
     $('#heatmap2Menu').find('option')[2].selected = true;
     document.getElementById("heatmap3Menu").innerHTML = topicDropdownHTML;
     $('#heatmap3Menu').find('option')[3].selected = true;
+    replaceHeatmap(1,heatmapTopic1);
+    replaceHeatmap(2,heatmapTopic2);
+    replaceHeatmap(3,heatmapTopic3);
 
     for (let iter = 1; iter < 4; iter++){
         let topic = eval("heatmapTopic" + iter);
