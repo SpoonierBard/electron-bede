@@ -727,14 +727,13 @@ function createWordCloud(topicNum, width, height) {
     let fill = d3.schemeCategory20;
     let size = width * height;
     let len = reduced_entries.length;
-    console.log("size", size);
     const mid = (size >= 250000 && len >= 200);
     const large = (size >= 600000 && len >= 350);
     const biggest = (size >= 1000000 && len >= 450);
     if (mid) fill = fill.concat(d3.schemeCategory10);
     if (large) fill = fill.concat(d3.schemeCategory20c);
     if (biggest) fill = fill.concat(d3.schemeCategory20b);
-    console.log(fill);
+    console.log(fill.length);
     let xScale = d3.scaleLinear()
         .domain([0, d3.max(reduced_entries, function(d) {
             return d.value;
@@ -784,6 +783,14 @@ function resizeWordCloud() {
     console.log(topic);
     createWordCloud(topic, width, height);
 }
+
+// function exportWordCloud() {
+//     console.log("export");
+//     let wordCloud = document.getElementById('word-cloud');
+//     let image = wordCloud.toDataURL();
+//     console.log(image);
+//     window.open('', image);
+// }
 /**
  * Loads new word cloud on dropdown change
  */
