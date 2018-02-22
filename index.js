@@ -1,9 +1,24 @@
 let fs = require("fs"),
     model = {},
-    input;
+    input,
+    currentLoaded = [0, 0]; //track from which word to which word we've loaded
 const colors  = ["#66c2a5", "#fc8d62", "#8da0cb"],
     scaledColors = ["hsl(161, 30%, 90%)", "hsl(17, 30%, 90%)", "hsl(222, 30%, 90%)", "hsl(161, 63%, 38%)", "hsl(17, 86%, 49%)", "hsl(222, 57%, 47%)"];
 
+
+/**
+ * Reloads main menu choice on button click; can be called from all other pages
+ */
+function reloadMainMenu(){
+    document.getElementById("welcome-page").style.display = "block";
+    document.getElementById("create-file-form").style.display = "none";
+    document.getElementById("file-upload").style.display = "none";
+    document.getElementById("tabs").style.display = "none";
+    document.getElementById("json-file").value="";
+    document.getElementById("json-file-label").innerText = "Browse";
+    document.getElementById("an-text-body").innerHTML = "";
+    model = {};
+}
 
 /**
  * Transitions from welcome page to config file creation page on button click
@@ -21,11 +36,17 @@ function loadFileChoice() {
     document.getElementById("file-upload").style.display = "block";
 }
 
-$(document).ready(function(){
-    $("#upload").attr("disabled", "disabled");
-    $("#json-file").change(function() {
-        $("#upload").removeAttr("disabled");
-    })
+/**
+ * Updates browse button with file name
+ */
+$(document).ready(function () {
+    $("#json-file").change(function (e) {
+        let fileName = '';
+        if (e.target.value)
+            fileName = e.target.value.split('\\').pop();
+        if (fileName)
+            document.getElementById("json-file-label").innerText = fileName;
+    });
 });
 /**
  * Creates a json file containing configuration parameters for LDA.py based on user choices
@@ -91,8 +112,8 @@ function createConfigFile(){
         "tam", "tamen", "trans", "tu", "tum", "ubi", "uel", "uero", "unus", "ut"],
 
         source = document.getElementById("create-file-source").value,
-        iterations = document.getElementById("create-file-iterations").value,
-        topics = document.getElementById("create-file-topics").value,
+        iterations = parseInt(document.getElementById("create-file-iterations").value),
+        topics = parseInt(document.getElementById("create-file-topics").value),
         outputname = document.getElementById("create-file-output").value,
         upperlimit = parseInt(document.getElementById("create-file-upperlimit").value) / 100,
         lowerlimit = parseInt(document.getElementById("create-file-lowerlimit").value) / 100,
@@ -101,9 +122,10 @@ function createConfigFile(){
         numberofdocuments,
         lengthofdocuments,
         splitstring,
-        alpha = document.getElementById("create-file-alpha").value,
-        beta = document.getElementById("create-file-beta").value;
+        alpha = parseFloat(document.getElementById("create-file-alpha").value),
+        beta = parseFloat(document.getElementById("create-file-beta").value);
 
+    console.log(upperlimit);
 
     if (document.getElementById("create-file-default-english-stopwords").value === "true"){
         blacklist.push.apply(blacklist, englishStopwords);
@@ -113,12 +135,12 @@ function createConfigFile(){
     }
 
     if(document.getElementById("chunking-number").checked) {
-        numberofdocuments = document.getElementById("create-file-number-documents").value;
+        numberofdocuments = parseInt(document.getElementById("create-file-number-documents").value);
         lengthofdocuments = "off";
         splitstring = "off";
     } else if (document.getElementById("chunking-length").checked) {
         numberofdocuments = "off";
-        lengthofdocuments = document.getElementById("create-file-length-documents").value;
+        lengthofdocuments = parseInt(document.getElementById("create-file-length-documents").value);
         splitstring = "off";
     } else if (document.getElementById("chunking-splitstring").checked) {
         numberofdocuments = "off";
@@ -152,6 +174,7 @@ function createConfigFile(){
             console.error(err);
         }
     });
+    reloadMainMenu();
 }
 
 /**
@@ -159,7 +182,6 @@ function createConfigFile(){
  */
 //Function to read data from uploaded json file. Called on button click.
 function loadFile() {
-    hideUploadScreen();
     let reader;
     reader = new FileReader();
     input = document.getElementById("json-file");
@@ -167,6 +189,7 @@ function loadFile() {
         alert("Please select a file before clicking upload");
     }
     else {
+        hideUploadScreen();
         reader.onload = (function() {
             model = JSON.parse(reader.result);
             createMetadata();
@@ -285,6 +308,7 @@ $( function() {
     dialog.dialog({
             autoOpen: false,
             height: 400,
+            modal: true,
             width: 350,
             overflow: scroll
         }
@@ -342,9 +366,9 @@ $( function() {
 
 /**
  * Initializes annotated text tab with no topics selected
- * @param {number} startIndex -- //TODO: once this is used, say what it does
  */
-function createAnnotatedText(startIndex) {
+
+function createAnnotatedText() {
     let topicDropdownHTML = "<option disabled selected>Select Topic</option>";
 
     //create three identical selectors for three possible topic comparisons
@@ -355,16 +379,25 @@ function createAnnotatedText(startIndex) {
     document.getElementById("an-text-topic-select-2").innerHTML = topicDropdownHTML;
     document.getElementById("an-text-topic-select-3").innerHTML = topicDropdownHTML;
 
-    for(let i = 1; i < 4; i++) {
+    for (let i = 1; i < 4; i++) {
         d3.select("#an-text-topic-select-" + i)
-            .style("background", function () {return colors[i - 1]; });
+            .style("background", function () {
+                return colors[i - 1];
+            });
     }
+    loadAnnotatedText(currentLoaded[0]);
+    d3.select('#tab-3')
+        .on('scroll', scrollAnnotatedText);
+}
 
+function loadAnnotatedText(startIndex, endIndex=(startIndex + 500)) {
+    d3.select("#an-text-body").selectAll("span").remove();
     //iterate through full text and add each word as own span with topic as class
     let puncTracker = 0, //index of punctuation
         puncLocation = 0, //index of puncLocation
         puncLocTracker = 0, //where in text
         newlineTracker = 0, //index of newlines
+        startTracker = 0, //track how far into text we are
         wordToApp;
     for (let docInText in model.wordsByLocationWithStopwords) {
         for (let word in model.wordsByLocationWithStopwords[docInText]) {
@@ -379,18 +412,33 @@ function createAnnotatedText(startIndex) {
                 newlineTracker += 1;
             }
             puncLocTracker += 1;
-            d3.select("#an-text-body")
-                .append("span")
-                .html(wordToApp)
-                // .text(wordToApp)
-                .attr("class", "topic-" + model.topicsByLocationWithStopwords[docInText][word])
-                .on("mouseover", onHover)
-                .on("mouseout", offHover);
-             d3.select('#an-text-body')
-                .append("span")
-                .text(" ");
+            if (startIndex <= startTracker && startTracker <= endIndex) {
+                d3.select("#an-text-body")
+                    .append("span")
+                    .html(wordToApp)
+                    // .text(wordToApp)
+                    .attr("class", "topic-" + model.topicsByLocationWithStopwords[docInText][word])
+                    .on("mouseover", onHover)
+                    .on("mouseout", offHover);
+                d3.select('#an-text-body')
+                    .append("span")
+                    .text(" ");
+
+            }
+            startTracker += 1;
         }
     }
+    currentLoaded[1] = endIndex;
+}
+
+function scrollAnnotatedText() {
+    let direction = d3.event.wheelDelta < 0 ? 'down' : 'up';
+    if (direction === 'up') {
+        loadAnnotatedText(currentLoaded[0] + 11, currentLoaded[1] + 11);
+    } else {
+        loadAnnotatedText(currentLoaded[0] - 11, currentLoaded[1] - 11);
+    }
+    onSelect();
 }
 
 /**
@@ -508,17 +556,19 @@ $(document).ready(function() {
      * Reloads heatmaps taking into account the new smoothing constant on dropdown change
      */
     $("#smoothingSelect").change(function () {
-        heatmapSmoothing = parseInt($("#smoothingSelect").val());
-        replaceHeatmap(1,heatmapTopic1);
-        replaceHeatmap(2,heatmapTopic2);
-        replaceHeatmap(3,heatmapTopic3);
+        if ($("#smoothingBox").is(':checked')) {
+            heatmapSmoothing = parseInt($("#smoothingSelect").val());
+            replaceHeatmap(1, heatmapTopic1);
+            replaceHeatmap(2, heatmapTopic2);
+            replaceHeatmap(3, heatmapTopic3);
+        }
     });
 });
 
 /**
  * Creates an array representing the distribution of a particular topic across corpus
  * @param {number} topic -- topic whose distribution array will represent
- * @returns {number[]} -- array representing topic distribution across corpus
+ * @returns {{array: number[], binSize: number}} -- array representing topic distribution across corpus
  */
 function createPrevalenceArray(topic) {
     let innerArray = [];
@@ -555,7 +605,7 @@ function createPrevalenceArray(topic) {
         }
     }
     prevalenceArray = [];
-    return binnedArray;
+    return {"array": binnedArray, "binSize": binSize};
 }
 
 /**
@@ -614,10 +664,12 @@ function initializeHeatmaps() {
         });
         svg.style("height", 50);
 
-        let binnedArray = createPrevalenceArray(topic);
+        let binnedArrayinfo = createPrevalenceArray(topic),
+            binnedArray = binnedArrayinfo["array"],
+            binnedArrayBinSize = binnedArrayinfo["binSize"];
         binnedArray = smoothArray(binnedArray, heatmapSmoothing);
 
-        drawRectangles(svg, binnedArray, iter);
+        drawRectangles(svg, binnedArray, binnedArrayBinSize, iter);
     }
 }
 
@@ -644,9 +696,10 @@ function changeTop5Words(heatmapNum, topic) {
  * Draws rectangles representing the values in an array
  * @param svg -- where to draw the rectangles
  * @param {number[]} dataset -- array representing topic distribution
+ * @param binSize -- size of bins in array
  * @param {number} heatmapNum -- which heatmap to draw the rectangles in
  */
-function drawRectangles(svg, dataset, heatmapNum) {
+function drawRectangles(svg, dataset, binSize, heatmapNum) {
     let colorScale = d3.scaleLinear()
         .domain([d3.min(dataset),
             d3.max(dataset)])
@@ -669,7 +722,9 @@ function drawRectangles(svg, dataset, heatmapNum) {
             })
         })
         .on("click", function(d, i){
-            console.log(i/dataset.length);
+            $("#tabs").tabs("option", "active", 2);
+            loadAnnotatedText(i * binSize);
+            currentLoaded[0] = i * binSize;
         })
 }
 
@@ -681,9 +736,11 @@ function drawRectangles(svg, dataset, heatmapNum) {
 function replaceHeatmap(heatmapNum, topic) {
     var svg = d3.select("#heatmapSVG" + heatmapNum);
     svg.html("");
-    let heatmapArray = createPrevalenceArray(topic);
+    let heatmapArrayinfo = createPrevalenceArray(topic),
+        heatmapArray = heatmapArrayinfo["array"],
+        heatmapBinSize = heatmapArrayinfo["binSize"];
     heatmapArray = smoothArray(heatmapArray, heatmapSmoothing);
-    drawRectangles(svg, heatmapArray, heatmapNum);
+    drawRectangles(svg, heatmapArray, heatmapBinSize, heatmapNum);
     changeTop5Words(heatmapNum, topic);
 }
 
@@ -707,7 +764,7 @@ function initializeWordCloudTab() {
         sizeDropdownHTMLWordCloud = sizeDropdownHTMLWordCloud + "<option class=\select-size-" + i + "\" value=\"" + i + "\">" + size + "</option>"
     }
     document.getElementById("word-cloud-topic-select").innerHTML = topicDropdownHTMLWordCloud;
-    let width = window.innerWidth - 230;
+    let width = window.innerWidth - 270;
     let height = window.innerHeight - 160;
     createWordCloud(0, width, height);
 }
@@ -774,7 +831,7 @@ function createWordCloud(topicNum, width, height) {
 }
 
 function resizeWordCloud() {
-    let width = window.innerWidth - 230;
+    let width = window.innerWidth - 270;
     let height = window.innerHeight - 160;
     let topic = $("#word-cloud-topic-select").find("option:selected").val();
     if (topic == -1) {
@@ -798,7 +855,7 @@ $(document).ready (function () {
     $("#word-cloud-topic-select").change(function () {
         let topic = $("#word-cloud-topic-select").find("option:selected").val();
         //let size = parseInt($("#cloud-size").find("option:selected").val());
-        let width = window.innerWidth - 230;
+        let width = window.innerWidth - 270;
         let height = window.innerHeight - 160;
         createWordCloud(topic, width, height)
     });

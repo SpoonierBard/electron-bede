@@ -3,8 +3,8 @@
 :focus {outline:0 !important;}
 
 body {
-    width: 100vw;
-    height: 95vh;
+    width: 95vw;
+    height: 90vh;
 }
 #webview {
     position: absolute;
@@ -23,6 +23,9 @@ input[type="file"] {
     display: none;
 }
 
+input[type="number"] {
+    width: 50px;
+}
 .centered {
     position: absolute;
     top: 50%;
@@ -30,6 +33,9 @@ input[type="file"] {
     transform: translate(-50%, -50%);
 }
 
+.ui-button {
+    margin-bottom: 1em;
+}
 .styled-select {
     background: #e6e6e6 url("js/jquery-ui-1.12.1.custom/images/ui-bg_glass_75_e6e6e6_1x400.png") 50% 50% repeat-x;
     height: 29px;
@@ -54,6 +60,7 @@ input[type="file"] {
 
 #tabs {
     display: none;
+    position: relative;
 }
 
 #progressbar {
@@ -70,10 +77,6 @@ input[type="file"] {
 #create-file-form {
     display: none;
 }
-#tab-3 {
-    /*font-family: monospace;*/
-    /*padding: 2%;*/
-}
 
 .ui-tabs{
     padding: 0;
@@ -81,12 +84,15 @@ input[type="file"] {
     width: 100%;
 }
 .ui-tabs-vertical .ui-tabs-nav {
-    padding: .2em .1em .2em .2em;
+    padding: .2em .1em 3em .2em;
     float: left;
     width: 10em;
     height: 100%;
     }
 
+#ui-id-4 {
+    padding-bottom: 0;
+}
 .ui-tabs-vertical .ui-tabs-nav li {
     clear: left;
     width: 100%;
@@ -116,15 +122,24 @@ input[type="file"] {
 
 .ui-tabs-vertical .ui-tabs-panel {
     padding: 1em;
-    overflow: scroll;
+    margin-left: 11em;
     height: 100%;
+    overflow: hidden;
     }
 
 
-select {
+.scrollable {
     overflow: scroll;
 }
 
+#progressbar {
+    width: 80%;
+}
+
+#word-cloud {
+    height: 80%;
+    width: 100%;
+}
 #fixed-tools {
     margin-top: 0;
     position: fixed;
@@ -136,10 +151,29 @@ select {
     padding-bottom: 12px;
 }
 
-#an-text-body {
-    margin-top: 125px;
+#json-file-label {
+    width: 279px;
 }
 
+#json-file-main-menu{
+    width: 180px;
+}
+
+#upload {
+    width: 130px;
+    float: right;
+}
+#an-text-body {
+    height: 80%;
+    margin-top: 150px;
+}
+
+#tab-3 {
+    overflow: scroll;
+}
+#metadata-topic-preview-text {
+    height: 11em;
+}
 
 /* Tooltip styles developed by Chris Bracco*/
 [data-tooltip] {
@@ -211,4 +245,9 @@ select {
 .bottomMargin {
     margin-top: 20px;
     margin-bottom: 10px;
+}
+
+.config-form {
+    display: inline-grid;
+    padding: 5px;
 }
