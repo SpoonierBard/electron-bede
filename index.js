@@ -1,7 +1,8 @@
-let //fs = require("fs"),
+let fs = require("fs"),
     model = {},
     input,
-    currentLoaded = [0, 0]; //track from which word to which word we've loaded
+    currentLoaded = [0, 0], //track from which word to which word we've loaded
+    lastScrollPosition = 0;
 const colors  = ["#66c2a5", "#fc8d62", "#8da0cb"],
     scaledColors = ["hsl(161, 30%, 90%)", "hsl(17, 30%, 90%)", "hsl(222, 30%, 90%)", "hsl(161, 63%, 38%)", "hsl(17, 86%, 49%)", "hsl(222, 57%, 47%)"];
 
@@ -428,17 +429,35 @@ function loadAnnotatedText(startIndex, endIndex=(startIndex + 500)) {
             startTracker += 1;
         }
     }
+    currentLoaded[0] = startIndex;
     currentLoaded[1] = endIndex;
 }
 
 function scrollAnnotatedText() {
-    let direction = d3.event.wheelDelta < 0 ? 'down' : 'up';
-    if (direction === 'up') {
-        loadAnnotatedText(currentLoaded[0] + 11, currentLoaded[1] + 11);
+    //TODO: find a way for this to not always be 0 :(
+    let newScrollPosition = window.scrollY;
+    if (newScrollPosition >= lastScrollPosition){
+        //upward : load previous text
+        currentLoaded[0] -= 11;
+        currentLoaded[1] -= 11;
     } else {
-        loadAnnotatedText(currentLoaded[0] - 11, currentLoaded[1] - 11);
+        //downward : load next text
+        currentLoaded[0] += 11;
+        currentLoaded[1] += 11;
     }
+    lastScrollPosition = newScrollPosition;
+
+    // let direction = d3.event.wheelDelta < 0 ? 'down' : 'up';
+    // if (direction == 'up') {
+    //     currentLoaded[0] += 11;
+    //     currentLoaded[1] += 11;
+    // } else {
+    //     currentLoaded[0] -= 11;
+    //     currentLoaded[1] -= 11;
+    // }
+    loadAnnotatedText(currentLoaded[0], currentLoaded[1]);
     onSelect();
+    console.log(currentLoaded);
 }
 
 /**
