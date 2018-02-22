@@ -432,11 +432,12 @@ function loadAnnotatedText(startIndex, endIndex=(startIndex + 500)) {
 
 function scrollAnnotatedText() {
     let direction = d3.event.wheelDelta < 0 ? 'down' : 'up';
-    if (direction = 'down') {
+    if (truth = (direction == 'up')) {
         loadAnnotatedText(currentLoaded[0] + 11, currentLoaded[1] + 11);
     } else {
         loadAnnotatedText(currentLoaded[0] - 11, currentLoaded[1] - 11);
     }
+    onSelect();
 }
 
 /**
