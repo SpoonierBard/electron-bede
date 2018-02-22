@@ -1,9 +1,10 @@
 let fs = require("fs"),
     model = {},
     input,
-    currentLoaded = [0, 0]; //track from which word to which word we've loaded
+    currentLoaded = [0, 0], //track from which word to which word we've loaded
+    lastScrollPosition = 0;
 const colors  = ["#66c2a5", "#fc8d62", "#8da0cb"],
-    scaledColors = ["hsl(161, 30%, 90%)", "hsl(17, 30%, 90%)", "hsl(222, 30%, 90%)", "hsl(161, 63%, 38%)", "hsl(17, 86%, 49%)", "hsl(222, 57%, 47%)"];
+    scaledColors = ["hsl(161, 30%, 90%)", "hsl(17, 30%, 90%)", "hsl(222, 30%, 90%)", "hsl(70, 0%, 90%)", "hsl(161, 63%, 38%)", "hsl(17, 86%, 49%)", "hsl(222, 57%, 47%)", "hsl(70, 0%, 20%)"];
 
 
 /**
@@ -17,6 +18,7 @@ function reloadMainMenu(){
     document.getElementById("json-file").value="";
     document.getElementById("json-file-label").innerText = "Browse";
     document.getElementById("an-text-body").innerHTML = "";
+    currentLoaded = [0, 0];
     model = {};
 }
 
@@ -111,6 +113,16 @@ function createConfigFile(){
         "quisque", "quisquis", "quo", "quoniam", "sed", "si", "sic", "sive", "sub", "sui", "sum", "super", "suus",
         "tam", "tamen", "trans", "tu", "tum", "ubi", "uel", "uero", "unus", "ut"],
 
+        bedeLatinStopwords = ["ab", "ac/1", "ad/2", "adhic", "aliqvi", "aliqvis", "an", "ante/2", "apvd", "at/2",
+            "atqve", "avt", "avtem", "cvm/2", "cvm/1", "cvm/3", "cvr/1", "de", "deinde", "dum/2", "ego", "enim/2", 
+            "ergo", "es", "est", "et/2", "etiam", "etsi/2", "ex", "fio", "havd", "hic/1", "iam", "idem", "igitvr",
+            "ille", "in", "infra/2", "inter", "interim", "ipse", "is", "ita", "magis/2", "modo/1", "mox", "nam",
+            "ne/4", "nec", "necqve", "neqve", "nisi", "non", "nos", "o", "ob", "per", "possvm/1", "post/2", "pro/1",
+            "qvae", "qvam/1", "qvare/1", "qvi/1", "qvi/2","quia", "qvicvmqve/1", "qvidem", "qvilibet", "qvis/1",
+            "qvisnam", "qvisquam", "qvisqve/2", "qvisqvis/2", "qvo", "qvoniam", "sed", "si/2", "sic", "sive/1", "svb",
+            "svi/1", "svm/1", "svper/2", "suus", "tam", "tamen", "trans/2", "tv", "tvm", "vbi/1", "vel/1", "vero/2",
+            "vero/3", "vnvs", "vt/4", "#n/a"],
+
         source = document.getElementById("create-file-source").value,
         iterations = parseInt(document.getElementById("create-file-iterations").value),
         topics = parseInt(document.getElementById("create-file-topics").value),
@@ -122,6 +134,7 @@ function createConfigFile(){
         numberofdocuments,
         lengthofdocuments,
         splitstring,
+        usingcsv,
         alpha = parseFloat(document.getElementById("create-file-alpha").value),
         beta = parseFloat(document.getElementById("create-file-beta").value);
 
@@ -130,22 +143,33 @@ function createConfigFile(){
     if (document.getElementById("create-file-default-english-stopwords").value === "true"){
         blacklist.push.apply(blacklist, englishStopwords);
     }
-    if (document.getElementById("create-file-default-english-stopwords").value === "true"){
+    if (document.getElementById("create-file-default-latin-stopwords").value === "true"){
         blacklist.push.apply(blacklist, latinStopwords);
+    }
+    if (document.getElementById("create-file-default-bede-stopwords").value === "true"){
+        blacklist.push.apply(blacklist, bedeLatinStopwords);
     }
 
     if(document.getElementById("chunking-number").checked) {
         numberofdocuments = parseInt(document.getElementById("create-file-number-documents").value);
         lengthofdocuments = "off";
         splitstring = "off";
+        usingcsv = "off";
     } else if (document.getElementById("chunking-length").checked) {
         numberofdocuments = "off";
         lengthofdocuments = parseInt(document.getElementById("create-file-length-documents").value);
         splitstring = "off";
+        usingcsv = "off";
     } else if (document.getElementById("chunking-splitstring").checked) {
         numberofdocuments = "off";
         lengthofdocuments = "off";
         splitstring = document.getElementById("create-file-split-string").value;
+        usingcsv = "off";
+    } else if (document.getElementById("chunking-csv").checked) {
+        numberofdocuments = "off";
+        lengthofdocuments = "off";
+        splitstring = "off";
+        usingcsv = "on";
     }
 
     let config = {}, reqparam = {}, stoptions = {}, choptions = {}, hyperparameters = {};
@@ -160,6 +184,7 @@ function createConfigFile(){
     choptions["number of documents"] = numberofdocuments;
     choptions["length of documents"] = lengthofdocuments;
     choptions["split string"] = splitstring;
+    choptions["using csv"] = usingcsv;
     hyperparameters["alpha"] = alpha;
     hyperparameters["beta"] = beta;
 
@@ -260,15 +285,20 @@ function createMetadata(){
         }
     }
     //dynamically create injectable HTML with dropdown options for each topic
-    let topicDropdownHTMLmetadata = "<option disabled selected='selected' value='-1'>Select topic to display</option>";
-    let topicDropdownHTMLnickname = "<option disabled selected>Select topic to nickname</option>";
+    let topicDropdownHTMLmetadata = "";
 
     for (let i = 0; i < model.topicWordInstancesDict.length; i++) {
         topicDropdownHTMLmetadata = topicDropdownHTMLmetadata + "<option class=\"select-topic-" + i + "\" value=\"" + i + "\">" + model.nicknames[i] + "</option>";
-        topicDropdownHTMLnickname = topicDropdownHTMLnickname + "<option class=\"select-topic-" + i + "\" value=\"" + i + "\">" + model.nicknames[i] + "</option>";
     }
     document.getElementById("metadata-topic-select").innerHTML = topicDropdownHTMLmetadata;
-    document.getElementById("nickname-topic-select").innerHTML = topicDropdownHTMLnickname;
+    $('#metadata-topic-select').find('option')[0].selected = true;
+
+    let topicWordList = Object.keys(model.topicWordInstancesDict[0]);
+    topicWordList = topicWordList.sort(function (a, b) {
+        return model.topicWordInstancesDict[0][b] -
+            model.topicWordInstancesDict[0][a];
+    });
+    document.getElementById("metadata-topic-preview-text").textContent = topicWordList.join(", ");
 }
 
 /**
@@ -324,7 +354,7 @@ $( function() {
  */
 $( function() {
     let dialog, form,
-        topic = $( "#nickname-topic-select"),
+        topic = $( "#metadata-topic-select"),
         nickname = $( "#nickname-input" );
 
     dialog = $( "#nickname-dialog-form" ).dialog({
@@ -378,6 +408,8 @@ function createAnnotatedText() {
     document.getElementById("an-text-topic-select-1").innerHTML = topicDropdownHTML;
     document.getElementById("an-text-topic-select-2").innerHTML = topicDropdownHTML;
     document.getElementById("an-text-topic-select-3").innerHTML = topicDropdownHTML;
+    document.getElementById("an-text-scrollbar-select").innerHTML = topicDropdownHTML;
+    $('#an-text-scrollbar-select').find('option')[1].selected = true;
 
     for (let i = 1; i < 4; i++) {
         d3.select("#an-text-topic-select-" + i)
@@ -428,17 +460,35 @@ function loadAnnotatedText(startIndex, endIndex=(startIndex + 500)) {
             startTracker += 1;
         }
     }
+    currentLoaded[0] = startIndex;
     currentLoaded[1] = endIndex;
 }
 
 function scrollAnnotatedText() {
-    let direction = d3.event.wheelDelta < 0 ? 'down' : 'up';
-    if (direction === 'up') {
-        loadAnnotatedText(currentLoaded[0] + 11, currentLoaded[1] + 11);
+    //TODO: find a way for this to not always be 0 :(
+    let newScrollPosition = window.scrollY;
+    if (newScrollPosition >= lastScrollPosition){
+        //upward : load previous text
+        currentLoaded[0] -= 11;
+        currentLoaded[1] -= 11;
     } else {
-        loadAnnotatedText(currentLoaded[0] - 11, currentLoaded[1] - 11);
+        //downward : load next text
+        currentLoaded[0] += 11;
+        currentLoaded[1] += 11;
     }
+    lastScrollPosition = newScrollPosition;
+
+    // let direction = d3.event.wheelDelta < 0 ? 'down' : 'up';
+    // if (direction == 'up') {
+    //     currentLoaded[0] += 11;
+    //     currentLoaded[1] += 11;
+    // } else {
+    //     currentLoaded[0] -= 11;
+    //     currentLoaded[1] -= 11;
+    // }
+    loadAnnotatedText(currentLoaded[0], currentLoaded[1]);
     onSelect();
+    console.log(currentLoaded);
 }
 
 /**
@@ -514,7 +564,8 @@ let prevalenceArray = [],
     heatmapSmoothing = 10,
     heatmapTopic1 = 0,
     heatmapTopic2 = 1,
-    heatmapTopic3 = 2;
+    heatmapTopic3 = 2,
+    heatmapTopic4 = 0;
 
 
 
@@ -533,6 +584,11 @@ $(document).ready(function() {
     $( "#heatmap3Menu" ).change(function () {
         heatmapTopic3 = $("#heatmap3Menu").find("option:selected").val();
         replaceHeatmap(3, heatmapTopic3);
+    });
+    $( "#an-text-scrollbar-select" ).change(function () {
+        heatmapTopic4 = $("#an-text-scrollbar-select").find("option:selected").val();
+        console.log(heatmapTopic4);
+        replaceHeatmap(4, heatmapTopic4);
     });
     /**
      * Reloads heatmaps taking into account whether a smoothing constant is being applied on checkbox change
@@ -652,17 +708,27 @@ function initializeHeatmaps() {
     $('#heatmap2Menu').find('option')[2].selected = true;
     document.getElementById("heatmap3Menu").innerHTML = topicDropdownHTML;
     $('#heatmap3Menu').find('option')[3].selected = true;
+    replaceHeatmap(1,heatmapTopic1);
+    replaceHeatmap(2,heatmapTopic2);
+    replaceHeatmap(3,heatmapTopic3);
 
-    for (let iter = 1; iter < 4; iter++){
+    for (let iter = 1; iter < 5; iter++){
         let topic = eval("heatmapTopic" + iter);
 
-        changeTop5Words(iter, (iter - 1));
-
         let svg = d3.select("#heatmapSVG" + iter);
-        svg.style("width", function(){
-            return heatmapWidthPx*1.5 + "px"
-        });
-        svg.style("height", 50);
+
+        if (iter === 4) {
+            svg.style("height", function(){
+                return heatmapWidthPx*1.5 + "px"
+            });
+            svg.style("width", 50)
+        } else {
+            svg.style("width", function () {
+                return heatmapWidthPx * 1.5 + "px"
+            });
+            svg.style("height", 50);
+            changeTop5Words(iter, (iter - 1));
+        }
 
         let binnedArrayinfo = createPrevalenceArray(topic),
             binnedArray = binnedArrayinfo["array"],
@@ -671,6 +737,8 @@ function initializeHeatmaps() {
 
         drawRectangles(svg, binnedArray, binnedArrayBinSize, iter);
     }
+
+
 }
 
 /**
@@ -703,35 +771,66 @@ function drawRectangles(svg, dataset, binSize, heatmapNum) {
     let colorScale = d3.scaleLinear()
         .domain([d3.min(dataset),
             d3.max(dataset)])
-        .range([scaledColors[heatmapNum - 1], scaledColors[heatmapNum + 2]])
-
-    svg.selectAll("rect")
-        .data(dataset)
-        .enter()
-        .append("rect")
-        .attr("width", function() {return heatmapResPx})
-        .attr("height", 50)
-        .attr("y", 0)
-        .attr("x", function(d,i) {return i * heatmapResPx})
-        .style("fill", function(d) {return colorScale(d);})
-        .on("mouseover", function(d){
-            d3.select(this).style("fill", "black");
-        })
-        .on("mouseout", function(d){
-            d3.select(this).style("fill", function(d) {return colorScale(d);
+        .range([scaledColors[heatmapNum - 1], scaledColors[heatmapNum + 3]]);
+    if (heatmapNum === 4) {
+        svg.selectAll("rect")
+            .data(dataset)
+            .enter()
+            .append("rect")
+            .attr("height", function() {return heatmapResPx})
+            .attr("width", 50)
+            .attr("y", 0)
+            .attr("x", function(d,i) {return i * heatmapResPx})
+            .style("fill", function(d) {return colorScale(d);})
+            .on("mouseover", function(d){
+                d3.select(this).style("fill", "black");
             })
-        })
-        .on("click", function(d, i){
-            $("#tabs").tabs("option", "active", 2);
-            loadAnnotatedText(i * binSize);
-            currentLoaded[0] = i * binSize;
-        })
+            .on("mouseout", function(d){
+                d3.select(this).style("fill", function(d) {return colorScale(d);
+                })
+            })
+            .on("click", function(d, i){
+                $("#tabs").tabs("option", "active", 2);
+                console.log(i, i*binSize);
+                loadAnnotatedText(i * binSize);
+                currentLoaded[0] = i * binSize;
+            })
+    } else {
+        svg.selectAll("rect")
+            .data(dataset)
+            .enter()
+            .append("rect")
+            .attr("width", function () {
+                return heatmapResPx
+            })
+            .attr("height", 50)
+            .attr("y", 0)
+            .attr("x", function (d, i) {
+                return i * heatmapResPx
+            })
+            .style("fill", function (d) {
+                return colorScale(d);
+            })
+            .on("mouseover", function (d) {
+                d3.select(this).style("fill", "black");
+            })
+            .on("mouseout", function (d) {
+                d3.select(this).style("fill", function (d) {
+                    return colorScale(d);
+                })
+            })
+            .on("click", function (d, i) {
+                $("#tabs").tabs("option", "active", 2);
+                loadAnnotatedText(i * binSize);
+                currentLoaded[0] = i * binSize;
+            })
+    }
 }
 
 /**
  * Reloads a given heatmap with a new topic
  * @param {number} heatmapNum -- which heatmap to update
- * @param {number] topic -- which topic to load
+ * @param {number} topic -- which topic to load
  */
 function replaceHeatmap(heatmapNum, topic) {
     var svg = d3.select("#heatmapSVG" + heatmapNum);
@@ -741,7 +840,7 @@ function replaceHeatmap(heatmapNum, topic) {
         heatmapBinSize = heatmapArrayinfo["binSize"];
     heatmapArray = smoothArray(heatmapArray, heatmapSmoothing);
     drawRectangles(svg, heatmapArray, heatmapBinSize, heatmapNum);
-    changeTop5Words(heatmapNum, topic);
+    if (heatmapNum < 4) changeTop5Words(heatmapNum, topic);
 }
 
 
