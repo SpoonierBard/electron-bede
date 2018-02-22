@@ -114,7 +114,7 @@ function createConfigFile(){
         "tam", "tamen", "trans", "tu", "tum", "ubi", "uel", "uero", "unus", "ut"],
 
         bedeLatinStopwords = ["ab", "ac/1", "ad/2", "adhic", "aliqvi", "aliqvis", "an", "ante/2", "apvd", "at/2",
-            "atqve", "avt", "avtem", "cvm/2", "cvm/1", "cvm/3", "cvr/1", "de", "deinde", "dum/2", "ego", "enim/2", 
+            "atqve", "avt", "avtem", "cvm/2", "cvm/1", "cvm/3", "cvr/1", "de", "deinde", "dum/2", "ego", "enim/2",
             "ergo", "es", "est", "et/2", "etiam", "etsi/2", "ex", "fio", "havd", "hic/1", "iam", "idem", "igitvr",
             "ille", "in", "infra/2", "inter", "interim", "ipse", "is", "ita", "magis/2", "modo/1", "mox", "nam",
             "ne/4", "nec", "necqve", "neqve", "nisi", "non", "nos", "o", "ob", "per", "possvm/1", "post/2", "pro/1",
@@ -488,7 +488,6 @@ function scrollAnnotatedText() {
     // }
     loadAnnotatedText(currentLoaded[0], currentLoaded[1]);
     onSelect();
-    console.log(currentLoaded);
 }
 
 /**
@@ -778,9 +777,9 @@ function drawRectangles(svg, dataset, binSize, heatmapNum) {
             .enter()
             .append("rect")
             .attr("height", function() {return heatmapResPx})
-            .attr("width", 50)
-            .attr("y", 0)
-            .attr("x", function(d,i) {return i * heatmapResPx})
+            .attr("width", 30)
+            .attr("x", 0)
+            .attr("y", function(d,i) {return i * heatmapResPx})
             .style("fill", function(d) {return colorScale(d);})
             .on("mouseover", function(d){
                 d3.select(this).style("fill", "black");
@@ -791,9 +790,9 @@ function drawRectangles(svg, dataset, binSize, heatmapNum) {
             })
             .on("click", function(d, i){
                 $("#tabs").tabs("option", "active", 2);
-                console.log(i, i*binSize);
+                console.log(i, i * binSize);
                 loadAnnotatedText(i * binSize);
-                currentLoaded[0] = i * binSize;
+                //currentLoaded[0] = i * binSize;
             })
     } else {
         svg.selectAll("rect")

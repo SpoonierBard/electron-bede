@@ -151,6 +151,14 @@ input[type="number"] {
     padding-bottom: 12px;
 }
 
+#an-text-scrollbar {
+    margin-top: 0;
+    position: fixed;
+    top: 0;
+    right: 0;
+    padding: 2em 0 2em 2em;
+}
+
 #json-file-label {
     width: 279px;
 }
