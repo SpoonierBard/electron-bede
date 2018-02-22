@@ -705,55 +705,29 @@ function initializeWordCloudTab() {
     for (let i = 0; i < sizeArray.length; i++) {
         size = sizeArray[i];
         sizeDropdownHTMLWordCloud = sizeDropdownHTMLWordCloud + "<option class=\select-size-" + i + "\" value=\"" + i + "\">" + size + "</option>"
-        console.log(i);
     }
     document.getElementById("word-cloud-topic-select").innerHTML = topicDropdownHTMLWordCloud;
-    document.getElementById("cloud-size").innerHTML = sizeDropdownHTMLWordCloud;
-    createWordCloud(0, 1);
+    let width = window.innerWidth - 230;
+    let height = window.innerHeight - 170;
+    createWordCloud(0, width, height);
 }
-function createWordCloud(topicNum, size) {
+function createWordCloud(topicNum, width, height) {
+    console.log("hi");
+    console.log(width);
+    console.log(height);
 /**
  * Reloads word cloud based on a new topic
  * @param {number} topicNum -- topic to be displayed
  */
     $("#word-cloud").empty();
-    let width = 0;
-    let height = 0;
-    let numWords = 0;
-    switch (size) {
-        case 0:
-            width = 500;
-            height = 500;
-            numWords = 400;
-            break;
-        case 1:
-            width = 600;
-            height = 600;
-            numWords = 600;
-            break;
-        case 2:
-            width = 1000;
-            height = 650;
-            numWords = 2000;
-            break;
-        default:
-            console.log("defualt");
-            width = 600;
-            height = 600;
-            numWords = 600;
-    }
     let svg_location = "#word-cloud", topic = topicNum;
-    //const width = 500//$(document).width();
-    //const height = 600//$(document).height();
-
     let fill = d3.schemeCategory20;
     let word_entries = model.topicWordInstancesDict[topic];
     //filtered_entries contains every element of word_entries with a count greater than 1
-    let filtered_entries = d3.entries(Object.keys(word_entries).reduce(function (new_dict, key) {
+    let reduced_entries = d3.entries(Object.keys(word_entries).reduce(function (new_dict, key) {
         if (word_entries[key] > 1 && key.length > 2) new_dict[key] = word_entries[key];
         return new_dict;
     }, {}));
-    reduced_entries = filtered_entries.slice(0,Math.min(filtered_entries.length, numWords));
     let xScale = d3.scaleLinear()
         .domain([0, d3.max(reduced_entries, function(d) {
             return d.value;
@@ -793,24 +767,30 @@ function createWordCloud(topicNum, size) {
     d3.layout.cloud().stop();
 }
 
+function resizeWordCloud() {
+    console.log("resize!!");
+    let width = window.innerWidth - 230;
+    let height = window.innerHeight - 170;
+    console.log(width);
+    console.log(height);
+    let topic = $("#word-cloud-topic-select").find("option:selected").val();
+    if (topic == -1) {
+        topic = 0;
+    }
+    console.log(topic);
+    createWordCloud(topic, width, height);
+}
 /**
  * Loads new word cloud on dropdown change
  */
 $(document).ready (function () {
     $("#word-cloud-topic-select").change(function () {
         let topic = $("#word-cloud-topic-select").find("option:selected").val();
-        let size = parseInt($("#cloud-size").find("option:selected").val());
-        createWordCloud(topic, size)
-    });
-    $("#cloud-size").change(function () {
-        let topic = $("#word-cloud-topic-select").find("option:selected").val();
-        let size = parseInt($("#cloud-size").find("option:selected").val());
-        console.log(topic);
-        if (parseInt(topic) === -1) {
-            createWordCloud(0, size);
-        } else {
-            createWordCloud(topic, size);
-        }
+        //let size = parseInt($("#cloud-size").find("option:selected").val());
+        let width = window.innerWidth - 230;
+        let height = window.innerHeight - 170;
+        //console.log(width);
+        //console.log(height);
+        createWordCloud(topic, width, height)
     });
 });
-
