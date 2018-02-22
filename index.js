@@ -124,6 +124,7 @@ function createConfigFile(){
         numberofdocuments,
         lengthofdocuments,
         splitstring,
+        usingcsv,
         alpha = parseFloat(document.getElementById("create-file-alpha").value),
         beta = parseFloat(document.getElementById("create-file-beta").value);
 
@@ -140,14 +141,22 @@ function createConfigFile(){
         numberofdocuments = parseInt(document.getElementById("create-file-number-documents").value);
         lengthofdocuments = "off";
         splitstring = "off";
+        usingcsv = "off";
     } else if (document.getElementById("chunking-length").checked) {
         numberofdocuments = "off";
         lengthofdocuments = parseInt(document.getElementById("create-file-length-documents").value);
         splitstring = "off";
+        usingcsv = "off";
     } else if (document.getElementById("chunking-splitstring").checked) {
         numberofdocuments = "off";
         lengthofdocuments = "off";
         splitstring = document.getElementById("create-file-split-string").value;
+        usingcsv = "off";
+    } else if (document.getElementById("chunking-csv").checked) {
+        numberofdocuments = "off";
+        lengthofdocuments = "off";
+        splitstring = "off";
+        usingcsv = "on";
     }
 
     let config = {}, reqparam = {}, stoptions = {}, choptions = {}, hyperparameters = {};
@@ -162,6 +171,7 @@ function createConfigFile(){
     choptions["number of documents"] = numberofdocuments;
     choptions["length of documents"] = lengthofdocuments;
     choptions["split string"] = splitstring;
+    choptions["using csv"] = usingcsv;
     hyperparameters["alpha"] = alpha;
     hyperparameters["beta"] = beta;
 
