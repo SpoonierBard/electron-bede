@@ -151,6 +151,14 @@ input[type="number"] {
     padding-bottom: 12px;
 }
 
+#an-text-scrollbar {
+    margin-top: 0;
+    position: fixed;
+    top: 0;
+    right: 0;
+    padding: 2em 0 2em 2em;
+}
+
 #json-file-label {
     width: 279px;
 }
@@ -168,17 +176,15 @@ input[type="number"] {
     margin-top: 150px;
 }
 
-#tab-3 {
-    overflow: scroll;
-}
 #metadata-topic-preview-text {
-    height: 11em;
+    min-height: 11em;
+    height: 100%;
 }
 
 /* Tooltip styles developed by Chris Bracco*/
 [data-tooltip] {
     position: relative;
-    z-index: 2;
+    z-index: 2000;
     cursor: pointer;
 }
 
@@ -250,4 +256,8 @@ input[type="number"] {
 .config-form {
     display: inline-grid;
     padding: 5px;
+}
+
+#heatmapSVG4 {
+    margin-top:111px;
 }

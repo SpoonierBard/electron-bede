@@ -25,7 +25,7 @@
         <label for="create-file-iterations">Iterations</label>
         <input type="number" id="create-file-iterations" min="1" value="50"><br>
         <label for="create-file-topics">Topics</label>
-        <input type="number" id="create-file-topics" min="1" value="10"><br>
+        <input type="number" id="create-file-topics" min="3" value="10"><br>
         <label for="create-file-output">Output name</label>
         <input type="text" id="create-file-output">
     </div>
@@ -43,6 +43,7 @@
         <textarea id="create-file-blacklist"></textarea><br>
         <nobr><input type="checkbox" id="create-file-default-english-stopwords" value="true">Add default English stopwords</nobr><br>
         <nobr><input type="checkbox" id="create-file-default-latin-stopwords" value="true">Add default Latin stopwords</nobr>
+        <nobr><input type="checkbox" id="create-file-default-bede-stopwords" value="true">Add Latin stopwords for Bede</nobr>
     </div>
     <div class="config-form">
         <h5>Chunking Options</h5>
@@ -62,6 +63,11 @@
                         document.getElementById('create-file-length-documents').disabled = true;
                         document.getElementById('create-file-split-string').disabled = false;">Split string
         <input type="text" id="create-file-split-string" disabled><br>
+        <input type="radio" name="chunking" value="csv" id="chunking-csv"
+               onclick="document.getElementById('create-file-number-documents').disabled = true;
+                        document.getElementById('create-file-length-documents').disabled = true;
+                        document.getElementById('create-file-split-string').disabled = true;"
+               checked>Using pre-chunked CSV file
     </div>
     <div class="config-form">
         <h5>Hyperparameters</h5>
@@ -167,22 +173,24 @@
              <h2>Annotated Text</h2>
             </div>
             <div id = "selector-div">
-                <select name="an-text-topic-select" id="an-text-topic-select-1" onchange="onSelect()" class="styled-select slate">
-                    <option disabled selected>Select Topic</option>
-                    <option value="Topic1">Topic 1</option>
+                <select name="an-text-topic-select" id="an-text-topic-select-1" onchange="highlightAnText();" class="styled-select slate">
+                    <!-- this select tag will be filled with an <option> for each topic-->
                 </select>
-                <select name="an-text-topic-select" id="an-text-topic-select-2" onchange="onSelect()" class="styled-select slate">
-                    <option disabled selected>Select Topic</option>
-                    <option value="Topic1">Topic 1</option>
+                <select name="an-text-topic-select" id="an-text-topic-select-2" onchange="highlightAnText();" class="styled-select slate">
+                    <!-- this select tag will be filled with an <option> for each topic-->
                 </select>
-                <select name="an-text-topic-select" id="an-text-topic-select-3" onchange="onSelect()" class="styled-select slate">
-                    <option disabled selected>Select Topic</option>
-                    <option value="Topic1">Topic 1</option>
+                <select name="an-text-topic-select" id="an-text-topic-select-3" onchange="highlightAnText();" class="styled-select slate">
+                    <!-- this select tag will be filled with an <option> for each topic-->
                 </select>
+                <select name="an-text-scrollbar-select" id="an-text-scrollbar-select" class="styled-select slate"></select>
             </div>
             <div><input id="check-highlight" type="checkbox" checked> <label for="check-highlight">Highlight Topic on Mouseover</label> </div>
         </div>
-        <div id = "an-text-body"></div>
+        <div id = "an-text-body">
+        </div>
+        <div id="an-text-scrollbar">
+            <svg id="heatmapSVG4"></svg>
+        </div>
     </div>
     <div id="tab-4">
         <h2 style="margin-top: 0;">Word Cloud</h2>
@@ -198,9 +206,6 @@
 <div id="nickname-dialog-form" title="Nickname">
     <form>
         <fieldset>
-            <select id="nickname-topic-select" class="styled-select slate">
-                <!-- this select tag will be filled with an <option> for each topic-->
-            </select>
             <label for="nickname-input">Nickname</label>
             <input type="text" name="nickname" id="nickname-input" value="" class="text ui-widget-content ui-corner-all">
             <!-- Allow form submission with keyboard without duplicating the dialog button -->
