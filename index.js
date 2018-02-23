@@ -447,6 +447,7 @@ function createAnnotatedText() {
 
 function loadAnnotatedText(pageNum) {
     d3.select("#an-text-body").selectAll("span").remove();
+
     let startIndex = pageRanges[pageNum][0],
         endIndex = pageRanges[pageNum][1],
         puncTracker = 0, //index of punctuation
@@ -454,6 +455,7 @@ function loadAnnotatedText(pageNum) {
         puncLocTracker = 0, //where in text
         newlineTracker = 0, //index of newlines
         startTracker = 0, //track how far into text we are
+        newlineSetback = 0,
         wordToApp;
     for (let docInText in model.wordsByLocationWithStopwords) {
         for (let word in model.wordsByLocationWithStopwords[docInText]) {
