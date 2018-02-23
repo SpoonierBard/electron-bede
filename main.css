@@ -259,3 +259,7 @@ input[type="number"] {
     display: inline-grid;
     padding: 5px;
 }
+
+#heatmapSVG4 {
+    margin-top:111px;
+}
