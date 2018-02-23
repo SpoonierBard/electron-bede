@@ -438,6 +438,10 @@ function createAnnotatedText() {
                 return colors[i - 1];
             });
     }
+    d3.select("#an-text-body")
+        .attr("height", function() {
+            return document.getElementById("heatmapSVG4").height
+        });
     loadAnnotatedText(0);
 }
 
@@ -485,6 +489,7 @@ function loadAnnotatedText(pageNum) {
             startTracker += 1;
         }
     }
+    document.getElementById("an-text-body").scrollTo(0,0);
     onAnTextTopicSelect();
 }
 
@@ -584,14 +589,14 @@ function indexByPage() {
             } else {
                 curPage[1] = locTracker;
             }
-            if ((countDown<=0) && (locTracker === model.newlineLocations[newlineTracker]))  {
+            if ((countDown<=0) /*&& (locTracker === model.newlineLocations[newlineTracker])*/)  {
                 countDown = binSize;
                 binnedPages.push(curPage);
                 curPage = [-1, -1];
             }
-            while (locTracker === model.newlineLocations[newlineTracker]) {
-                newlineTracker += 1;
-            }
+            // while (locTracker === model.newlineLocations[newlineTracker]) {
+            //     newlineTracker += 1;
+            // }
         }
     }
     return binnedPages;
