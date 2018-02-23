@@ -438,6 +438,10 @@ function createAnnotatedText() {
                 return colors[i - 1];
             });
     }
+    d3.select("#an-text-body")
+        .attr("height", function() {
+            return document.getElementById("heatmapSVG4").height
+        });
     loadAnnotatedText(0);
 }
 
@@ -496,8 +500,8 @@ function loadAnnotatedText(pageNum) {
             startTracker += 1;
         }
     }
+    document.getElementById("an-text-body").scrollTo(0,0);
     onAnTextTopicSelect();
-
 }
 
 
@@ -596,14 +600,14 @@ function indexByPage() {
             } else {
                 curPage[1] = locTracker;
             }
-            if ((countDown<=0) && (locTracker === model.newlineLocations[newlineTracker]))  {
+            if ((countDown<=0) /*&& (locTracker === model.newlineLocations[newlineTracker])*/)  {
                 countDown = binSize;
                 binnedPages.push(curPage);
                 curPage = [-1, -1];
             }
-            while (locTracker === model.newlineLocations[newlineTracker]) {
-                newlineTracker += 1;
-            }
+            // while (locTracker === model.newlineLocations[newlineTracker]) {
+            //     newlineTracker += 1;
+            // }
         }
     }
     return binnedPages;
@@ -613,9 +617,9 @@ function indexByPage() {
 //HEATMAP TAB
 
 let prevalenceArray = [], //this is an array that counts the number of topic words in a bin
-    heatmapWidthPx = 500, //this is the total width of the heatmap bar as a whole
+    heatmapWidthPx = 500, //this is the total width of the heatmap bar
     heatmapResPx = 1, //this is the width of each individual rect making up the heatmap
-    heatmapSmoothing = 10,
+    heatmapSmoothing = 10, //this is the smoothing width in pixels of the heatmap
     heatmapTopic1 = 0,
     heatmapTopic2 = 1,
     heatmapTopic3 = 2,
@@ -726,20 +730,28 @@ function createPrevalenceArray(topic) {
 function smoothArray(originalArray, smoothingRadius) {
     let smoothedArray =
         Array.apply(null, Array(originalArray.length)).map(Number.prototype.valueOf,0);
+    console.log("Smoothed Array",smoothedArray);
     for (let i = 0; i < originalArray.length; i++) {
-        if (originalArray[i] !== 0) {
+        if (originalArray[i] > 0) {
             for (let j = (i - smoothingRadius + 1); j < i + smoothingRadius; j++) {
-                if ((j >= 0) && (j <= i)) {
-                    smoothedArray[j] +=
-                        originalArray[i]*(smoothingRadius - (i - j));
+                // Do not smooth bin markers (-1)
+                if(originalArray[j] < 0) {
+                    smoothedArray[j] = -1;
+                } else {
+                    if ((j >= 0) && (j <= i)) {
+                        smoothedArray[j] +=
+                            originalArray[i]*(smoothingRadius - (i - j));
+                    }
+                    if ((j > i)&&(j < originalArray.length)) {
+                        smoothedArray[j] +=
+                            originalArray[i]*(smoothingRadius + (i - j));
+                    }
                 }
-                if ((j > i)&&(j < originalArray.length)) {
-                    smoothedArray[j] +=
-                        originalArray[i]*(smoothingRadius + (i - j));
-                }
+
             }
         }
     }
+    console.log("Smoothed Array",smoothedArray);
     return smoothedArray;
 }
 
@@ -832,7 +844,10 @@ function drawRectangles(svg, dataset, heatmapNum) {
             .attr("width", 30)
             .attr("x", 5)
             .attr("y", function(d,i) {return i * heatmapResPx})
-            .style("fill", function(d) {return colorScale(d);})
+            .attr("class", function(d, i) {return "rect-"+i})
+            .style("fill", function(d) {
+                return colorScale(d);
+            })
             .on("mouseover", function(d){
                 if (d3.select(this).style("fill") !== "red"){
                     d3.select(this)
@@ -883,9 +898,13 @@ function drawRectangles(svg, dataset, heatmapNum) {
             .on("mouseover", function (d) {
                 d3.select(this).style("fill", "black");
             })
-            .on("mouseout", function (d) {
+            .on("mouseout", function (d,i) {
                 d3.select(this).style("fill", function (d) {
-                    return colorScale(d);
+                    if(dataset[i] == -1) {
+                        return "black";
+                    } else {
+                        return colorScale(d);
+                    }
                 })
             })
             .on("click", function (d, i) {
