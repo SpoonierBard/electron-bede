@@ -443,15 +443,14 @@ function createAnnotatedText() {
 }
 
 function loadAnnotatedText(pageNum) {
-
     d3.select("#an-text-body").selectAll("span").remove();
     //iterate through full text and add each word as own span with topic as class
     // if (startIndex < 0) {
     //     startIndex = 0;
     // }
-    let startIndex = pageRanges[pageNum][0];
-    let endIndex = pageRanges[pageNum][1];
-    let puncTracker = 0, //index of punctuation
+    let startIndex = pageRanges[pageNum][0],
+        endIndex = pageRanges[pageNum][1],
+        puncTracker = 0, //index of punctuation
         puncLocation = 0, //index of puncLocation
         puncLocTracker = 0, //where in text
         newlineTracker = 0, //index of newlines
@@ -489,8 +488,8 @@ function loadAnnotatedText(pageNum) {
             startTracker += 1;
         }
     }
+    document.getElementById("page-number").innerText = ("Page " + (currentPage + 1) + " of " + (pageRanges.length + 1));
     onAnTextTopicSelect();
-
 }
 
 
@@ -905,14 +904,18 @@ function replaceHeatmap(heatmapNum, topic) {
 
 function pageLeft() {
     currentPage--;
+    if (currentPage < 0) {
+        currentPage = 0;
+    }
     loadAnnotatedText(currentPage);
-    console.log(currentPage);
 }
 
 function pageRight() {
     currentPage++;
+    if (currentPage > (pageRanges.length - 1)) {
+        currentPage = pageRanges.length;
+    }
     loadAnnotatedText(currentPage);
-    console.log(currentPage);
 }
 
 
