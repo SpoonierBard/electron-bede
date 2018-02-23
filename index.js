@@ -602,14 +602,14 @@ function indexByPage() {
             } else {
                 curPage[1] = locTracker;
             }
-            if ((countDown<=0) && (locTracker === model.newlineLocations[newlineTracker]))  {
+            if ((countDown<=0) /*&& (locTracker === model.newlineLocations[newlineTracker])*/)  {
                 countDown = binSize;
                 binnedPages.push(curPage);
                 curPage = [-1, -1];
             }
-            while (locTracker === model.newlineLocations[newlineTracker]) {
+            /*while (locTracker === model.newlineLocations[newlineTracker]) {
                 newlineTracker += 1;
-            }
+            }*/
         }
     }
     return binnedPages;
@@ -868,6 +868,7 @@ function drawRectangles(svg, dataset, heatmapNum) {
                         .attr("width", 40)
                 }
                 $("#tabs").tabs("option", "active", 2);
+                currentPage = i;
                 loadAnnotatedText(i);
             })
     } else {
