@@ -1064,3 +1064,8 @@ $(document).ready (function () {
         createWordCloud(topic, width, height)
     });
 });
+
+window.addEventListener('resize', function() {
+
+    console.log('addEventListener - resize');
+}, true);

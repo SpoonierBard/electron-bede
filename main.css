@@ -181,6 +181,10 @@ input[type="number"] {
     height: 100%;
 }
 
+/*#tab-4 {
+    width: 90%;
+}*/
+
 /* Tooltip styles developed by Chris Bracco*/
 [data-tooltip] {
     position: relative;
