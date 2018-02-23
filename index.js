@@ -744,9 +744,6 @@ function replaceHeatmap(heatmapNum, topic) {
     changeTop5Words(heatmapNum, topic);
 }
 
-
-
-
 //WORD CLOUD TAB
 
 /**
