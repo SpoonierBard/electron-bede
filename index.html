@@ -186,9 +186,11 @@
             </div>
             <div><input id="check-highlight" type="checkbox" checked> <label for="check-highlight">Highlight Topic on Mouseover</label> </div>
             <div id="an-text-nav">
-                <button class="ui-button ui-widget ui-corner-all" onclick="pageLeft();"><</button>
-
-                <button class="ui-button ui-widget ui-corner-all" onclick="pageRight();">></button>
+                <nobr>
+                    <button class="ui-button ui-widget ui-corner-all" onclick="pageLeft();"><</button>
+                    <div id="page-number" style="display: inline; margin: 2em;"></div>
+                    <button class="ui-button ui-widget ui-corner-all" onclick="pageRight();">></button>
+                </nobr>
             </div>
         </div>
         <div id = "an-text-body" class="scrollable">

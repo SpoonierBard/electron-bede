@@ -446,16 +446,13 @@ function createAnnotatedText() {
 }
 
 function loadAnnotatedText(pageNum) {
-
     d3.select("#an-text-body").selectAll("span").remove();
-    //iterate through full text and add each word as own span with topic as class
-    let startIndex = pageRanges[pageNum][0];
-    let endIndex = pageRanges[pageNum][1];
-    let puncTracker = 0, //index of punctuation
+    let startIndex = pageRanges[pageNum][0],
+        endIndex = pageRanges[pageNum][1],
+        puncTracker = 0, //index of punctuation
         puncLocation = 0, //index of puncLocation
         puncLocTracker = 0, //where in text
         newlineTracker = 0, //index of newlines
-        newlineSetback = 0,
         startTracker = 0, //track how far into text we are
         wordToApp;
     for (let docInText in model.wordsByLocationWithStopwords) {
@@ -500,6 +497,7 @@ function loadAnnotatedText(pageNum) {
             startTracker += 1;
         }
     }
+    document.getElementById("page-number").innerText = ("Page " + (currentPage + 1) + " of " + (pageRanges.length + 1));
     document.getElementById("an-text-body").scrollTo(0,0);
     onAnTextTopicSelect();
 }
@@ -600,14 +598,14 @@ function indexByPage() {
             } else {
                 curPage[1] = locTracker;
             }
-            if ((countDown<=0) /*&& (locTracker === model.newlineLocations[newlineTracker])*/)  {
+            if ((countDown<=0) && (locTracker === model.newlineLocations[newlineTracker]))  {
                 countDown = binSize;
                 binnedPages.push(curPage);
                 curPage = [-1, -1];
             }
-            // while (locTracker === model.newlineLocations[newlineTracker]) {
-            //     newlineTracker += 1;
-            // }
+            while (locTracker === model.newlineLocations[newlineTracker]) {
+                newlineTracker += 1;
+            }
         }
     }
     return binnedPages;
@@ -617,9 +615,9 @@ function indexByPage() {
 //HEATMAP TAB
 
 let prevalenceArray = [], //this is an array that counts the number of topic words in a bin
-    heatmapWidthPx = 500, //this is the total width of the heatmap bar
+    heatmapWidthPx = 500, //this is the total width of the heatmap bar as a whole
     heatmapResPx = 1, //this is the width of each individual rect making up the heatmap
-    heatmapSmoothing = 10, //this is the smoothing width in pixels of the heatmap
+    heatmapSmoothing = 10,
     heatmapTopic1 = 0,
     heatmapTopic2 = 1,
     heatmapTopic3 = 2,
@@ -730,28 +728,20 @@ function createPrevalenceArray(topic) {
 function smoothArray(originalArray, smoothingRadius) {
     let smoothedArray =
         Array.apply(null, Array(originalArray.length)).map(Number.prototype.valueOf,0);
-    console.log("Smoothed Array",smoothedArray);
     for (let i = 0; i < originalArray.length; i++) {
-        if (originalArray[i] > 0) {
+        if (originalArray[i] !== 0) {
             for (let j = (i - smoothingRadius + 1); j < i + smoothingRadius; j++) {
-                // Do not smooth bin markers (-1)
-                if(originalArray[j] < 0) {
-                    smoothedArray[j] = -1;
-                } else {
-                    if ((j >= 0) && (j <= i)) {
-                        smoothedArray[j] +=
-                            originalArray[i]*(smoothingRadius - (i - j));
-                    }
-                    if ((j > i)&&(j < originalArray.length)) {
-                        smoothedArray[j] +=
-                            originalArray[i]*(smoothingRadius + (i - j));
-                    }
+                if ((j >= 0) && (j <= i)) {
+                    smoothedArray[j] +=
+                        originalArray[i]*(smoothingRadius - (i - j));
                 }
-
+                if ((j > i)&&(j < originalArray.length)) {
+                    smoothedArray[j] +=
+                        originalArray[i]*(smoothingRadius + (i - j));
+                }
             }
         }
     }
-    console.log("Smoothed Array",smoothedArray);
     return smoothedArray;
 }
 
@@ -844,10 +834,7 @@ function drawRectangles(svg, dataset, heatmapNum) {
             .attr("width", 30)
             .attr("x", 5)
             .attr("y", function(d,i) {return i * heatmapResPx})
-            .attr("class", function(d, i) {return "rect-"+i})
-            .style("fill", function(d) {
-                return colorScale(d);
-            })
+            .style("fill", function(d) {return colorScale(d);})
             .on("mouseover", function(d){
                 if (d3.select(this).style("fill") !== "red"){
                     d3.select(this)
@@ -899,13 +886,9 @@ function drawRectangles(svg, dataset, heatmapNum) {
             .on("mouseover", function (d) {
                 d3.select(this).style("fill", "black");
             })
-            .on("mouseout", function (d,i) {
+            .on("mouseout", function (d) {
                 d3.select(this).style("fill", function (d) {
-                    if(dataset[i] == -1) {
-                        return "black";
-                    } else {
-                        return colorScale(d);
-                    }
+                    return colorScale(d);
                 })
             })
             .on("click", function (d, i) {
@@ -932,14 +915,18 @@ function replaceHeatmap(heatmapNum, topic) {
 
 function pageLeft() {
     currentPage--;
+    if (currentPage < 0) {
+        currentPage = 0;
+    }
     loadAnnotatedText(currentPage);
-    console.log(currentPage);
 }
 
 function pageRight() {
     currentPage++;
+    if (currentPage > (pageRanges.length - 1)) {
+        currentPage = pageRanges.length;
+    }
     loadAnnotatedText(currentPage);
-    console.log(currentPage);
 }
 
 
