@@ -488,17 +488,28 @@ function loadAnnotatedText(startIndex, endIndex=(startIndex + 500)) {
 }
 
 function scrollAnnotatedText() {
-    //TODO: find a way for this to not always be 0 :(
-    let newScrollPosition = window.scrollY;
-    if (newScrollPosition >= lastScrollPosition){
+    //TODO: make it so that start and end index keep up with user scrolling
+    let newScrollPosition = document.getElementById("tab-3").scrollTop;
+    console.log("New Scroll Position", newScrollPosition);
+    console.log("Current Start Index", currentLoaded[0]);
+    console.log("Last Scroll Position", lastScrollPosition);
+    console.log("------------");
+    let scrollAmount = newScrollPosition-lastScrollPosition;
+    if (newScrollPosition < lastScrollPosition){
         //upward : load previous text
-        currentLoaded[0] -= 11;
-        currentLoaded[1] -= 11;
+        //currentLoaded[0] += scrollAmount;
+        currentLoaded[1] += scrollAmount;
+        if(currentLoaded[0] < 0) {
+            currentLoaded[0] = 0;
+            currentLoaded[1] = 500
+        }
+
     } else {
         //downward : load next text
-        currentLoaded[0] += 11;
-        currentLoaded[1] += 11;
+        //currentLoaded[0] += scrollAmount;
+        currentLoaded[1] += scrollAmount;
     }
+
     lastScrollPosition = newScrollPosition;
 
     // let direction = d3.event.wheelDelta < 0 ? 'down' : 'up';
@@ -803,6 +814,7 @@ function drawRectangles(svg, dataset, binSize, heatmapNum) {
             .attr("width", 30)
             .attr("x", 0)
             .attr("y", function(d,i) {return i * heatmapResPx})
+            .attr("class", function(d, i) {return "rect-"+i})
             .style("fill", function(d) {return colorScale(d);})
             .on("mouseover", function(d){
                 if (d3.select(this).style("fill") !== "red"){
