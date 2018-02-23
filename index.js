@@ -439,7 +439,7 @@ function createAnnotatedText() {
                 return colors[i - 1];
             });
     }
-    
+
     loadAnnotatedText(0);
     // loadAnnotatedText(currentLoaded[0]);
 
