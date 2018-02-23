@@ -1,7 +1,6 @@
 //let fs = require("fs"),
 let model = {},
     input,
-    // currentLoaded = [0, 0], //track from which word to which word we've loaded
     currentPage = 0,
     pageRanges = [], //track from which word to which word we've loaded
     lastScrollPosition = 0;
@@ -439,24 +438,11 @@ function createAnnotatedText() {
                 return colors[i - 1];
             });
     }
-
     loadAnnotatedText(0);
-    // loadAnnotatedText(currentLoaded[0]);
-
-    // document.getElementById("tab-3").addEventListener('mousewheel', mouseWheelEvent);
 }
 
-function mouseWheelEvent(e) {
-    let delta = e.wheelDelta;
-    loadAnnotatedText(currentLoaded[0] + delta);
-    console.log(delta);
-}
-// function loadAnnotatedText(startIndex, endIndex=(startIndex + 500)) {
 function loadAnnotatedText(pageNum) {
-//     loadAnnotatedText(0, 0);
-// }
 
-// function loadAnnotatedText(startIndex, endIndex=(startIndex + 500)) {
     d3.select("#an-text-body").selectAll("span").remove();
     //iterate through full text and add each word as own span with topic as class
     // if (startIndex < 0) {
@@ -503,43 +489,8 @@ function loadAnnotatedText(pageNum) {
         }
     }
     onAnTextTopicSelect();
-    // currentLoaded[0] = startIndex;
-    // currentLoaded[1] = endIndex;
+
 }
-
-// function scrollAnnotatedText() {
-    //TODO: find a way for this to not always be 0 :(
-    // let newScrollPosition = window.scrollY;
-    // if (newScrollPosition >= lastScrollPosition){
-        //downward : load next text
-        // currentLoaded[0] += 11;
-        // currentLoaded[1] += 11;
-    // } else {
-        //upward : load previous text
-    //     currentLoaded[0] -= 11;
-    //     currentLoaded[1] -= 11;
-    // }
-    // lastScrollPosition = newScrollPosition;
-
-
-    // let direction = d3.event.wheelDelta < 0 ? 'down' : 'up';
-    // if (direction == 'up') {
-    //     currentLoaded[0] -= 11;
-    //     currentLoaded[1] -= 11;
-    // } else {
-    //     currentLoaded[0] += 11;
-    //     currentLoaded[1] += 11;
-    // }
-function updatePageNumber(clickDirection) {
-    if (clickDirection == 0 && currentPage != 0) {
-        currentPage -= 1;
-    } else if (clickDirection == 1 && currentPage != pageRanges.length) {
-        currentPage += 1;
-    }
-    loadAnnotatedText(currentPage);
-}
-
-
 
 
 /**
@@ -950,6 +901,19 @@ function replaceHeatmap(heatmapNum, topic) {
     drawRectangles(svg, heatmapArray, heatmapNum);
     if (heatmapNum < 4) changeTop5Words(heatmapNum, topic);
 }
+
+function pageLeft() {
+    currentPage--;
+    loadAnnotatedText(currentPage);
+    console.log(currentPage);
+}
+
+function pageRight() {
+    currentPage++;
+    loadAnnotatedText(currentPage);
+    console.log(currentPage);
+}
+
 
 //WORD CLOUD TAB
 
