@@ -172,21 +172,19 @@ input[type="number"] {
     float: right;
 }
 #an-text-body {
-    height: 80%;
-    margin-top: 150px;
+    height: 10em;
+    margin-top: 200px;
 }
 
-#tab-3 {
-    overflow: scroll;
-}
 #metadata-topic-preview-text {
-    height: 11em;
+    min-height: 11em;
+    height: 100%;
 }
 
 /* Tooltip styles developed by Chris Bracco*/
 [data-tooltip] {
     position: relative;
-    z-index: 2;
+    z-index: 2000;
     cursor: pointer;
 }
 

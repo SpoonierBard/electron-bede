@@ -1,7 +1,8 @@
 //let fs = require("fs"),
 let model = {},
     input,
-    currentLoaded = [0, 0], //track from which word to which word we've loaded
+    currentPage = 0,
+    pageRanges = [], //track from which word to which word we've loaded
     lastScrollPosition = 0;
 const colors  = ["#66c2a5", "#fc8d62", "#8da0cb"],
     scaledColors = ["hsl(161, 30%, 90%)", "hsl(17, 30%, 90%)", "hsl(222, 30%, 90%)", "hsl(70, 0%, 90%)", "hsl(161, 63%, 38%)", "hsl(17, 86%, 49%)", "hsl(222, 57%, 47%)", "hsl(70, 0%, 20%)"];
@@ -18,7 +19,7 @@ function reloadMainMenu(){
     document.getElementById("json-file").value="";
     document.getElementById("json-file-label").innerText = "Browse";
     document.getElementById("an-text-body").innerHTML = "";
-    currentLoaded = [0, 0];
+    currentPage = 0;
     model = {};
 }
 
@@ -138,8 +139,6 @@ function createConfigFile(){
         alpha = parseFloat(document.getElementById("create-file-alpha").value),
         beta = parseFloat(document.getElementById("create-file-beta").value);
 
-    console.log(upperlimit);
-
     if (document.getElementById("create-file-default-english-stopwords").value === "true"){
         blacklist.push.apply(blacklist, englishStopwords);
     }
@@ -220,7 +219,6 @@ function loadFile() {
         hideUploadScreen();
         reader.onload = (function() {
             model = JSON.parse(reader.result);
-            console.log(model);
             if (model["dataset"] === undefined ||
                 model["topics"] === undefined ||
                 model["iterations"] === undefined ||
@@ -233,7 +231,6 @@ function loadFile() {
                 model["puncAndCap"] === null ||
                 model["puncCapLocations"] === null ||
                 model["newlineLocations"] === null) {
-                    console.log(model);
                     document.getElementById("file-upload").style.display = "block";
                     document.getElementById("progressbar").style.display = "none";
                     document.getElementById("json-file").value="";
@@ -422,6 +419,7 @@ $( function() {
  */
 
 function createAnnotatedText() {
+    pageRanges = indexByPage();
     let topicDropdownHTML = "<option disabled selected>Select Topic</option>";
 
     //create three identical selectors for three possible topic comparisons
@@ -440,19 +438,19 @@ function createAnnotatedText() {
                 return colors[i - 1];
             });
     }
-    loadAnnotatedText(currentLoaded[0]);
 
-    document.getElementById("tab-3").addEventListener('mousewheel', mouseWheelEvent);
+    loadAnnotatedText(0);
 }
 
-function mouseWheelEvent(e) {
-    let delta = e.wheelDelta;
-    loadAnnotatedText(currentLoaded[0] + delta);
-    console.log(delta);
-}
-function loadAnnotatedText(startIndex, endIndex=(startIndex + 500)) {
+function loadAnnotatedText(pageNum) {
+
     d3.select("#an-text-body").selectAll("span").remove();
     //iterate through full text and add each word as own span with topic as class
+    // if (startIndex < 0) {
+    //     startIndex = 0;
+    // }
+    let startIndex = pageRanges[pageNum][0];
+    let endIndex = pageRanges[pageNum][1];
     let puncTracker = 0, //index of punctuation
         puncLocation = 0, //index of puncLocation
         puncLocTracker = 0, //where in text
@@ -491,48 +489,8 @@ function loadAnnotatedText(startIndex, endIndex=(startIndex + 500)) {
             startTracker += 1;
         }
     }
-    currentLoaded[0] = startIndex;
-    currentLoaded[1] = endIndex;
-}
-
-function scrollAnnotatedText() {
-    //TODO: make it so that start and end index keep up with user scrolling
-    let newScrollPosition = document.getElementById("tab-3").scrollTop;
-    console.log("New Scroll Position", newScrollPosition);
-    console.log("Current Start Index", currentLoaded[0]);
-    console.log("Last Scroll Position", lastScrollPosition);
-    console.log("------------");
-    let scrollAmount = newScrollPosition-lastScrollPosition;
-    if (newScrollPosition < lastScrollPosition){
-        //upward : load previous text
-        //currentLoaded[0] += scrollAmount;
-        currentLoaded[1] += scrollAmount;
-        if(currentLoaded[0] < 0) {
-            currentLoaded[0] = 0;
-            currentLoaded[1] = 500
-        }
-
-    } else {
-        //downward : load next text
-        //currentLoaded[0] += scrollAmount;
-        currentLoaded[1] += scrollAmount;
-    }
-
-    lastScrollPosition = newScrollPosition;
-
-    // let direction = d3.event.wheelDelta < 0 ? 'down' : 'up';
-    // if (direction == 'up') {
-    //     currentLoaded[0] += 11;
-    //     currentLoaded[1] += 11;
-    // } else {
-    //     currentLoaded[0] -= 11;
-    //     currentLoaded[1] -= 11;
-    // }
-    loadAnnotatedText(currentLoaded[0], currentLoaded[1]);
     onAnTextTopicSelect();
 }
-
-
 
 
 /**
@@ -606,7 +564,42 @@ function jumpToHeatmap(topicNum) {
     }
 }
 
+function indexByPage() {
+    let binnedPages = [],
+        curPage = [-1,-1],
+        totalLength = 0,
+        locTracker = 0, //where in text
+        newlineTracker = 0, //index of newlines
+        wordToApp = "";
+    for (let i = 0; i < model.wordsByLocationWithStopwords.length; i++) {
+        totalLength += model.wordsByLocationWithStopwords[i].length;
+    }
+    console.log(totalLength);
+    let binSize = Math.floor(totalLength/(heatmapWidthPx/heatmapResPx)),
+        countDown = binSize;
 
+        console.log(binSize);
+    for (let i = 0; i < model.wordsByLocationWithStopwords.length; i++) {
+        for (let j = 0; j < model.wordsByLocationWithStopwords[i].length; j++) {
+            locTracker++;
+            countDown--;
+            if (curPage[0] === -1) {
+                curPage[0] = locTracker;
+            } else {
+                curPage[1] = locTracker;
+            }
+            if ((countDown<=0) && (locTracker === model.newlineLocations[newlineTracker]))  {
+                countDown = binSize;
+                binnedPages.push(curPage);
+                curPage = [-1, -1];
+            }
+            while (locTracker === model.newlineLocations[newlineTracker]) {
+                newlineTracker += 1;
+            }
+        }
+    }
+    return binnedPages;
+}
 
 
 //HEATMAP TAB
@@ -640,7 +633,6 @@ $(document).ready(function() {
     });
     $( "#an-text-scrollbar-select" ).change(function () {
         heatmapTopic4 = $("#an-text-scrollbar-select").find("option:selected").val();
-        console.log(heatmapTopic4);
         replaceHeatmap(4, heatmapTopic4);
     });
     /**
@@ -677,7 +669,7 @@ $(document).ready(function() {
 /**
  * Creates an array representing the distribution of a particular topic across corpus
  * @param {number} topic -- topic whose distribution array will represent
- * @returns {{array: number[], binSize: number}} -- array representing topic distribution across corpus
+ * @returns number[] -- array representing topic distribution across corpus
  */
 function createPrevalenceArray(topic) {
     let innerArray = [];
@@ -714,7 +706,7 @@ function createPrevalenceArray(topic) {
         }
     }
     prevalenceArray = [];
-    return {"array": binnedArray, "binSize": binSize};
+    return binnedArray;
 }
 
 /**
@@ -792,12 +784,10 @@ function initializeHeatmaps() {
             changeTop5Words(iter, (iter - 1));
         }
 
-        let binnedArrayinfo = createPrevalenceArray(topic),
-            binnedArray = binnedArrayinfo["array"],
-            binnedArrayBinSize = binnedArrayinfo["binSize"];
+        let binnedArray = createPrevalenceArray(topic);
         binnedArray = smoothArray(binnedArray, heatmapSmoothing);
 
-        drawRectangles(svg, binnedArray, binnedArrayBinSize, iter, topic);
+        drawRectangles(svg, binnedArray, iter);
     }
 
 
@@ -826,10 +816,9 @@ function changeTop5Words(heatmapNum, topic) {
  * Draws rectangles representing the values in an array
  * @param svg -- where to draw the rectangles
  * @param {number[]} dataset -- array representing topic distribution
- * @param binSize -- size of bins in array
  * @param {number} heatmapNum -- which heatmap to draw the rectangles in
  */
-function drawRectangles(svg, dataset, binSize, heatmapNum) {
+function drawRectangles(svg, dataset, heatmapNum) {
     let colorScale = d3.scaleLinear()
         .domain([d3.min(dataset),
             d3.max(dataset)])
@@ -876,8 +865,7 @@ function drawRectangles(svg, dataset, binSize, heatmapNum) {
                         .attr("width", 40)
                 }
                 $("#tabs").tabs("option", "active", 2);
-                loadAnnotatedText(i * binSize);
-                onAnTextTopicSelect();
+                loadAnnotatedText(i);
             })
     } else {
         svg.selectAll("rect")
@@ -909,8 +897,8 @@ function drawRectangles(svg, dataset, binSize, heatmapNum) {
             })
             .on("click", function (d, i) {
                 $("#tabs").tabs("option", "active", 2);
-                loadAnnotatedText(i * binSize);
-                currentLoaded[0] = i * binSize;
+                loadAnnotatedText(i);
+                currentPage = i;
             })
     }
 }
@@ -923,15 +911,23 @@ function drawRectangles(svg, dataset, binSize, heatmapNum) {
 function replaceHeatmap(heatmapNum, topic) {
     var svg = d3.select("#heatmapSVG" + heatmapNum);
     svg.html("");
-    let heatmapArrayinfo = createPrevalenceArray(topic),
-        heatmapArray = heatmapArrayinfo["array"],
-        heatmapBinSize = heatmapArrayinfo["binSize"];
+    let heatmapArray = createPrevalenceArray(topic);
     heatmapArray = smoothArray(heatmapArray, heatmapSmoothing);
-    drawRectangles(svg, heatmapArray, heatmapBinSize, heatmapNum);
+    drawRectangles(svg, heatmapArray, heatmapNum);
     if (heatmapNum < 4) changeTop5Words(heatmapNum, topic);
 }
 
+function pageLeft() {
+    currentPage--;
+    loadAnnotatedText(currentPage);
+    console.log(currentPage);
+}
 
+function pageRight() {
+    currentPage++;
+    loadAnnotatedText(currentPage);
+    console.log(currentPage);
+}
 
 
 //WORD CLOUD TAB
@@ -944,60 +940,40 @@ function initializeWordCloudTab() {
     for (let i = 0; i < model.topicWordInstancesDict.length; i++) {
         topicDropdownHTMLWordCloud = topicDropdownHTMLWordCloud + "<option class=\"select-topic-" + i + "\" value=\"" + i + "\">" + model.nicknames[i] + "</option>";
     }
-    let sizeDropdownHTMLWordCloud = "<option disabled selected='selected' value='-1'>Select wordcloud size</option>";
-    sizeArray = ["Small", "Medium", "Large"];
+    let sizeDropdownHTMLWordCloud = "<option disabled selected='selected' value='-1'>Select wordcloud size</option>",
+        sizeArray = ["Small", "Medium", "Large"];
     for (let i = 0; i < sizeArray.length; i++) {
         size = sizeArray[i];
         sizeDropdownHTMLWordCloud = sizeDropdownHTMLWordCloud + "<option class=\select-size-" + i + "\" value=\"" + i + "\">" + size + "</option>"
-        console.log(i);
     }
     document.getElementById("word-cloud-topic-select").innerHTML = topicDropdownHTMLWordCloud;
-    document.getElementById("cloud-size").innerHTML = sizeDropdownHTMLWordCloud;
-    createWordCloud(0, 1);
+    let width = window.innerWidth - 270;
+    let height = window.innerHeight - 160;
+    createWordCloud(0, width, height);
 }
-function createWordCloud(topicNum, size) {
+function createWordCloud(topicNum, width, height) {
 /**
  * Reloads word cloud based on a new topic
  * @param {number} topicNum -- topic to be displayed
  */
     $("#word-cloud").empty();
-    let width = 0;
-    let height = 0;
-    let numWords = 0;
-    switch (size) {
-        case 0:
-            width = 500;
-            height = 500;
-            numWords = 400;
-            break;
-        case 1:
-            width = 600;
-            height = 600;
-            numWords = 600;
-            break;
-        case 2:
-            width = 1000;
-            height = 650;
-            numWords = 2000;
-            break;
-        default:
-            console.log("default");
-            width = 600;
-            height = 600;
-            numWords = 600;
-    }
     let svg_location = "#word-cloud", topic = topicNum;
-    //const width = 500//$(document).width();
-    //const height = 600//$(document).height();
-
-    let fill = d3.schemeCategory20;
     let word_entries = model.topicWordInstancesDict[topic];
     //filtered_entries contains every element of word_entries with a count greater than 1
-    let filtered_entries = d3.entries(Object.keys(word_entries).reduce(function (new_dict, key) {
+    let reduced_entries = d3.entries(Object.keys(word_entries).reduce(function (new_dict, key) {
         if (word_entries[key] > 1 && key.length > 2) new_dict[key] = word_entries[key];
         return new_dict;
     }, {}));
-    reduced_entries = filtered_entries.slice(0,Math.min(filtered_entries.length, numWords));
+    let fill = d3.schemeCategory20;
+    let size = width * height;
+    let len = reduced_entries.length;
+    const mid = (size >= 250000 && len >= 200);
+    const large = (size >= 600000 && len >= 350);
+    const biggest = (size >= 1000000 && len >= 450);
+    if (mid) fill = fill.concat(d3.schemeCategory10);
+    if (large) fill = fill.concat(d3.schemeCategory20c);
+    if (biggest) fill = fill.concat(d3.schemeCategory20b);
+    console.log(fill.length);
     let xScale = d3.scaleLinear()
         .domain([0, d3.max(reduced_entries, function(d) {
             return d.value;
@@ -1037,24 +1013,33 @@ function createWordCloud(topicNum, size) {
     d3.layout.cloud().stop();
 }
 
+function resizeWordCloud() {
+    let width = window.innerWidth - 270;
+    let height = window.innerHeight - 160;
+    let topic = $("#word-cloud-topic-select").find("option:selected").val();
+    if (topic == -1) {
+        topic = 0;
+    }
+    console.log(topic);
+    createWordCloud(topic, width, height);
+}
+
+// function exportWordCloud() {
+//     console.log("export");
+//     let wordCloud = document.getElementById('word-cloud');
+//     let image = wordCloud.toDataURL();
+//     console.log(image);
+//     window.open('', image);
+// }
 /**
  * Loads new word cloud on dropdown change
  */
 $(document).ready (function () {
     $("#word-cloud-topic-select").change(function () {
         let topic = $("#word-cloud-topic-select").find("option:selected").val();
-        let size = parseInt($("#cloud-size").find("option:selected").val());
-        createWordCloud(topic, size)
-    });
-    $("#cloud-size").change(function () {
-        let topic = $("#word-cloud-topic-select").find("option:selected").val();
-        let size = parseInt($("#cloud-size").find("option:selected").val());
-        console.log(topic);
-        if (parseInt(topic) === -1) {
-            createWordCloud(0, size);
-        } else {
-            createWordCloud(topic, size);
-        }
+        //let size = parseInt($("#cloud-size").find("option:selected").val());
+        let width = window.innerWidth - 270;
+        let height = window.innerHeight - 160;
+        createWordCloud(topic, width, height)
     });
 });
-
