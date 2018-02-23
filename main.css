@@ -172,8 +172,8 @@ input[type="number"] {
     float: right;
 }
 #an-text-body {
-    height: 80%;
-    margin-top: 150px;
+    height: 10em;
+    margin-top: 200px;
 }
 
 #metadata-topic-preview-text {
