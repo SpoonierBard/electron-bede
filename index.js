@@ -19,7 +19,7 @@ function reloadMainMenu(){
     document.getElementById("json-file").value="";
     document.getElementById("json-file-label").innerText = "Browse";
     document.getElementById("an-text-body").innerHTML = "";
-    currentLoaded = [0, 0];
+    currentPage = 0;
     model = {};
 }
 
@@ -438,16 +438,9 @@ function createAnnotatedText() {
                 return colors[i - 1];
             });
     }
-    loadAnnotatedText(currentLoaded[0]);
-
-    document.getElementById("tab-3").addEventListener('mousewheel', mouseWheelEvent);
+    loadAnnotatedText(0, 0);
 }
 
-function mouseWheelEvent(e) {
-    let delta = e.wheelDelta;
-    loadAnnotatedText(currentLoaded[0] + delta);
-    console.log(delta);
-}
 function loadAnnotatedText(startIndex, endIndex=(startIndex + 500)) {
     d3.select("#an-text-body").selectAll("span").remove();
     //iterate through full text and add each word as own span with topic as class
@@ -489,8 +482,6 @@ function loadAnnotatedText(startIndex, endIndex=(startIndex + 500)) {
             startTracker += 1;
         }
     }
-    currentLoaded[0] = startIndex;
-    currentLoaded[1] = endIndex;
 }
 
 function scrollAnnotatedText() {
@@ -805,10 +796,10 @@ function initializeHeatmaps() {
             changeTop5Words(iter, (iter - 1));
         }
 
-        let binnedArray = createPrevalenceArray(topic),
+        let binnedArray = createPrevalenceArray(topic);
         binnedArray = smoothArray(binnedArray, heatmapSmoothing);
 
-        drawRectangles(svg, binnedArray, iter, topic);
+        drawRectangles(svg, binnedArray, iter);
     }
 
 
@@ -837,7 +828,6 @@ function changeTop5Words(heatmapNum, topic) {
  * Draws rectangles representing the values in an array
  * @param svg -- where to draw the rectangles
  * @param {number[]} dataset -- array representing topic distribution
- * @param binSize -- size of bins in array
  * @param {number} heatmapNum -- which heatmap to draw the rectangles in
  */
 function drawRectangles(svg, dataset, heatmapNum) {
@@ -884,8 +874,7 @@ function drawRectangles(svg, dataset, heatmapNum) {
                         .attr("width", 40)
                 }
                 $("#tabs").tabs("option", "active", 2);
-                loadAnnotatedText(i * binSize);
-                onAnTextTopicSelect();
+                loadAnnotatedText(i);
             })
     } else {
         svg.selectAll("rect")
@@ -928,7 +917,7 @@ function replaceHeatmap(heatmapNum, topic) {
     var svg = d3.select("#heatmapSVG" + heatmapNum);
     svg.html("");
     let heatmapArray = createPrevalenceArray(topic);
-    let heatmapArray = smoothArray(heatmapArray, heatmapSmoothing);
+    heatmapArray = smoothArray(heatmapArray, heatmapSmoothing);
     drawRectangles(svg, heatmapArray, heatmapNum);
     if (heatmapNum < 4) changeTop5Words(heatmapNum, topic);
 }
