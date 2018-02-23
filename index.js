@@ -441,10 +441,15 @@ function createAnnotatedText() {
             });
     }
     loadAnnotatedText(currentLoaded[0]);
-    d3.select('#tab-3')
-        .on('scroll', scrollAnnotatedText);
+
+    document.getElementById("tab-3").addEventListener('mousewheel', mouseWheelEvent);
 }
 
+function mouseWheelEvent(e) {
+    let delta = e.wheelDelta;
+    loadAnnotatedText(currentLoaded[0] + delta);
+    console.log(delta);
+}
 function loadAnnotatedText(startIndex, endIndex=(startIndex + 500)) {
     d3.select("#an-text-body").selectAll("span").remove();
     //iterate through full text and add each word as own span with topic as class
@@ -515,6 +520,9 @@ function scrollAnnotatedText() {
     loadAnnotatedText(currentLoaded[0], currentLoaded[1]);
     onAnTextTopicSelect();
 }
+
+
+
 
 /**
  * Displays tooltip of topic for word on hover; highlights other words in topic if check-highlight is checked
@@ -814,27 +822,36 @@ function drawRectangles(svg, dataset, binSize, heatmapNum) {
             .append("rect")
             .attr("height", function() {return heatmapResPx})
             .attr("width", 30)
-            .attr("x", 0)
+            .attr("x", 5)
             .attr("y", function(d,i) {return i * heatmapResPx})
             .style("fill", function(d) {return colorScale(d);})
             .on("mouseover", function(d){
                 if (d3.select(this).style("fill") !== "red"){
-                    d3.select(this).style("fill", "black");
+                    d3.select(this)
+                        .style("fill", "black")
+                        .attr("x", 0)
+                        .attr("width", 40)
                 }
             })
             .on("mouseout", function(d){
                 if (d3.select(this).style("fill") !== "red") {
-                    d3.select(this).style("fill", function(d) {
-                        return colorScale(d);
-                })
+                    d3.select(this)
+                        .style("fill", function(d) {return colorScale(d);})
+                        .attr("x", 5)
+                        .attr("width", 30)
             }})
             .on("click", function(d, i){
                 if (heatmapNum === 4) {
                     svg.selectAll("rect")
                         .style("fill", function (d) {
                             return colorScale(d);
-                        });
-                    d3.select(this).style("fill", "red");
+                        })
+                        .attr("width", 30)
+                        .attr("x", 5)
+                    d3.select(this)
+                        .style("fill", "red")
+                        .attr("x", 0)
+                        .attr("width", 40)
                 }
                 $("#tabs").tabs("option", "active", 2);
                 loadAnnotatedText(i * binSize);
