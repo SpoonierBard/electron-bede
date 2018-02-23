@@ -866,6 +866,7 @@ function drawRectangles(svg, dataset, heatmapNum) {
                         .attr("width", 40)
                 }
                 $("#tabs").tabs("option", "active", 2);
+                currentPage = i;
                 loadAnnotatedText(i);
             })
     } else {
