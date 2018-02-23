@@ -185,8 +185,13 @@
                 <select name="an-text-scrollbar-select" id="an-text-scrollbar-select" class="styled-select slate"></select>
             </div>
             <div><input id="check-highlight" type="checkbox" checked> <label for="check-highlight">Highlight Topic on Mouseover</label> </div>
+            <div id="an-text-nav">
+                <button class="ui-button ui-widget ui-corner-all" onclick="pageLeft();"><</button>
+
+                <button class="ui-button ui-widget ui-corner-all" onclick="pageRight();">></button>
+            </div>
         </div>
-        <div id = "an-text-body">
+        <div id = "an-text-body" class="scrollable">
         </div>
         <div id="an-text-scrollbar">
             <svg id="heatmapSVG4"></svg>
