@@ -500,7 +500,9 @@ function loadAnnotatedText(pageNum) {
         }
     }
     document.getElementById("page-number").innerText = ("Page " + (currentPage + 1) + " of " + (pageRanges.length + 1));
-    document.getElementById("an-text-body").scrollTo(0,0);
+    if (document.getElementById("an-text-body").scrollTop > 20){
+        document.getElementById("an-text-body").scrollTop = 0;
+    }
     onAnTextTopicSelect();
 }
 
