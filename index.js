@@ -1,5 +1,5 @@
-let fs = require("fs"),
-    model = {},
+//let fs = require("fs"),
+let model = {},
     input,
     currentLoaded = [0, 0], //track from which word to which word we've loaded
     lastScrollPosition = 0;
@@ -579,10 +579,9 @@ function onAnTextTopicSelect() {
 
 //HEATMAP TAB
 
-//TODO: @Adam and @Brendan, could you give inline comments on what these constants do?
-let prevalenceArray = [],
-    heatmapWidthPx = 500, //This is a constant that does... something
-    heatmapResPx = 1, //This one too!
+let prevalenceArray = [], //this is an array that counts the number of topic words in a bin
+    heatmapWidthPx = 500, //this is the total width of the heatmap bar as a whole
+    heatmapResPx = 1, //this is the width of each individual rect making up the heatmap
     heatmapSmoothing = 10,
     heatmapTopic1 = 0,
     heatmapTopic2 = 1,
@@ -733,6 +732,7 @@ function initializeHeatmaps() {
     replaceHeatmap(1,heatmapTopic1);
     replaceHeatmap(2,heatmapTopic2);
     replaceHeatmap(3,heatmapTopic3);
+    replaceHeatmap(4, heatmapTopic4);
 
     for (let iter = 1; iter < 5; iter++){
         let topic = eval("heatmapTopic" + iter);
