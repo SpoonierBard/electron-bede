@@ -212,16 +212,38 @@ function loadFile() {
     input = document.getElementById("json-file");
     if (!input.files[0]) {
         alert("Please select a file before clicking upload");
-    }
-    else {
+    } else if (input.files[0].name.split('.').pop().toLowerCase() !== "json"){
+        document.getElementById("json-file").value="";
+        document.getElementById("json-file-label").innerText = "Browse";
+        alert("Please select a JSON file")
+    } else {
         hideUploadScreen();
         reader.onload = (function() {
             model = JSON.parse(reader.result);
-            createMetadata();
-            initializeHeatmaps();
-            createAnnotatedText();
-            initializeWordCloudTab();
-            loadTabs();
+            if (model.dataset === undefined ||
+                model.topics === undefined ||
+                model.iterations === undefined ||
+                model.alpha === undefined ||
+                model.beta === undefined ||
+                model.wordsByLocationsWithStopwords === undefined ||
+                model.topicsByLocationWithStopwords === undefined ||
+                model.topicWordInstancesDict === undefined ||
+                model.stopwords === undefined ||
+                model.puncAndCap === undefined ||
+                model.puncCapLocations === undefined ||
+                model.newlineLocations === undefined) {
+                    document.getElementById("file-upload").style.display = "block";
+                    document.getElementById("progressbar").style.display = "none";
+                    document.getElementById("json-file").value="";
+                    document.getElementById("json-file-label").innerText = "Browse";
+                    alert("Please upload a correctly formatted JSON file")
+            } else {
+                createMetadata();
+                initializeHeatmaps();
+                createAnnotatedText();
+                initializeWordCloudTab();
+                loadTabs();
+            }
         });
         reader.readAsText(input.files[0]);
     }
@@ -231,8 +253,7 @@ function loadFile() {
  * Transitions from json file upload page to progress bar
  */
 function hideUploadScreen() {
-    let uploadbox = document.getElementById("file-upload");
-    uploadbox.style.display = "none";
+    document.getElementById("file-upload").style.display = "none";
     document.getElementById("progressbar").style.display = "block";
 }
 
@@ -487,7 +508,7 @@ function scrollAnnotatedText() {
     //     currentLoaded[1] -= 11;
     // }
     loadAnnotatedText(currentLoaded[0], currentLoaded[1]);
-    onSelect();
+    onAnTextTopicSelect();
 }
 
 /**
@@ -537,7 +558,7 @@ function offHover() {
 /**
  * Highlights all words in selected topic with the corresponding color of the dropdown
  */
-function onSelect() {
+function onAnTextTopicSelect() {
     //reset all spans to unselected
     d3.selectAll("span")
         .style("background-color", "white");
@@ -792,7 +813,7 @@ function drawRectangles(svg, dataset, binSize, heatmapNum) {
                 $("#tabs").tabs("option", "active", 2);
                 console.log(i, i * binSize);
                 loadAnnotatedText(i * binSize);
-                //currentLoaded[0] = i * binSize;
+                onAnTextTopicSelect();
             })
     } else {
         svg.selectAll("rect")
