@@ -455,6 +455,7 @@ function loadAnnotatedText(pageNum) {
         puncLocation = 0, //index of puncLocation
         puncLocTracker = 0, //where in text
         newlineTracker = 0, //index of newlines
+        newlineSetback = 0,
         startTracker = 0, //track how far into text we are
         wordToApp;
     for (let docInText in model.wordsByLocationWithStopwords) {
@@ -465,7 +466,17 @@ function loadAnnotatedText(pageNum) {
                 puncTracker += 1;
                 puncLocation += 1;
             }
-            while (puncLocTracker === model.newlineLocations[newlineTracker]) {
+            while (puncLocTracker + newlineSetback === model.newlineLocations[newlineTracker]) {
+                wordToApp += '<br/>';
+                newlineTracker += 1;
+            }
+            if (model.puncCapLocations[puncLocation] - model.puncCapLocations[puncLocation - 1] == 0.5) {
+                wordToApp += model.puncAndCap[puncTracker];
+                puncTracker += 1;
+                puncLocation += 1;
+                newlineSetback += 1;
+            }
+            while (puncLocTracker + newlineSetback === model.newlineLocations[newlineTracker]) {
                 wordToApp += '<br/>';
                 newlineTracker += 1;
             }
