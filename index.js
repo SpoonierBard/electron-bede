@@ -220,18 +220,20 @@ function loadFile() {
         hideUploadScreen();
         reader.onload = (function() {
             model = JSON.parse(reader.result);
-            if (model.dataset === undefined ||
-                model.topics === undefined ||
-                model.iterations === undefined ||
-                model.alpha === undefined ||
-                model.beta === undefined ||
-                model.wordsByLocationsWithStopwords === undefined ||
-                model.topicsByLocationWithStopwords === undefined ||
-                model.topicWordInstancesDict === undefined ||
-                model.stopwords === undefined ||
-                model.puncAndCap === undefined ||
-                model.puncCapLocations === undefined ||
-                model.newlineLocations === undefined) {
+            console.log(model);
+            if (model["dataset"] === undefined ||
+                model["topics"] === undefined ||
+                model["iterations"] === undefined ||
+                model["alpha"] === undefined ||
+                model["beta"] === undefined ||
+                model["wordsByLocationsWithStopwords"] === null ||
+                model["topicsByLocationWithStopwords"] === null ||
+                model["topicWordInstancesDict"] === null ||
+                model["stopwords"] === null ||
+                model["puncAndCap"] === null ||
+                model["puncCapLocations"] === null ||
+                model["newlineLocations"] === null) {
+                    console.log(model);
                     document.getElementById("file-upload").style.display = "block";
                     document.getElementById("progressbar").style.display = "none";
                     document.getElementById("json-file").value="";
@@ -755,7 +757,7 @@ function initializeHeatmaps() {
             binnedArrayBinSize = binnedArrayinfo["binSize"];
         binnedArray = smoothArray(binnedArray, heatmapSmoothing);
 
-        drawRectangles(svg, binnedArray, binnedArrayBinSize, iter);
+        drawRectangles(svg, binnedArray, binnedArrayBinSize, iter, topic);
     }
 
 
@@ -803,15 +805,25 @@ function drawRectangles(svg, dataset, binSize, heatmapNum) {
             .attr("y", function(d,i) {return i * heatmapResPx})
             .style("fill", function(d) {return colorScale(d);})
             .on("mouseover", function(d){
-                d3.select(this).style("fill", "black");
+                if (d3.select(this).style("fill") !== "red"){
+                    d3.select(this).style("fill", "black");
+                }
             })
             .on("mouseout", function(d){
-                d3.select(this).style("fill", function(d) {return colorScale(d);
+                if (d3.select(this).style("fill") !== "red") {
+                    d3.select(this).style("fill", function(d) {
+                        return colorScale(d);
                 })
-            })
+            }})
             .on("click", function(d, i){
+                if (heatmapNum === 4) {
+                    svg.selectAll("rect")
+                        .style("fill", function (d) {
+                            return colorScale(d);
+                        });
+                    d3.select(this).style("fill", "red");
+                }
                 $("#tabs").tabs("option", "active", 2);
-                console.log(i, i * binSize);
                 loadAnnotatedText(i * binSize);
                 onAnTextTopicSelect();
             })
