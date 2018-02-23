@@ -1,7 +1,8 @@
 //let fs = require("fs"),
 let model = {},
     input,
-    currentLoaded = [0, 0], //track from which word to which word we've loaded
+    currentPage = 0,
+    pages = [], //track from which word to which word we've loaded
     lastScrollPosition = 0;
 const colors  = ["#66c2a5", "#fc8d62", "#8da0cb"],
     scaledColors = ["hsl(161, 30%, 90%)", "hsl(17, 30%, 90%)", "hsl(222, 30%, 90%)", "hsl(70, 0%, 90%)", "hsl(161, 63%, 38%)", "hsl(17, 86%, 49%)", "hsl(222, 57%, 47%)", "hsl(70, 0%, 20%)"];
@@ -138,8 +139,6 @@ function createConfigFile(){
         alpha = parseFloat(document.getElementById("create-file-alpha").value),
         beta = parseFloat(document.getElementById("create-file-beta").value);
 
-    console.log(upperlimit);
-
     if (document.getElementById("create-file-default-english-stopwords").value === "true"){
         blacklist.push.apply(blacklist, englishStopwords);
     }
@@ -220,7 +219,6 @@ function loadFile() {
         hideUploadScreen();
         reader.onload = (function() {
             model = JSON.parse(reader.result);
-            console.log(model);
             if (model["dataset"] === undefined ||
                 model["topics"] === undefined ||
                 model["iterations"] === undefined ||
@@ -233,7 +231,6 @@ function loadFile() {
                 model["puncAndCap"] === null ||
                 model["puncCapLocations"] === null ||
                 model["newlineLocations"] === null) {
-                    console.log(model);
                     document.getElementById("file-upload").style.display = "block";
                     document.getElementById("progressbar").style.display = "none";
                     document.getElementById("json-file").value="";
@@ -422,6 +419,7 @@ $( function() {
  */
 
 function createAnnotatedText() {
+    pages = indexByPage();
     let topicDropdownHTML = "<option disabled selected>Select Topic</option>";
 
     //create three identical selectors for three possible topic comparisons
@@ -595,7 +593,42 @@ function jumpToHeatmap(topicNum) {
     }
 }
 
+function indexByPage() {
+    let binnedPages = [],
+        curPage = [-1,-1],
+        totalLength = 0,
+        locTracker = 0, //where in text
+        newlineTracker = 0, //index of newlines
+        wordToApp = "";
+    for (let i = 0; i < model.wordsByLocationWithStopwords.length; i++) {
+        totalLength += model.wordsByLocationWithStopwords[i].length;
+    }
+    console.log(totalLength);
+    let binSize = Math.floor(totalLength/(heatmapWidthPx/heatmapResPx)),
+        countDown = binSize;
 
+        console.log(binSize);
+    for (let i = 0; i < model.wordsByLocationWithStopwords.length; i++) {
+        for (let j = 0; j < model.wordsByLocationWithStopwords[i].length; j++) {
+            locTracker++;
+            countDown--;
+            if (curPage[0] === -1) {
+                curPage[0] = locTracker;
+            } else {
+                curPage[1] = locTracker;
+            }
+            if ((countDown<=0) && (locTracker === model.newlineLocations[newlineTracker]))  {
+                countDown = binSize;
+                binnedPages.push(curPage);
+                curPage = [-1, -1];
+            }
+            while (locTracker === model.newlineLocations[newlineTracker]) {
+                newlineTracker += 1;
+            }
+        }
+    }
+    return binnedPages;
+}
 
 
 //HEATMAP TAB
@@ -629,7 +662,6 @@ $(document).ready(function() {
     });
     $( "#an-text-scrollbar-select" ).change(function () {
         heatmapTopic4 = $("#an-text-scrollbar-select").find("option:selected").val();
-        console.log(heatmapTopic4);
         replaceHeatmap(4, heatmapTopic4);
     });
     /**
@@ -666,7 +698,7 @@ $(document).ready(function() {
 /**
  * Creates an array representing the distribution of a particular topic across corpus
  * @param {number} topic -- topic whose distribution array will represent
- * @returns {{array: number[], binSize: number}} -- array representing topic distribution across corpus
+ * @returns number[] -- array representing topic distribution across corpus
  */
 function createPrevalenceArray(topic) {
     let innerArray = [];
@@ -703,7 +735,7 @@ function createPrevalenceArray(topic) {
         }
     }
     prevalenceArray = [];
-    return {"array": binnedArray, "binSize": binSize};
+    return binnedArray;
 }
 
 /**
@@ -773,12 +805,10 @@ function initializeHeatmaps() {
             changeTop5Words(iter, (iter - 1));
         }
 
-        let binnedArrayinfo = createPrevalenceArray(topic),
-            binnedArray = binnedArrayinfo["array"],
-            binnedArrayBinSize = binnedArrayinfo["binSize"];
+        let binnedArray = createPrevalenceArray(topic),
         binnedArray = smoothArray(binnedArray, heatmapSmoothing);
 
-        drawRectangles(svg, binnedArray, binnedArrayBinSize, iter, topic);
+        drawRectangles(svg, binnedArray, iter, topic);
     }
 
 
@@ -810,7 +840,7 @@ function changeTop5Words(heatmapNum, topic) {
  * @param binSize -- size of bins in array
  * @param {number} heatmapNum -- which heatmap to draw the rectangles in
  */
-function drawRectangles(svg, dataset, binSize, heatmapNum) {
+function drawRectangles(svg, dataset, heatmapNum) {
     let colorScale = d3.scaleLinear()
         .domain([d3.min(dataset),
             d3.max(dataset)])
@@ -883,8 +913,8 @@ function drawRectangles(svg, dataset, binSize, heatmapNum) {
             })
             .on("click", function (d, i) {
                 $("#tabs").tabs("option", "active", 2);
-                loadAnnotatedText(i * binSize);
-                currentLoaded[0] = i * binSize;
+                loadAnnotatedText(i);
+                currentPage = i;
             })
     }
 }
@@ -897,11 +927,9 @@ function drawRectangles(svg, dataset, binSize, heatmapNum) {
 function replaceHeatmap(heatmapNum, topic) {
     var svg = d3.select("#heatmapSVG" + heatmapNum);
     svg.html("");
-    let heatmapArrayinfo = createPrevalenceArray(topic),
-        heatmapArray = heatmapArrayinfo["array"],
-        heatmapBinSize = heatmapArrayinfo["binSize"];
-    heatmapArray = smoothArray(heatmapArray, heatmapSmoothing);
-    drawRectangles(svg, heatmapArray, heatmapBinSize, heatmapNum);
+    let heatmapArray = createPrevalenceArray(topic);
+    let heatmapArray = smoothArray(heatmapArray, heatmapSmoothing);
+    drawRectangles(svg, heatmapArray, heatmapNum);
     if (heatmapNum < 4) changeTop5Words(heatmapNum, topic);
 }
 
@@ -918,12 +946,11 @@ function initializeWordCloudTab() {
     for (let i = 0; i < model.topicWordInstancesDict.length; i++) {
         topicDropdownHTMLWordCloud = topicDropdownHTMLWordCloud + "<option class=\"select-topic-" + i + "\" value=\"" + i + "\">" + model.nicknames[i] + "</option>";
     }
-    let sizeDropdownHTMLWordCloud = "<option disabled selected='selected' value='-1'>Select wordcloud size</option>";
-    sizeArray = ["Small", "Medium", "Large"];
+    let sizeDropdownHTMLWordCloud = "<option disabled selected='selected' value='-1'>Select wordcloud size</option>",
+        sizeArray = ["Small", "Medium", "Large"];
     for (let i = 0; i < sizeArray.length; i++) {
         size = sizeArray[i];
         sizeDropdownHTMLWordCloud = sizeDropdownHTMLWordCloud + "<option class=\select-size-" + i + "\" value=\"" + i + "\">" + size + "</option>"
-        console.log(i);
     }
     document.getElementById("word-cloud-topic-select").innerHTML = topicDropdownHTMLWordCloud;
     document.getElementById("cloud-size").innerHTML = sizeDropdownHTMLWordCloud;
@@ -1016,14 +1043,13 @@ function createWordCloud(topicNum, size) {
  */
 $(document).ready (function () {
     $("#word-cloud-topic-select").change(function () {
-        let topic = $("#word-cloud-topic-select").find("option:selected").val();
-        let size = parseInt($("#cloud-size").find("option:selected").val());
+        let topic = $("#word-cloud-topic-select").find("option:selected").val(),
+            size = parseInt($("#cloud-size").find("option:selected").val());
         createWordCloud(topic, size)
     });
     $("#cloud-size").change(function () {
-        let topic = $("#word-cloud-topic-select").find("option:selected").val();
-        let size = parseInt($("#cloud-size").find("option:selected").val());
-        console.log(topic);
+        let topic = $("#word-cloud-topic-select").find("option:selected").val(),
+            size = parseInt($("#cloud-size").find("option:selected").val());
         if (parseInt(topic) === -1) {
             createWordCloud(0, size);
         } else {

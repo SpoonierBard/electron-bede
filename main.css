@@ -176,11 +176,9 @@ input[type="number"] {
     margin-top: 150px;
 }
 
-#tab-3 {
-    overflow: scroll;
-}
 #metadata-topic-preview-text {
-    height: 11em;
+    min-height: 11em;
+    height: 100%;
 }
 
 /* Tooltip styles developed by Chris Bracco*/
