@@ -922,7 +922,17 @@ function replaceHeatmap(heatmapNum, topic) {
     if (heatmapNum < 4) changeTop5Words(heatmapNum, topic);
 }
 
+function pageLeft() {
+    currentPage--;
+    loadAnnotatedText(currentPage);
+    console.log(currentPage);
+}
 
+function pageRight() {
+    currentPage++;
+    loadAnnotatedText(currentPage);
+    console.log(currentPage);
+}
 
 
 //WORD CLOUD TAB
