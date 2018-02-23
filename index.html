@@ -186,7 +186,12 @@
             </div>
             <div><input id="check-highlight" type="checkbox" checked> <label for="check-highlight">Highlight Topic on Mouseover</label> </div>
         </div>
-        <div id = "an-text-body"></div>
+        <div id = "an-text-body">
+        </div>
+        <div id = "an-text-page-nav">
+            <span id = "back-an-text" class = "ui-icon ui-icon-triangle-1-w" onclick = "updatePageNumber(0)"> </span>
+            <span id = "fwd-an-text" class = "ui-icon ui-icon-triangle-1-e" onclick = "updatePageNumber(1)"> </span>
+        </div>
         <div id="an-text-scrollbar">
             <svg id="heatmapSVG4"></svg>
         </div>

@@ -1,8 +1,10 @@
 //let fs = require("fs"),
 let model = {},
     input,
-    currentLoaded = [0, 0], //track from which word to which word we've loaded
-    lastScrollPosition = 0;
+    // currentLoaded = [0, 0], //track from which word to which word we've loaded
+    pageRanges = [[0,500],[501,1000],[1001,1500]],
+    currentPage = 0;
+    // lastScrollPosition = 0;
 const colors  = ["#66c2a5", "#fc8d62", "#8da0cb"],
     scaledColors = ["hsl(161, 30%, 90%)", "hsl(17, 30%, 90%)", "hsl(222, 30%, 90%)", "hsl(70, 0%, 90%)", "hsl(161, 63%, 38%)", "hsl(17, 86%, 49%)", "hsl(222, 57%, 47%)", "hsl(70, 0%, 20%)"];
 
@@ -440,9 +442,19 @@ function createAnnotatedText() {
                 return colors[i - 1];
             });
     }
-    loadAnnotatedText(currentLoaded[0]);
 
-    document.getElementById("tab-3").addEventListener('mousewheel', mouseWheelEvent);
+    $( ".back-an-text" ).button({
+        icon: "ui-icon-triangle-1-w"
+    });
+
+    $( ".fwd-an-text" ).button({
+        icon: "ui-icon-triangle-1-e"
+    });
+
+    loadAnnotatedText(0);
+    // loadAnnotatedText(currentLoaded[0]);
+
+    // document.getElementById("tab-3").addEventListener('mousewheel', mouseWheelEvent);
 }
 
 function mouseWheelEvent(e) {
@@ -450,12 +462,15 @@ function mouseWheelEvent(e) {
     loadAnnotatedText(currentLoaded[0] + delta);
     console.log(delta);
 }
-function loadAnnotatedText(startIndex, endIndex=(startIndex + 500)) {
+// function loadAnnotatedText(startIndex, endIndex=(startIndex + 500)) {
+function loadAnnotatedText(pageNum) {
     d3.select("#an-text-body").selectAll("span").remove();
     //iterate through full text and add each word as own span with topic as class
-    if (startIndex < 0) {
-        startIndex = 0;
-    }
+    // if (startIndex < 0) {
+    //     startIndex = 0;
+    // }
+    let startIndex = pageRanges[pageNum][0];
+    let endIndex = pageRanges[pageNum][1];
     let puncTracker = 0, //index of punctuation
         puncLocation = 0, //index of puncLocation
         puncLocTracker = 0, //where in text
@@ -495,23 +510,23 @@ function loadAnnotatedText(startIndex, endIndex=(startIndex + 500)) {
         }
     }
     onAnTextTopicSelect();
-    currentLoaded[0] = startIndex;
-    currentLoaded[1] = endIndex;
+    // currentLoaded[0] = startIndex;
+    // currentLoaded[1] = endIndex;
 }
 
-function scrollAnnotatedText() {
+// function scrollAnnotatedText() {
     //TODO: find a way for this to not always be 0 :(
-    let newScrollPosition = window.scrollY;
-    if (newScrollPosition >= lastScrollPosition){
+    // let newScrollPosition = window.scrollY;
+    // if (newScrollPosition >= lastScrollPosition){
         //downward : load next text
-        currentLoaded[0] += 11;
-        currentLoaded[1] += 11;
-    } else {
+        // currentLoaded[0] += 11;
+        // currentLoaded[1] += 11;
+    // } else {
         //upward : load previous text
-        currentLoaded[0] -= 11;
-        currentLoaded[1] -= 11;
-    }
-    lastScrollPosition = newScrollPosition;
+    //     currentLoaded[0] -= 11;
+    //     currentLoaded[1] -= 11;
+    // }
+    // lastScrollPosition = newScrollPosition;
 
 
     // let direction = d3.event.wheelDelta < 0 ? 'down' : 'up';
@@ -522,8 +537,13 @@ function scrollAnnotatedText() {
     //     currentLoaded[0] += 11;
     //     currentLoaded[1] += 11;
     // }
-    loadAnnotatedText(currentLoaded[0], currentLoaded[1]);
-    onAnTextTopicSelect();
+function updatePageNumber(clickDirection) {
+    if (clickDirection == 0 && currentPage != 0) {
+        currentPage -= 1;
+    } else if (clickDirection == 1 && currentPage != pageRanges.length) {
+        currentPage += 1;
+    }
+    loadAnnotatedText(currentPage);
 }
 
 

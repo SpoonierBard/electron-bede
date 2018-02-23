@@ -186,7 +186,7 @@ input[type="number"] {
 /* Tooltip styles developed by Chris Bracco*/
 [data-tooltip] {
     position: relative;
-    z-index: 2;
+    z-index: 2000;
     cursor: pointer;
 }
 
