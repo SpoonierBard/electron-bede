@@ -474,7 +474,10 @@ function loadAnnotatedText(startIndex, endIndex=(startIndex + 500)) {
                     // .text(wordToApp)
                     .attr("class", "topic-" + model.topicsByLocationWithStopwords[docInText][word])
                     .on("mouseover", onHover)
-                    .on("mouseout", offHover);
+                    .on("mouseout", offHover)
+                    .on("click", function() {
+                        jumpToHeatmap(model.topicsByLocationWithStopwords[docInText][word]);
+                    });
                 d3.select('#an-text-body')
                     .append("span")
                     .text(" ");
@@ -571,6 +574,16 @@ function onAnTextTopicSelect() {
         let topic = ".topic-" + document.getElementById(selector).value;
         d3.selectAll(topic)
             .style("background-color", function() { return colors[i]; });
+    }
+}
+
+function jumpToHeatmap(topicNum) {
+    if (topicNum != -1){
+        heatmapTopic1 = topicNum;
+        replaceHeatmap(1,heatmapTopic1);
+        //TODO: change #heatmap1Menu selection
+        $("#heatmap1Menu").val(topicNum)
+        $("#tabs").tabs("option", "active", 1);
     }
 }
 
