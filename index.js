@@ -1,5 +1,5 @@
-let fs = require("fs"),
-    model = {},
+//let fs = require("fs"),
+let model = {},
     input,
     currentLoaded = [0, 0], //track from which word to which word we've loaded
     lastScrollPosition = 0;
@@ -114,7 +114,7 @@ function createConfigFile(){
         "tam", "tamen", "trans", "tu", "tum", "ubi", "uel", "uero", "unus", "ut"],
 
         bedeLatinStopwords = ["ab", "ac/1", "ad/2", "adhic", "aliqvi", "aliqvis", "an", "ante/2", "apvd", "at/2",
-            "atqve", "avt", "avtem", "cvm/2", "cvm/1", "cvm/3", "cvr/1", "de", "deinde", "dum/2", "ego", "enim/2", 
+            "atqve", "avt", "avtem", "cvm/2", "cvm/1", "cvm/3", "cvr/1", "de", "deinde", "dum/2", "ego", "enim/2",
             "ergo", "es", "est", "et/2", "etiam", "etsi/2", "ex", "fio", "havd", "hic/1", "iam", "idem", "igitvr",
             "ille", "in", "infra/2", "inter", "interim", "ipse", "is", "ita", "magis/2", "modo/1", "mox", "nam",
             "ne/4", "nec", "necqve", "neqve", "nisi", "non", "nos", "o", "ob", "per", "possvm/1", "post/2", "pro/1",
@@ -212,16 +212,40 @@ function loadFile() {
     input = document.getElementById("json-file");
     if (!input.files[0]) {
         alert("Please select a file before clicking upload");
-    }
-    else {
+    } else if (input.files[0].name.split('.').pop().toLowerCase() !== "json"){
+        document.getElementById("json-file").value="";
+        document.getElementById("json-file-label").innerText = "Browse";
+        alert("Please select a JSON file")
+    } else {
         hideUploadScreen();
         reader.onload = (function() {
             model = JSON.parse(reader.result);
-            createMetadata();
-            initializeHeatmaps();
-            createAnnotatedText();
-            initializeWordCloudTab();
-            loadTabs();
+            console.log(model);
+            if (model["dataset"] === undefined ||
+                model["topics"] === undefined ||
+                model["iterations"] === undefined ||
+                model["alpha"] === undefined ||
+                model["beta"] === undefined ||
+                model["wordsByLocationsWithStopwords"] === null ||
+                model["topicsByLocationWithStopwords"] === null ||
+                model["topicWordInstancesDict"] === null ||
+                model["stopwords"] === null ||
+                model["puncAndCap"] === null ||
+                model["puncCapLocations"] === null ||
+                model["newlineLocations"] === null) {
+                    console.log(model);
+                    document.getElementById("file-upload").style.display = "block";
+                    document.getElementById("progressbar").style.display = "none";
+                    document.getElementById("json-file").value="";
+                    document.getElementById("json-file-label").innerText = "Browse";
+                    alert("Please upload a correctly formatted JSON file")
+            } else {
+                createMetadata();
+                initializeHeatmaps();
+                createAnnotatedText();
+                initializeWordCloudTab();
+                loadTabs();
+            }
         });
         reader.readAsText(input.files[0]);
     }
@@ -231,8 +255,7 @@ function loadFile() {
  * Transitions from json file upload page to progress bar
  */
 function hideUploadScreen() {
-    let uploadbox = document.getElementById("file-upload");
-    uploadbox.style.display = "none";
+    document.getElementById("file-upload").style.display = "none";
     document.getElementById("progressbar").style.display = "block";
 }
 
@@ -418,10 +441,15 @@ function createAnnotatedText() {
             });
     }
     loadAnnotatedText(currentLoaded[0]);
-    d3.select('#tab-3')
-        .on('scroll', scrollAnnotatedText);
+
+    document.getElementById("tab-3").addEventListener('mousewheel', mouseWheelEvent);
 }
 
+function mouseWheelEvent(e) {
+    let delta = e.wheelDelta;
+    loadAnnotatedText(currentLoaded[0] + delta);
+    console.log(delta);
+}
 function loadAnnotatedText(startIndex, endIndex=(startIndex + 500)) {
     d3.select("#an-text-body").selectAll("span").remove();
     //iterate through full text and add each word as own span with topic as class
@@ -451,7 +479,10 @@ function loadAnnotatedText(startIndex, endIndex=(startIndex + 500)) {
                     // .text(wordToApp)
                     .attr("class", "topic-" + model.topicsByLocationWithStopwords[docInText][word])
                     .on("mouseover", onHover)
-                    .on("mouseout", offHover);
+                    .on("mouseout", offHover)
+                    .on("click", function() {
+                        jumpToHeatmap(model.topicsByLocationWithStopwords[docInText][word]);
+                    });
                 d3.select('#an-text-body')
                     .append("span")
                     .text(" ");
@@ -487,9 +518,11 @@ function scrollAnnotatedText() {
     //     currentLoaded[1] -= 11;
     // }
     loadAnnotatedText(currentLoaded[0], currentLoaded[1]);
-    onSelect();
-    console.log(currentLoaded);
+    onAnTextTopicSelect();
 }
+
+
+
 
 /**
  * Displays tooltip of topic for word on hover; highlights other words in topic if check-highlight is checked
@@ -538,7 +571,7 @@ function offHover() {
 /**
  * Highlights all words in selected topic with the corresponding color of the dropdown
  */
-function onSelect() {
+function onAnTextTopicSelect() {
     //reset all spans to unselected
     d3.selectAll("span")
         .style("background-color", "white");
@@ -552,15 +585,24 @@ function onSelect() {
     }
 }
 
+function jumpToHeatmap(topicNum) {
+    if (topicNum != -1){
+        heatmapTopic1 = topicNum;
+        replaceHeatmap(1,heatmapTopic1);
+        //TODO: change #heatmap1Menu selection
+        $("#heatmap1Menu").val(topicNum)
+        $("#tabs").tabs("option", "active", 1);
+    }
+}
+
 
 
 
 //HEATMAP TAB
 
-//TODO: @Adam and @Brendan, could you give inline comments on what these constants do?
-let prevalenceArray = [],
-    heatmapWidthPx = 500, //This is a constant that does... something
-    heatmapResPx = 1, //This one too!
+let prevalenceArray = [], //this is an array that counts the number of topic words in a bin
+    heatmapWidthPx = 500, //this is the total width of the heatmap bar as a whole
+    heatmapResPx = 1, //this is the width of each individual rect making up the heatmap
     heatmapSmoothing = 10,
     heatmapTopic1 = 0,
     heatmapTopic2 = 1,
@@ -711,6 +753,7 @@ function initializeHeatmaps() {
     replaceHeatmap(1,heatmapTopic1);
     replaceHeatmap(2,heatmapTopic2);
     replaceHeatmap(3,heatmapTopic3);
+    replaceHeatmap(4, heatmapTopic4);
 
     for (let iter = 1; iter < 5; iter++){
         let topic = eval("heatmapTopic" + iter);
@@ -735,7 +778,7 @@ function initializeHeatmaps() {
             binnedArrayBinSize = binnedArrayinfo["binSize"];
         binnedArray = smoothArray(binnedArray, heatmapSmoothing);
 
-        drawRectangles(svg, binnedArray, binnedArrayBinSize, iter);
+        drawRectangles(svg, binnedArray, binnedArrayBinSize, iter, topic);
     }
 
 
@@ -778,22 +821,41 @@ function drawRectangles(svg, dataset, binSize, heatmapNum) {
             .enter()
             .append("rect")
             .attr("height", function() {return heatmapResPx})
-            .attr("width", 50)
-            .attr("y", 0)
-            .attr("x", function(d,i) {return i * heatmapResPx})
+            .attr("width", 30)
+            .attr("x", 5)
+            .attr("y", function(d,i) {return i * heatmapResPx})
             .style("fill", function(d) {return colorScale(d);})
             .on("mouseover", function(d){
-                d3.select(this).style("fill", "black");
+                if (d3.select(this).style("fill") !== "red"){
+                    d3.select(this)
+                        .style("fill", "black")
+                        .attr("x", 0)
+                        .attr("width", 40)
+                }
             })
             .on("mouseout", function(d){
-                d3.select(this).style("fill", function(d) {return colorScale(d);
-                })
-            })
+                if (d3.select(this).style("fill") !== "red") {
+                    d3.select(this)
+                        .style("fill", function(d) {return colorScale(d);})
+                        .attr("x", 5)
+                        .attr("width", 30)
+            }})
             .on("click", function(d, i){
+                if (heatmapNum === 4) {
+                    svg.selectAll("rect")
+                        .style("fill", function (d) {
+                            return colorScale(d);
+                        })
+                        .attr("width", 30)
+                        .attr("x", 5)
+                    d3.select(this)
+                        .style("fill", "red")
+                        .attr("x", 0)
+                        .attr("width", 40)
+                }
                 $("#tabs").tabs("option", "active", 2);
-                console.log(i, i*binSize);
                 loadAnnotatedText(i * binSize);
-                currentLoaded[0] = i * binSize;
+                onAnTextTopicSelect();
             })
     } else {
         svg.selectAll("rect")
