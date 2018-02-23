@@ -432,6 +432,7 @@ function loadAnnotatedText(startIndex, endIndex=(startIndex + 500)) {
             startTracker += 1;
         }
     }
+    onSelect();
     currentLoaded[0] = startIndex;
     currentLoaded[1] = endIndex;
 }
@@ -440,26 +441,26 @@ function scrollAnnotatedText() {
     //TODO: find a way for this to not always be 0 :(
     let newScrollPosition = window.scrollY;
     if (newScrollPosition >= lastScrollPosition){
-        //upward : load previous text
-        currentLoaded[0] -= 11;
-        currentLoaded[1] -= 11;
-    } else {
         //downward : load next text
         currentLoaded[0] += 11;
         currentLoaded[1] += 11;
+    } else {
+        //upward : load previous text
+        currentLoaded[0] -= 11;
+        currentLoaded[1] -= 11;
     }
     lastScrollPosition = newScrollPosition;
 
+
     // let direction = d3.event.wheelDelta < 0 ? 'down' : 'up';
     // if (direction == 'up') {
-    //     currentLoaded[0] += 11;
-    //     currentLoaded[1] += 11;
-    // } else {
     //     currentLoaded[0] -= 11;
     //     currentLoaded[1] -= 11;
+    // } else {
+    //     currentLoaded[0] += 11;
+    //     currentLoaded[1] += 11;
     // }
     loadAnnotatedText(currentLoaded[0], currentLoaded[1]);
-    onSelect();
     console.log(currentLoaded);
 }
 
