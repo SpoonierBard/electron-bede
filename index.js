@@ -438,16 +438,15 @@ function createAnnotatedText() {
                 return colors[i - 1];
             });
     }
-
+    d3.select("#an-text-body")
+        .attr("height", function() {
+            return document.getElementById("heatmapSVG4").height
+        });
     loadAnnotatedText(0);
 }
 
 function loadAnnotatedText(pageNum) {
     d3.select("#an-text-body").selectAll("span").remove();
-    //iterate through full text and add each word as own span with topic as class
-    // if (startIndex < 0) {
-    //     startIndex = 0;
-    // }
     let startIndex = pageRanges[pageNum][0],
         endIndex = pageRanges[pageNum][1],
         puncTracker = 0, //index of punctuation
@@ -464,7 +463,17 @@ function loadAnnotatedText(pageNum) {
                 puncTracker += 1;
                 puncLocation += 1;
             }
-            while (puncLocTracker === model.newlineLocations[newlineTracker]) {
+            while (puncLocTracker + newlineSetback === model.newlineLocations[newlineTracker]) {
+                wordToApp += '<br/>';
+                newlineTracker += 1;
+            }
+            if (model.puncCapLocations[puncLocation] - model.puncCapLocations[puncLocation - 1] == 0.5) {
+                wordToApp += model.puncAndCap[puncTracker];
+                puncTracker += 1;
+                puncLocation += 1;
+                newlineSetback += 1;
+            }
+            while (puncLocTracker + newlineSetback === model.newlineLocations[newlineTracker]) {
                 wordToApp += '<br/>';
                 newlineTracker += 1;
             }
@@ -489,6 +498,7 @@ function loadAnnotatedText(pageNum) {
         }
     }
     document.getElementById("page-number").innerText = ("Page " + (currentPage + 1) + " of " + (pageRanges.length + 1));
+    document.getElementById("an-text-body").scrollTo(0,0);
     onAnTextTopicSelect();
 }
 

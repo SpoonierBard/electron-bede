@@ -172,7 +172,7 @@ input[type="number"] {
     float: right;
 }
 #an-text-body {
-    height: 10em;
+    height: 500px;
     margin-top: 200px;
 }
 
@@ -259,5 +259,5 @@ input[type="number"] {
 }
 
 #heatmapSVG4 {
-    margin-top:111px;
+    margin-top:200px;
 }
