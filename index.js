@@ -1,5 +1,5 @@
-//let fs = require("fs"),
-let model = {},
+let fs = require("fs"),
+    model = {},
     input,
     currentPage = 0,
     pageRanges = [], //track from which word to which word we've loaded
@@ -499,7 +499,7 @@ function loadAnnotatedText(pageNum) {
             startTracker += 1;
         }
     }
-    document.getElementById("page-number").innerText = ("Page " + (currentPage + 1) + " of " + (pageRanges.length + 1));
+    document.getElementById("page-number").innerText = ("Page " + (currentPage + 1) + " of " + (pageRanges.length));
     if (document.getElementById("an-text-body").scrollTop > 20){
         document.getElementById("an-text-body").scrollTop = 0;
     }
@@ -591,8 +591,6 @@ function indexByPage() {
     console.log(totalLength);
     let binSize = Math.floor(totalLength/(heatmapWidthPx/heatmapResPx)),
         countDown = binSize;
-
-        console.log(binSize);
     for (let i = 0; i < model.wordsByLocationWithStopwords.length; i++) {
         for (let j = 0; j < model.wordsByLocationWithStopwords[i].length; j++) {
             locTracker++;
@@ -602,14 +600,13 @@ function indexByPage() {
             } else {
                 curPage[1] = locTracker;
             }
-            if ((countDown<=0) /*&& (locTracker === model.newlineLocations[newlineTracker])*/)  {
+            if ((countDown<=0) && (totalLength - locTracker > binSize) /*&& (locTracker === model.newlineLocations[newlineTracker])*/)  {
                 countDown = binSize;
                 binnedPages.push(curPage);
                 curPage = [-1, -1];
+            } else if (locTracker === totalLength){
+                binnedPages.push(curPage);
             }
-            /*while (locTracker === model.newlineLocations[newlineTracker]) {
-                newlineTracker += 1;
-            }*/
         }
     }
     return binnedPages;
@@ -928,7 +925,7 @@ function pageLeft() {
 function pageRight() {
     currentPage++;
     if (currentPage > (pageRanges.length - 1)) {
-        currentPage = pageRanges.length;
+        currentPage = pageRanges.length - 1;
     }
     loadAnnotatedText(currentPage);
 }
