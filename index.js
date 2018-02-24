@@ -1,4 +1,4 @@
-let fs = require("fs"),
+let //fs = require("fs"),
     model = {},
     input,
     currentPage = 0,
@@ -138,8 +138,6 @@ function createConfigFile(){
         usingcsv,
         alpha = parseFloat(document.getElementById("create-file-alpha").value),
         beta = parseFloat(document.getElementById("create-file-beta").value);
-        console.log(whitelist);
-        console.log(blacklist);
 
     if (document.getElementById("create-file-default-english-stopwords").value === "true"){
         blacklist.push.apply(blacklist, englishStopwords);
@@ -422,16 +420,18 @@ $( function() {
 
 function createAnnotatedText() {
     pageRanges = indexByPage();
-    let topicDropdownHTML = "<option disabled selected>Select Topic</option>";
+    let topicDropdownHTML = "<option selected>Select Topic</option>";
+    let topicDropdownHTMLScroll = "<option disabled selected>Select Topic</option>";
 
     //create three identical selectors for three possible topic comparisons
     for (let i = 0; i < model.topicWordInstancesDict.length; i++) {
         topicDropdownHTML = topicDropdownHTML + "<option class=\"select-topic-" + i + "\" value=\"" + i + "\">" + model.nicknames[i] + "</option>";
+        topicDropdownHTMLScroll = topicDropdownHTMLScroll + "<option class=\"select-topic-" + i + "\" value=\"" + i + "\">" + model.nicknames[i] + "</option>";
     }
     document.getElementById("an-text-topic-select-1").innerHTML = topicDropdownHTML;
     document.getElementById("an-text-topic-select-2").innerHTML = topicDropdownHTML;
     document.getElementById("an-text-topic-select-3").innerHTML = topicDropdownHTML;
-    document.getElementById("an-text-scrollbar-select").innerHTML = topicDropdownHTML;
+    document.getElementById("an-text-scrollbar-select").innerHTML = topicDropdownHTMLScroll;
     $('#an-text-scrollbar-select').find('option')[1].selected = true;
 
     for (let i = 1; i < 4; i++) {
@@ -447,11 +447,11 @@ function createAnnotatedText() {
     loadAnnotatedText(0);
 }
 
-function loadAnnotatedText(pageNum) {
+function loadAnnotatedText() {
     d3.select("#an-text-body").selectAll("span").remove();
 
-    let startIndex = pageRanges[pageNum][0],
-        endIndex = pageRanges[pageNum][1],
+    let startIndex = pageRanges[currentPage][0],
+        endIndex = pageRanges[currentPage][1],
         puncTracker = 0, //index of punctuation
         puncLocation = 0, //index of puncLocation
         puncLocTracker = 0, //where in text
@@ -505,7 +505,7 @@ function loadAnnotatedText(pageNum) {
     if (document.getElementById("an-text-body").scrollTop > 20){
         document.getElementById("an-text-body").scrollTop = 0;
     }
-    var getRekt = "#rect-"+pageNum;
+    var getRekt = "#rect-"+currentPage;
     replaceHeatmap(4, heatmapTopic4)
     d3.select(getRekt)
         .style("fill", "red")
@@ -635,8 +635,8 @@ function indexByPage() {
 let prevalenceArray = [], //this is an array that counts the number of topic words in a bin
     heatmapWidthPx = 500, //this is the total width of the heatmap bar as a whole
     heatmapResPx = 1, //this is the width of each individual rect making up the heatmap
-    heatmapSmoothing = 10,
-    heatmapTopic1 = 0,
+    heatmapSmoothing = 10, //this is how intense the smoothing applied to the heatmap is
+    heatmapTopic1 = 0, //the topic currently displayed in heatmap 1
     heatmapTopic2 = 1,
     heatmapTopic3 = 2,
     heatmapTopic4 = 0;
@@ -661,7 +661,7 @@ $(document).ready(function() {
     });
     $( "#an-text-scrollbar-select" ).change(function () {
         heatmapTopic4 = $("#an-text-scrollbar-select").find("option:selected").val();
-        replaceHeatmap(4, heatmapTopic4);
+        loadAnnotatedText();
     });
     /**
      * Reloads heatmaps taking into account whether a smoothing constant is being applied on checkbox change
@@ -781,10 +781,14 @@ function initializeHeatmaps() {
     $('#heatmap2Menu').find('option')[2].selected = true;
     document.getElementById("heatmap3Menu").innerHTML = topicDropdownHTML;
     $('#heatmap3Menu').find('option')[3].selected = true;
-    replaceHeatmap(1,heatmapTopic1);
-    replaceHeatmap(2,heatmapTopic2);
-    replaceHeatmap(3,heatmapTopic3);
-    replaceHeatmap(4, heatmapTopic4);
+    heatmapTopic1 = 0;
+    heatmapTopic2 = 1;
+    heatmapTopic3 = 2;
+    heatmapTopic4 = 0;
+    replaceHeatmap(1,0);
+    replaceHeatmap(2,1);
+    replaceHeatmap(3,2);
+    replaceHeatmap(4, 0);
 
     for (let iter = 1; iter < 5; iter++){
         let topic = eval("heatmapTopic" + iter);
@@ -820,6 +824,7 @@ function initializeHeatmaps() {
  */
 function changeTop5Words(heatmapNum, topic) {
     //var topic = eval("heatmapTopic" + heatmapNum);
+    console.log(topic);
     let topicWords = Object.keys(model.topicWordInstancesDict[topic]),
         sortedWords = topicWords.sort(function(a,b){
         return model.topicWordInstancesDict[topic][b] - model.topicWordInstancesDict[topic][a];
@@ -874,21 +879,12 @@ function drawRectangles(svg, dataset, heatmapNum) {
                         .attr("width", 30)
             }})
             .on("click", function(d, i){
-                if (heatmapNum === 4) {
-                    svg.selectAll("rect")
-                        .style("fill", function (d) {
-                            return colorScale(d);
-                        })
-                        .attr("width", 30)
-                        .attr("x", 5)
-                    d3.select(this)
-                        .style("fill", "red")
-                        .attr("x", 0)
-                        .attr("width", 40)
-                }
                 $("#tabs").tabs("option", "active", 2);
                 currentPage = i;
-                loadAnnotatedText(i);
+                if (currentPage >= 500) {
+                    currentPage--;
+                }
+                loadAnnotatedText(currentPage);
             })
     } else {
         svg.selectAll("rect")
@@ -943,7 +939,9 @@ function replaceHeatmap(heatmapNum, topic) {
     var svg = d3.select("#heatmapSVG" + heatmapNum);
     svg.html("");
     let heatmapArray = createPrevalenceArray(topic);
-    heatmapArray = smoothArray(heatmapArray, heatmapSmoothing);
+    if(heatmapNum != 4) {
+        heatmapArray = smoothArray(heatmapArray, heatmapSmoothing);
+    }
     drawRectangles(svg, heatmapArray, heatmapNum);
     if (heatmapNum < 4) changeTop5Words(heatmapNum, topic);
 }
@@ -983,7 +981,7 @@ function initializeWordCloudTab() {
     }
     document.getElementById("word-cloud-topic-select").innerHTML = topicDropdownHTMLWordCloud;
     let width = window.innerWidth - 270;
-    let height = window.innerHeight - 160;
+    let height = window.innerHeight - 170;
     createWordCloud(0, width, height);
 }
 function createWordCloud(topicNum, width, height) {
@@ -1071,14 +1069,19 @@ $(document).ready (function () {
     $("#word-cloud-topic-select").change(function () {
         let topic = $("#word-cloud-topic-select").find("option:selected").val();
         let width = window.innerWidth - 270;
-        let height = window.innerHeight - 160;
+        let height = window.innerHeight - 170;
         createWordCloud(topic, width, height);
     });
 });
 
-/*window.addEventListener('resize', function() {
+window.addEventListener('resize', function() {
+    let width = window.innerWidth - 270;
+    let height = window.innerHeight - 500;
+    //document.getElementById('metadata-topic-preview-text').height(height);
+    $("#metadata-topic-preview-text").height(height);
+    $("#metadata-topic-preview-text").width(width);
+    /*
     $("#word-cloud").empty();
-    console.log("resize :) ");
     let topic = $("#word-cloud-topic-select").find("option:selected").val();
     if (topic == -1) topic = 0;
     //let topic = document.getElementById("word-cloud-topic-select").val();
@@ -1086,5 +1089,5 @@ $(document).ready (function () {
     //let size = parseInt($("#cloud-size").find("option:selected").val());
     let width = window.innerWidth - 270;
     let height = window.innerHeight - 160;
-    createWordCloud(topic, width, height);
-}, true);*/
+    createWordCloud(topic, width, height);*/
+}, true);
