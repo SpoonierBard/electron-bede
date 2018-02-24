@@ -477,6 +477,7 @@ function createAnnotatedText() {
     loadAnnotatedText(0);
 }
 
+/* Loads the current page of the text in to the annotated text body */
 function loadAnnotatedText() {
     d3.select("#an-text-body").selectAll("span").remove();
 
@@ -519,9 +520,11 @@ function loadAnnotatedText() {
                     .append("span")
                     .html(wordToApp)
                     .attr("class", "topic-" + model.topicsByLocationWithStopwords[docInText][word])
+                    //value = 1 if span is a selected topic, 0 otherwise
                     .attr("value", 0)
                     .on("mouseover", onHover)
                     .on("mouseout", offHover)
+                    //clicking on selected span triggers a jump to the heatmap
                     .on("click", function () {
                         if (parseInt(d3.select(this).attr("value")) === 1) {
                             jumpToHeatmap();
@@ -534,15 +537,20 @@ function loadAnnotatedText() {
             startTracker += 1;
         }
     }
+    //update page number indicator
     document.getElementById("page-number").innerText = ("Page " + (currentPage + 1) + " of " + (pageRanges.length));
     if (document.getElementById("an-text-body").scrollTop > 20){
         document.getElementById("an-text-body").scrollTop = 0;
     }
+
+    //select correct scrollbar rectangle
     let getRekt = "#rect-"+currentPage;
     d3.select(getRekt)
         .style("fill", "red")
         .attr("x", 0)
         .attr("width", 40);
+
+    //make sure all topics get selected as necessary
     onAnTextTopicSelect();
 }
 
@@ -610,6 +618,9 @@ function onAnTextTopicSelect() {
     }
 }
 
+/*
+ Propagates topic selections in heatMap tab to anText tab
+ */
 function propagateDropdownChange() {
     for (let j = 1; j < 4; j++) {
         let menuName = "heatmap" + j + "Menu";
@@ -619,6 +630,10 @@ function propagateDropdownChange() {
     }
 }
 
+/*
+On clicking a selected span in anText, switch to heat map tab with same topics selected
+If anText has unselected topics, use default values for each heatmap
+*/
 function jumpToHeatmap() {
     console.log("jumped");
     let topicNum;
@@ -632,13 +647,18 @@ function jumpToHeatmap() {
         $('#heatmap' + i + 'Menu').val(topicNum);
     }
     $("#tabs").tabs("option", "active", 1);
+
+    //add indicator in heatMap for position in annotatedText that we jumped from
     let jumpedRect = ".rect-"  + currentPage;
     d3.selectAll(jumpedRect)
         .style("fill", "black");
+    //delay and then remove indicator
     window.setTimeout(replaceAllHeatmaps, 2000);
-
 }
 
+/*
+Helper function for heatmap jump that removes indicators by overwriting every heatmap
+*/
 function replaceAllHeatmaps() {
     for (let i = 1; i < 4; i++) {
         let topicNum = document.getElementById("heatmap" + i + "Menu").value;
@@ -646,6 +666,9 @@ function replaceAllHeatmaps() {
     }
 }
 
+/*
+Calculate the word ranges on each page and update pageRanges accordingly
+ */
 function indexByPage() {
     let binnedPages = [],
         curPage = [-1,-1],
@@ -1014,6 +1037,9 @@ function replaceHeatmap(heatmapNum, topic) {
     drawRectangles(svg, heatmapArray, heatmapNum);
 }
 
+/*
+Check to make sure we aren't on the first page, and update page number to previous
+ */
 function pageLeft() {
     currentPage--;
     if (currentPage < 0) {
@@ -1022,6 +1048,9 @@ function pageLeft() {
     loadAnnotatedText(currentPage);
 }
 
+/*
+Check to make sure we're not on the last page, and update page number to next
+ */
 function pageRight() {
     currentPage++;
     if (currentPage > (pageRanges.length - 1)) {
@@ -1030,6 +1059,9 @@ function pageRight() {
     loadAnnotatedText(currentPage);
 }
 
+/*
+Check that page number input is in defined page range, update current page, and reload text from that page
+ */
 function jumpPage() {
     let newPage = parseInt(document.getElementById("jumpNum").value);
     if (0 < newPage && newPage <= pageRanges.length) {
