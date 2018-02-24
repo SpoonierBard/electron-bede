@@ -3,6 +3,7 @@ let fs = require("fs"),
     input,
     currentPage = 0,
     pageRanges = []; //track from which word to which word we've loaded
+
 const colors  = ["#66c2a5", "#fc8d62", "#8da0cb"],
     scaledColors = ["hsl(161, 30%, 90%)", "hsl(17, 30%, 90%)", "hsl(222, 30%, 90%)", "hsl(70, 0%, 90%)", "hsl(161, 63%, 38%)", "hsl(17, 86%, 49%)", "hsl(222, 57%, 47%)", "hsl(70, 0%, 20%)"];
 
@@ -540,6 +541,7 @@ function loadAnnotatedText() {
         document.getElementById("an-text-body").scrollTop = 0;
     }
     let getRekt = "#rect-"+currentPage;
+    replaceHeatmap(4, heatmap4Topic);
     d3.select(getRekt)
         .style("fill", "red")
         .attr("x", 0)
