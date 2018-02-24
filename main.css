@@ -132,6 +132,10 @@ input[type="number"] {
     overflow: scroll;
 }
 
+.text-centered {
+    text-align: center;
+}
+
 #progressbar {
     width: 80%;
 }
@@ -145,7 +149,7 @@ input[type="number"] {
     position: fixed;
     top: 0;
     display: block;
-    width: 100%;
+    width: auto;
     background-color: white;
     z-index: 1000;
     padding-bottom: 12px;
@@ -172,7 +176,7 @@ input[type="number"] {
     float: right;
 }
 #an-text-body {
-    height: 10em;
+    height: 500px;
     margin-top: 200px;
 }
 
@@ -259,5 +263,5 @@ input[type="number"] {
 }
 
 #heatmapSVG4 {
-    margin-top:111px;
+    margin-top:200px;
 }

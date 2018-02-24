@@ -440,24 +440,24 @@ function createAnnotatedText() {
                 return colors[i - 1];
             });
     }
-
+    d3.select("#an-text-body")
+        .attr("height", function() {
+            return document.getElementById("heatmapSVG4").height
+        });
     loadAnnotatedText(0);
 }
 
 function loadAnnotatedText(pageNum) {
-
     d3.select("#an-text-body").selectAll("span").remove();
-    //iterate through full text and add each word as own span with topic as class
-    // if (startIndex < 0) {
-    //     startIndex = 0;
-    // }
-    let startIndex = pageRanges[pageNum][0];
-    let endIndex = pageRanges[pageNum][1];
-    let puncTracker = 0, //index of punctuation
+
+    let startIndex = pageRanges[pageNum][0],
+        endIndex = pageRanges[pageNum][1],
+        puncTracker = 0, //index of punctuation
         puncLocation = 0, //index of puncLocation
         puncLocTracker = 0, //where in text
         newlineTracker = 0, //index of newlines
         startTracker = 0, //track how far into text we are
+        newlineSetback = 0,
         wordToApp;
     for (let docInText in model.wordsByLocationWithStopwords) {
         for (let word in model.wordsByLocationWithStopwords[docInText]) {
@@ -467,7 +467,17 @@ function loadAnnotatedText(pageNum) {
                 puncTracker += 1;
                 puncLocation += 1;
             }
-            while (puncLocTracker === model.newlineLocations[newlineTracker]) {
+            while (puncLocTracker + newlineSetback === model.newlineLocations[newlineTracker]) {
+                wordToApp += '<br/>';
+                newlineTracker += 1;
+            }
+            if (model.puncCapLocations[puncLocation] - model.puncCapLocations[puncLocation - 1] == 0.5) {
+                wordToApp += model.puncAndCap[puncTracker];
+                puncTracker += 1;
+                puncLocation += 1;
+                newlineSetback += 1;
+            }
+            while (puncLocTracker + newlineSetback === model.newlineLocations[newlineTracker]) {
                 wordToApp += '<br/>';
                 newlineTracker += 1;
             }
@@ -491,8 +501,11 @@ function loadAnnotatedText(pageNum) {
             startTracker += 1;
         }
     }
+    document.getElementById("page-number").innerText = ("Page " + (currentPage + 1) + " of " + (pageRanges.length));
+    if (document.getElementById("an-text-body").scrollTop > 20){
+        document.getElementById("an-text-body").scrollTop = 0;
+    }
     onAnTextTopicSelect();
-
 }
 
 
@@ -580,8 +593,6 @@ function indexByPage() {
     console.log(totalLength);
     let binSize = Math.floor(totalLength/(heatmapWidthPx/heatmapResPx)),
         countDown = binSize;
-
-        console.log(binSize);
     for (let i = 0; i < model.wordsByLocationWithStopwords.length; i++) {
         for (let j = 0; j < model.wordsByLocationWithStopwords[i].length; j++) {
             locTracker++;
@@ -591,13 +602,12 @@ function indexByPage() {
             } else {
                 curPage[1] = locTracker;
             }
-            if ((countDown<=0) && (locTracker === model.newlineLocations[newlineTracker]))  {
+            if ((countDown<=0) && (totalLength - locTracker > binSize) /*&& (locTracker === model.newlineLocations[newlineTracker])*/)  {
                 countDown = binSize;
                 binnedPages.push(curPage);
                 curPage = [-1, -1];
-            }
-            while (locTracker === model.newlineLocations[newlineTracker]) {
-                newlineTracker += 1;
+            } else if (locTracker === totalLength){
+                binnedPages.push(curPage);
             }
         }
     }
@@ -857,6 +867,7 @@ function drawRectangles(svg, dataset, heatmapNum) {
                         .attr("width", 40)
                 }
                 $("#tabs").tabs("option", "active", 2);
+                currentPage = i;
                 loadAnnotatedText(i);
             })
     } else {
@@ -907,14 +918,18 @@ function replaceHeatmap(heatmapNum, topic) {
 
 function pageLeft() {
     currentPage--;
+    if (currentPage < 0) {
+        currentPage = 0;
+    }
     loadAnnotatedText(currentPage);
-    console.log(currentPage);
 }
 
 function pageRight() {
     currentPage++;
+    if (currentPage > (pageRanges.length - 1)) {
+        currentPage = pageRanges.length - 1;
+    }
     loadAnnotatedText(currentPage);
-    console.log(currentPage);
 }
 
 
