@@ -1,4 +1,4 @@
-let fs = require("fs"),
+let //fs = require("fs"),
     model = {},
     input,
     currentPage = 0,
@@ -865,18 +865,6 @@ function drawRectangles(svg, dataset, heatmapNum) {
                         .attr("width", 30)
             }})
             .on("click", function(d, i){
-                if (heatmapNum === 4) {
-                    svg.selectAll("rect")
-                        .style("fill", function (d) {
-                            return colorScale(d);
-                        })
-                        .attr("width", 30)
-                        .attr("x", 5)
-                    d3.select(this)
-                        .style("fill", "red")
-                        .attr("x", 0)
-                        .attr("width", 40)
-                }
                 $("#tabs").tabs("option", "active", 2);
                 currentPage = i;
                 loadAnnotatedText(i);
@@ -933,7 +921,9 @@ function replaceHeatmap(heatmapNum, topic) {
     var svg = d3.select("#heatmapSVG" + heatmapNum);
     svg.html("");
     let heatmapArray = createPrevalenceArray(topic);
-    heatmapArray = smoothArray(heatmapArray, heatmapSmoothing);
+    if(heatmapNum != 4) {
+        heatmapArray = smoothArray(heatmapArray, heatmapSmoothing);
+    }
     drawRectangles(svg, heatmapArray, heatmapNum);
     if (heatmapNum < 4) changeTop5Words(heatmapNum, topic);
 }
