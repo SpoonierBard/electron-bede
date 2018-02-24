@@ -168,11 +168,12 @@
         </div>
     </div>
     <div id="tab-3">
-        <div id = "fixed-tools">
+            <div style="display: grid;">
+                <div style="grid-row: 1;">
             <div id = "an-text-title">
-             <h2>Annotated Text</h2>
+             <h2 style="grid-row: 1;">Annotated Text</h2>
             </div>
-            <div id = "selector-div">
+            <div id = "selector-div" style="display: block; margin: 15px 0 15px 0;">
                 <select name="an-text-topic-select" id="an-text-topic-select-1" onchange="onAnTextTopicSelect();" class="styled-select slate">
                     <!-- this select tag will be filled with an <option> for each topic-->
                 </select>
@@ -182,23 +183,24 @@
                 <select name="an-text-topic-select" id="an-text-topic-select-3" onchange="onAnTextTopicSelect();" class="styled-select slate">
                     <!-- this select tag will be filled with an <option> for each topic-->
                 </select>
-                <select name="an-text-scrollbar-select" id="an-text-scrollbar-select" class="styled-select slate"></select>
             </div>
-            <div style="margin-top: 10px; margin-bottom: 10px"><input id="check-highlight" type="checkbox" checked> <label for="check-highlight">Highlight Topic on Mouseover</label> </div>
-            <div class="text-centered" id="an-text-nav">
-                <nobr>
-                    <button class="ui-button ui-widget ui-corner-all" onclick="pageLeft();"><</button>
-                    <div id="page-number" style="display: inline; margin: 2em;"></div>
-                    <button class="ui-button ui-widget ui-corner-all" onclick="pageRight();">></button>
-                    <button class="ui-button ui-widget ui-corner-all" onclick="jumpPage()">Jump to</button>
-                    <input type="number" id="jumpNum" value="">
-                </nobr>
+                    <div style="display: block; margin: 15px 0 15px 0;"><input id="check-highlight" type="checkbox" checked> <label for="check-highlight">Highlight Topic on Mouseover</label> </div>
+                    <div style="display: block; margin: 15px 0 15px 0;"><label for="an-text-scrollbar-select">Scrollbar topic </label><select name="an-text-scrollbar-select" id="an-text-scrollbar-select" class="styled-select slate"></select></div>
+                    <div id = "an-text-body" class="scrollable" style="display: block; margin: 15px 0 15px 0;"></div>
+                    <div class="text-centered" style="display: block;" id="an-text-nav">
+                    <nobr>
+                        <button class="ui-button ui-widget ui-corner-all" onclick="pageLeft();"><</button>
+                        <div id="page-number" style="display: inline; margin: 2em;"></div>
+                        <button class="ui-button ui-widget ui-corner-all" onclick="pageRight();">></button>
+                        <button class="ui-button ui-widget ui-corner-all" onclick="jumpPage()">Jump to</button>
+                        <input type="number" id="jumpNum" value="">
+                    </nobr>
+                </div>
             </div>
-        </div>
-        <div id="an-text-body-and-scrollbar">
-            <div id = "an-text-body" class="scrollable"></div>
-            <div id="an-text-scrollbar"><svg id="heatmapSVG4"></svg></div>
-        </div>
+                <div id="an-text-scrollbar" style="grid-row: 1;"><svg id="heatmapSVG4" style="padding-top: 2em;"></svg></div>
+
+            </div>
+
     </div>
     <div id="tab-4">
         <h2>Word Cloud</h2>
