@@ -836,6 +836,10 @@ function drawRectangles(svg, dataset, heatmapNum) {
             .attr("width", 30)
             .attr("x", 5)
             .attr("y", function(d,i) {return i * heatmapResPx})
+            .attr("data-tooltip", function() {
+                let assocPage = parseInt(d3.select(this).attr("y")) + 1;
+                return "Page " + assocPage;
+            })
             .style("fill", function(d) {return colorScale(d);})
             .on("mouseover", function(d){
                 if (d3.select(this).style("fill") !== "red"){
@@ -881,6 +885,10 @@ function drawRectangles(svg, dataset, heatmapNum) {
             .attr("y", 0)
             .attr("x", function (d, i) {
                 return i * heatmapResPx
+            })
+            .attr("data-tooltip", function() {
+                let assocPage = parseInt(d3.select(this).attr("y")) + 1;
+                return "Page " + assocPage;
             })
             .style("fill", function (d) {
                 return colorScale(d);
