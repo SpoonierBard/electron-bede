@@ -1128,7 +1128,7 @@ function resizeWordCloud() {
     let width = window.innerWidth - 270,
         height = window.innerHeight - 160;
     let topic = $("#word-cloud-topic-select").find("option:selected").val();
-    if (topic === -1) {
+    if (topic == -1) {
         topic = 0;
     }
     createWordCloud(topic, width, height);
