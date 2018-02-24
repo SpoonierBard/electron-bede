@@ -1,5 +1,5 @@
-let fs = require("fs"),
-    model = {},
+// let fs = require("fs"),
+let  model = {},
     input,
     currentPage = 0, //what page of the text are we on?
     pageRanges = []; //an array of 2-item arrays containing indeces of first and last words of the page
@@ -495,11 +495,9 @@ function loadAnnotatedText() {
         puncLocation = 0, //index of puncLocation
         puncLocTracker = 0, //where in text
         newlineTracker = 0, //index of newlines
-        startTracker = 1, //track how far into text we are
+        startTracker = 0, //track how far into text we are
         newlineSetback = 0,
         wordToApp;
-
-
     for (let docInText in model.wordsByLocationWithStopwords) {
         for (let word in model.wordsByLocationWithStopwords[docInText]) {
             wordToApp = model.wordsByLocationWithStopwords[docInText][word];
@@ -512,8 +510,8 @@ function loadAnnotatedText() {
                 wordToApp += '<br/>';
                 newlineTracker += 1;
             }
-            if (model.puncCapLocations[puncLocation] - model.puncCapLocations[puncLocation - 1] === 0.5) {
-                wordToApp += model.puncAndCap[puncTracker];
+            if (puncLocTracker == model.puncCapLocations[puncLocation] - 0.5) {
+                wordToApp += (' ' + model.puncAndCap[puncTracker]);
                 puncTracker += 1;
                 puncLocation += 1;
                 newlineSetback += 1;
