@@ -959,15 +959,12 @@ function drawRectangles(svg, dataset, heatmapNum) {
             .on("mouseout", function (d) {
                 //TODO: change color-scaling to take heatMap as param
                 // replaceAllHeatmaps();
-                for (let i = 1; i < 4; i++) {
-                    d3.select("#heatmapSVG" + i)
-                        .select("." + this.getAttribute("class"))
-                        .style("fill", function () {
-                            return colorScale(d);
-                        })
-                        .attr("height", 50)
-                        .attr("y", 5);
-                }
+                d3.selectAll("." + this.getAttribute("class"))
+                    .style("fill", function (d) {
+                        return colorScale(d);
+                    })
+                    .attr("height", 50)
+                    .attr("y", 5);
             })
             .on("click", function (d, i) {
                 $("#tabs").tabs("option", "active", 2);
