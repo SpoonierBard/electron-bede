@@ -447,11 +447,11 @@ function createAnnotatedText() {
     loadAnnotatedText(0);
 }
 
-function loadAnnotatedText(pageNum) {
+function loadAnnotatedText() {
     d3.select("#an-text-body").selectAll("span").remove();
 
-    let startIndex = pageRanges[pageNum][0],
-        endIndex = pageRanges[pageNum][1],
+    let startIndex = pageRanges[currentPage][0],
+        endIndex = pageRanges[currentPage][1],
         puncTracker = 0, //index of punctuation
         puncLocation = 0, //index of puncLocation
         puncLocTracker = 0, //where in text
@@ -505,7 +505,7 @@ function loadAnnotatedText(pageNum) {
     if (document.getElementById("an-text-body").scrollTop > 20){
         document.getElementById("an-text-body").scrollTop = 0;
     }
-    var getRekt = "#rect-"+pageNum;
+    var getRekt = "#rect-"+currentPage;
     replaceHeatmap(4, heatmapTopic4)
     d3.select(getRekt)
         .style("fill", "red")
@@ -652,7 +652,7 @@ $(document).ready(function() {
     });
     $( "#an-text-scrollbar-select" ).change(function () {
         heatmapTopic4 = $("#an-text-scrollbar-select").find("option:selected").val();
-        replaceHeatmap(4, heatmapTopic4);
+        loadAnnotatedText();
     });
     /**
      * Reloads heatmaps taking into account whether a smoothing constant is being applied on checkbox change
