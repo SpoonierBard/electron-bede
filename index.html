@@ -104,7 +104,7 @@
         <button class="ui-widget ui-button ui-corner-all" onclick="reloadMainMenu()" style="float: left; margin: 1em;">Main Menu</button>
     </div>
     <div id="tab-1">
-        <h2 style="margin-top: 0;">Metadata</h2>
+        <h2>Metadata</h2>
         <div>
             <label><strong>Dataset: </strong></label> <label id="dataset"></label><br><br>
             <label><strong>Topics: </strong></label> <label id="topics"></label><br>
@@ -126,7 +126,7 @@
             <p id="metadata-topic-preview-text" class="scrollable"></p></div>
     </div>
     <div class="padLeft50" id="tab-2">
-        <h2 style="margin-top: 0;">Heat Map</h2>
+        <h2>Heat Map</h2>
         <div id="options">
             <input id="smoothingBox" type="checkbox" checked>
             <p class=inline>Smoothing: </p>
@@ -193,14 +193,13 @@
                 </nobr>
             </div>
         </div>
-        <div id = "an-text-body" class="scrollable">
-        </div>
-        <div id="an-text-scrollbar">
-            <svg id="heatmapSVG4"></svg>
+        <div id="an-text-body-and-scrollbar">
+            <div id = "an-text-body" class="scrollable"></div>
+            <div id="an-text-scrollbar"><svg id="heatmapSVG4"></svg></div>
         </div>
     </div>
     <div id="tab-4">
-        <h2 style="margin-top: 0;">Word Cloud</h2>
+        <h2>Word Cloud</h2>
         <select id="word-cloud-topic-select" class="styled-select slate">
         </select>
         </select>
@@ -208,7 +207,6 @@
         <div id="word-cloud">
         </div>
     </div>
-</div>
 
 <div id="nickname-dialog-form" title="Nickname">
     <form>

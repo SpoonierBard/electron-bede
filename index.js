@@ -269,9 +269,8 @@ $(function() {
  * Transitions from progress bar to tabs once they have finished loading
  */
 function loadTabs() {
-    let tabs = document.getElementById("tabs");
     document.getElementById("progressbar").style.display = "none";
-    tabs.style.display = "block";
+    document.getElementById("tabs").style.display = "block";
 }
 
 /**
