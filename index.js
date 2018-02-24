@@ -1,5 +1,5 @@
-//let fs = require("fs"),
-let model = {},
+let fs = require("fs"),
+    model = {},
     input,
     currentPage = 0,
     pageRanges = [], //track from which word to which word we've loaded
@@ -130,14 +130,16 @@ function createConfigFile(){
         outputname = document.getElementById("create-file-output").value,
         upperlimit = parseInt(document.getElementById("create-file-upperlimit").value) / 100,
         lowerlimit = parseInt(document.getElementById("create-file-lowerlimit").value) / 100,
-        whitelist = document.getElementById("create-file-whitelist").value.split(),
-        blacklist = document.getElementById("create-file-blacklist").value.split(),
+        whitelist = document.getElementById("create-file-whitelist").value.split(",").map(x => x.trim()),
+        blacklist = document.getElementById("create-file-blacklist").value.split(",").map(x => x.trim()),
         numberofdocuments,
         lengthofdocuments,
         splitstring,
         usingcsv,
         alpha = parseFloat(document.getElementById("create-file-alpha").value),
         beta = parseFloat(document.getElementById("create-file-beta").value);
+        console.log(whitelist);
+        console.log(blacklist);
 
     if (document.getElementById("create-file-default-english-stopwords").value === "true"){
         blacklist.push.apply(blacklist, englishStopwords);
@@ -248,7 +250,7 @@ function loadFile() {
     }
 }
 
-/**
+/*
  * Transitions from json file upload page to progress bar
  */
 function hideUploadScreen() {
@@ -499,10 +501,16 @@ function loadAnnotatedText(pageNum) {
             startTracker += 1;
         }
     }
-    document.getElementById("page-number").innerText = ("Page " + (currentPage + 1) + " of " + (pageRanges.length + 1));
+    document.getElementById("page-number").innerText = ("Page " + (currentPage + 1) + " of " + (pageRanges.length));
     if (document.getElementById("an-text-body").scrollTop > 20){
         document.getElementById("an-text-body").scrollTop = 0;
     }
+    var getRekt = "#rect-"+pageNum;
+    replaceHeatmap(4, heatmapTopic4)
+    d3.select(getRekt)
+        .style("fill", "red")
+        .attr("x", 0)
+        .attr("width", 40);
     onAnTextTopicSelect();
 }
 
@@ -591,8 +599,6 @@ function indexByPage() {
     console.log(totalLength);
     let binSize = Math.floor(totalLength/(heatmapWidthPx/heatmapResPx)),
         countDown = binSize;
-
-        console.log(binSize);
     for (let i = 0; i < model.wordsByLocationWithStopwords.length; i++) {
         for (let j = 0; j < model.wordsByLocationWithStopwords[i].length; j++) {
             locTracker++;
@@ -602,14 +608,13 @@ function indexByPage() {
             } else {
                 curPage[1] = locTracker;
             }
-            if ((countDown<=0) /*&& (locTracker === model.newlineLocations[newlineTracker])*/)  {
+            if ((countDown<=0) && (totalLength - locTracker > binSize) /*&& (locTracker === model.newlineLocations[newlineTracker])*/)  {
                 countDown = binSize;
                 binnedPages.push(curPage);
                 curPage = [-1, -1];
+            } else if (locTracker === totalLength){
+                binnedPages.push(curPage);
             }
-            /*while (locTracker === model.newlineLocations[newlineTracker]) {
-                newlineTracker += 1;
-            }*/
         }
     }
     return binnedPages;
@@ -838,6 +843,7 @@ function drawRectangles(svg, dataset, heatmapNum) {
             .attr("width", 30)
             .attr("x", 5)
             .attr("y", function(d,i) {return i * heatmapResPx})
+            .attr("id", function(d,i) {return "rect-"+i})
             .style("fill", function(d) {return colorScale(d);})
             .on("mouseover", function(d){
                 if (d3.select(this).style("fill") !== "red"){
@@ -935,7 +941,7 @@ function pageLeft() {
 function pageRight() {
     currentPage++;
     if (currentPage > (pageRanges.length - 1)) {
-        currentPage = pageRanges.length;
+        currentPage = pageRanges.length - 1;
     }
     loadAnnotatedText(currentPage);
 }
@@ -984,7 +990,6 @@ function createWordCloud(topicNum, width, height) {
     if (mid) fill = fill.concat(d3.schemeCategory10);
     if (large) fill = fill.concat(d3.schemeCategory20c);
     if (biggest) fill = fill.concat(d3.schemeCategory20b);
-    console.log(fill.length);
     let xScale = d3.scaleLinear()
         .domain([0, d3.max(reduced_entries, function(d) {
             return d.value;
@@ -1031,7 +1036,6 @@ function resizeWordCloud() {
     if (topic == -1) {
         topic = 0;
     }
-    console.log(topic);
     createWordCloud(topic, width, height);
 }
 
@@ -1048,9 +1052,21 @@ function resizeWordCloud() {
 $(document).ready (function () {
     $("#word-cloud-topic-select").change(function () {
         let topic = $("#word-cloud-topic-select").find("option:selected").val();
-        //let size = parseInt($("#cloud-size").find("option:selected").val());
         let width = window.innerWidth - 270;
         let height = window.innerHeight - 160;
-        createWordCloud(topic, width, height)
+        createWordCloud(topic, width, height);
     });
 });
+
+/*window.addEventListener('resize', function() {
+    $("#word-cloud").empty();
+    console.log("resize :) ");
+    let topic = $("#word-cloud-topic-select").find("option:selected").val();
+    if (topic == -1) topic = 0;
+    //let topic = document.getElementById("word-cloud-topic-select").val();
+    console.log("topic", topic);
+    //let size = parseInt($("#cloud-size").find("option:selected").val());
+    let width = window.innerWidth - 270;
+    let height = window.innerHeight - 160;
+    createWordCloud(topic, width, height);
+}, true);*/
