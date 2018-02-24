@@ -576,6 +576,15 @@ function onAnTextTopicSelect() {
     }
 }
 
+function propagateDropdownChange() {
+    for (let j = 1; j < 4; j++) {
+        let menuName = "heatmap" + j + "Menu";
+        let topicSelected = parseInt(document.getElementById(menuName).value);
+        let selector = "#an-text-topic-select-" + j;
+        $(selector).val(topicSelected).change();
+    }
+}
+
 function jumpToHeatmap(topicNum) {
     if (topicNum != -1){
         heatmapTopic1 = topicNum;
@@ -918,8 +927,9 @@ function drawRectangles(svg, dataset, heatmapNum) {
             })
             .on("click", function (d, i) {
                 $("#tabs").tabs("option", "active", 2);
-                loadAnnotatedText(i);
+                propagateDropdownChange();
                 currentPage = i;
+                loadAnnotatedText(i);
             })
     }
 }
