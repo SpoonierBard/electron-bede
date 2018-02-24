@@ -1061,7 +1061,7 @@ $(document).ready (function () {
 
 window.addEventListener('resize', function() {
     let width = window.innerWidth - 270;
-    let height = window.innerHeight;
+    let height = window.innerHeight - 500;
     //document.getElementById('metadata-topic-preview-text').height(height);
     $("#metadata-topic-preview-text").height(height);
     $("#metadata-topic-preview-text").width(width);
