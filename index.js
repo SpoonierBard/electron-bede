@@ -419,8 +419,8 @@ $( function() {
 
 function createAnnotatedText() {
     pageRanges = indexByPage();
-    let topicDropdownHTML = "<option selected>Select Topic</option>";
-    let topicDropdownHTMLScroll = "<option disabled selected>Select Topic</option>";
+    let topicDropdownHTML = "<option selected value = \"-2\">Select Topic</option>";
+    let topicDropdownHTMLScroll = "<option disabled selected value = \"-2\">Select Topic</option>";
 
     //create three identical selectors for three possible topic comparisons
     for (let i = 0; i < model.topicWordInstancesDict.length; i++) {
@@ -591,11 +591,27 @@ function propagateDropdownChange() {
 function jumpToHeatmap() {
     let topicNum;
     for(let i = 1; i < 4; i++) {
-        topicNum = document.getElementById("an-text-topic-select-" + i).value;
+        if(document.getElementById("an-text-topic-select-" + i).value >= 0) {
+            topicNum = document.getElementById("an-text-topic-select-" + i).value;
+        } else {
+            topicNum = i;
+        }
         replaceHeatmap(i, topicNum);
         $('#heatmap' + i + 'Menu').val(topicNum);
     }
     $("#tabs").tabs("option", "active", 1);
+    let jumpedRect = ".rect-"  + currentPage;
+    d3.selectAll(jumpedRect)
+        .style("fill", "black");
+    window.setTimeout(replaceAllHeatmaps, 2000);
+
+}
+
+function replaceAllHeatmaps() {
+    for (let i = 1; i < 4; i++) {
+        let topicNum = document.getElementById("heatmap" + i + "Menu").value;
+        replaceHeatmap(i, topicNum);
+    }
 }
 
 function indexByPage() {
@@ -902,6 +918,7 @@ function drawRectangles(svg, dataset, heatmapNum) {
             .attr("x", function (d, i) {
                 return i * heatmapResPx
             })
+            .attr("class", function(d,i) {return "rect-" + i; })
             .attr("data-tooltip", function() {
                 let assocPage = parseInt(d3.select(this).attr("y")) + 1;
                 return "Page " + assocPage;
@@ -910,19 +927,24 @@ function drawRectangles(svg, dataset, heatmapNum) {
                 return colorScale(d);
             })
             .on("mouseover", function (d) {
-                d3.select(this)
+                let rectClass = this.getAttribute("class");
+                let classSelector = "." + rectClass;
+                d3.selectAll(classSelector)
+                //d3.select(this)
                     .style("fill", "black")
                     .attr("height", 60)
                     .attr("y", 0)
                 
             })
             .on("mouseout", function (d) {
-                d3.select(this)
-                    .style("fill", function (d) {
-                        return colorScale(d);
-                    })
-                    .attr("height", 50)
-                    .attr("y", 5);
+                //TODO: change color-scaling to take heatMap as param
+                replaceAllHeatmaps();
+                // d3.select(this)
+                //     .style("fill", function (d) {
+                //         return colorScale(d);
+                //     })
+                //     .attr("height", 50)
+                //     .attr("y", 5);
             })
             .on("click", function (d, i) {
                 $("#tabs").tabs("option", "active", 2);
