@@ -115,8 +115,8 @@
         <div>
             <nobr>
                 <button id="create-nickname">Nickname topic</button>
-                <button id="view-stopwords">View stopwords</button>
                 <button id="save-nicknames" class="ui-button ui-corner-all ui-widget" onclick="saveNicknames();">Save nicknames</button>
+                <button id="view-stopwords">View stopwords</button>
             </nobr>
         </div>
         <div id="metadata-topic-preview">
@@ -207,12 +207,12 @@
         <select id="word-cloud-topic-select" class="styled-select slate">
         </select>
         </select>
-        <input type="button" id="resize-button" value="Resize" onclick="resizeWordCloud();" class="ui-button ui-corner-all ui-widget">
+        <input type="button" id="resize-button" value="Resize" onclick="resizeWordCloud();" class="ui-button ui-corner-all ui-widget" style="margin-bottom: 0;">
         <div id="word-cloud">
         </div>
     </div>
 
-<div id="nickname-dialog-form" title="Nickname">
+<div id="nickname-dialog-form">
     <form>
         <fieldset>
             <label for="nickname-input">Nickname</label>
@@ -222,7 +222,7 @@
         </fieldset>
     </form>
 </div>
-<div id="stopwords-dialog" title="Stopwords">
+<div id="stopwords-dialog">
     <!-- this div will be filled with the stopword list-->
 </div>
 </body>

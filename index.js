@@ -2,8 +2,7 @@ let //fs = require("fs"),
     model = {},
     input,
     currentPage = 0,
-    pageRanges = [], //track from which word to which word we've loaded
-    lastScrollPosition = 0;
+    pageRanges = []; //track from which word to which word we've loaded
 const colors  = ["#66c2a5", "#fc8d62", "#8da0cb"],
     scaledColors = ["hsl(161, 30%, 90%)", "hsl(17, 30%, 90%)", "hsl(222, 30%, 90%)", "hsl(70, 0%, 90%)", "hsl(161, 63%, 38%)", "hsl(17, 86%, 49%)", "hsl(222, 57%, 47%)", "hsl(70, 0%, 20%)"];
 
@@ -19,6 +18,7 @@ function reloadMainMenu(){
     document.getElementById("json-file").value="";
     document.getElementById("json-file-label").innerText = "Browse";
     document.getElementById("an-text-body").innerHTML = "";
+    $("#tabs").tabs("option", "active", 0);
     currentPage = 0;
     model = {};
 }
@@ -284,6 +284,15 @@ $( function() {
 
 //METADATA TAB
 
+function resizeMetadata() {
+    let metadataWidth = window.innerWidth - 270,
+        metadataHeight = window.innerHeight - 550;
+
+    $("#metadata-topic-preview-text")
+        .height(metadataHeight)
+        .width(metadataWidth);
+}
+
 /**
  * Loads data into metadata tab
  */
@@ -295,6 +304,8 @@ function createMetadata(){
     document.getElementById("beta").innerHTML = model["beta"];
     
     document.getElementById("stopwords-dialog").innerHTML = "<p>" + model.stopwords.join(", ") + "</p>";
+
+    resizeMetadata();
 
     //create nicknames data structure
     if (model["nicknames"] === null || model["nicknames"] === undefined) {
@@ -355,8 +366,11 @@ $(document).ready(function() {
 $( function() {
     let dialog = $( "#stopwords-dialog");
     dialog.dialog({
+            open: function() {$("#ui-id-5").css("background-color", "transparent")},
+            title: "Stopwords",
             autoOpen: false,
             height: 400,
+            draggable: false,
             modal: true,
             width: 350,
             overflow: scroll
@@ -377,9 +391,12 @@ $( function() {
         nickname = $( "#nickname-input" );
 
     dialog = $( "#nickname-dialog-form" ).dialog({
+        open: function() {$("#ui-id-6").css("background-color", "transparent")},
+        title: "Nickname",
         autoOpen: false,
         height: 250,
         width: 350,
+        draggable: false,
         modal: true,
         buttons: {
             Cancel: function() {
@@ -402,16 +419,27 @@ $( function() {
     });
 
     function addNickname() {
-        model.nicknames[topic.val()] = nickname.val();
-        let toUpdate = document.getElementsByClassName("select-topic-" + topic.val());
-        for (let i = 0; i < toUpdate.length; i++){
-            toUpdate[i].innerText = model.nicknames[topic.val()];
+        if ($.trim(nickname.val()).length > 0)  {
+            model.nicknames[topic.val()] = nickname.val();
+            let toUpdate = document.getElementsByClassName("select-topic-" + topic.val());
+            for (let i = 0; i < toUpdate.length; i++){
+                toUpdate[i].innerText = model.nicknames[topic.val()];
+            }
         }
         dialog.dialog("close");
     }
 });
 
 //ANNOTATED TEXT TAB
+
+function resizeAnnotatedText() {
+    let textWidth = window.innerWidth - 300,
+        textHeight = window.innerHeight - 320;
+
+    $("#an-text-body")
+        .height(textHeight)
+        .width(textWidth);
+}
 
 /**
  * Initializes annotated text tab with no topics selected
@@ -421,6 +449,8 @@ function createAnnotatedText() {
     pageRanges = indexByPage();
     let topicDropdownHTML = "<option selected value = \"-2\">Select Topic</option>";
     let topicDropdownHTMLScroll = "<option disabled selected value = \"-2\">Select Topic</option>";
+
+    resizeAnnotatedText();
 
     //create three identical selectors for three possible topic comparisons
     for (let i = 0; i < model.topicWordInstancesDict.length; i++) {
@@ -458,6 +488,8 @@ function loadAnnotatedText() {
         startTracker = 1, //track how far into text we are
         newlineSetback = 0,
         wordToApp;
+
+
     for (let docInText in model.wordsByLocationWithStopwords) {
         for (let word in model.wordsByLocationWithStopwords[docInText]) {
             wordToApp = model.wordsByLocationWithStopwords[docInText][word];
@@ -470,7 +502,7 @@ function loadAnnotatedText() {
                 wordToApp += '<br/>';
                 newlineTracker += 1;
             }
-            if (model.puncCapLocations[puncLocation] - model.puncCapLocations[puncLocation - 1] == 0.5) {
+            if (model.puncCapLocations[puncLocation] - model.puncCapLocations[puncLocation - 1] === 0.5) {
                 wordToApp += model.puncAndCap[puncTracker];
                 puncTracker += 1;
                 puncLocation += 1;
@@ -489,15 +521,14 @@ function loadAnnotatedText() {
                     .attr("value", 0)
                     .on("mouseover", onHover)
                     .on("mouseout", offHover)
-                    .on("click", function() {
-                        if(d3.select(this).attr("value") == 1) {
+                    .on("click", function () {
+                        if (parseInt(d3.select(this).attr("value")) === 1) {
                             jumpToHeatmap();
                         }
                     });
                 d3.select('#an-text-body')
                     .append("span")
                     .text(" ");
-
             }
             startTracker += 1;
         }
@@ -506,8 +537,7 @@ function loadAnnotatedText() {
     if (document.getElementById("an-text-body").scrollTop > 20){
         document.getElementById("an-text-body").scrollTop = 0;
     }
-    var getRekt = "#rect-"+currentPage;
-    replaceHeatmap(4, heatmapTopic4)
+    let getRekt = "#rect-"+currentPage;
     d3.select(getRekt)
         .style("fill", "red")
         .attr("x", 0)
@@ -589,6 +619,7 @@ function propagateDropdownChange() {
 }
 
 function jumpToHeatmap() {
+    console.log("jumped");
     let topicNum;
     for(let i = 1; i < 4; i++) {
         if(document.getElementById("an-text-topic-select-" + i).value >= 0) {
@@ -618,19 +649,16 @@ function indexByPage() {
     let binnedPages = [],
         curPage = [-1,-1],
         totalLength = 0,
-        locTracker = 0, //where in text
-        newlineTracker = 0, //index of newlines
-        wordToApp = "";
+        locTracker = 0;
     for (let i = 0; i < model.wordsByLocationWithStopwords.length; i++) {
         totalLength += model.wordsByLocationWithStopwords[i].length;
     }
-    console.log(totalLength);
     let binSize = Math.floor(totalLength/(heatmapWidthPx/heatmapResPx)),
         countDown = binSize;
     for (let i = 0; i < model.wordsByLocationWithStopwords.length; i++) {
         for (let j = 0; j < model.wordsByLocationWithStopwords[i].length; j++) {
-            locTracker++;
             countDown--;
+            locTracker++;
             if (curPage[0] === -1) {
                 curPage[0] = locTracker;
             } else {
@@ -654,11 +682,11 @@ function indexByPage() {
 let prevalenceArray = [], //this is an array that counts the number of topic words in a bin
     heatmapWidthPx = 500, //this is the total width of the heatmap bar as a whole
     heatmapResPx = 1, //this is the width of each individual rect making up the heatmap
-    heatmapSmoothing = 10, //this is how intense the smoothing applied to the heatmap is
-    heatmapTopic1 = 0, //the topic currently displayed in heatmap 1
-    heatmapTopic2 = 1,
-    heatmapTopic3 = 2,
-    heatmapTopic4 = 0;
+    heatmapSmoothing = 10,
+    heatmap1Topic,//this is how intense the smoothing applied to the heatmap is
+    heatmap2Topic,
+    heatmap3Topic,
+    heatmap4Topic;
 
 
 
@@ -667,19 +695,16 @@ $(document).ready(function() {
      * Reloads heatmap on corresponding dropdown change
      */
     $( "#heatmap1Menu" ).change(function () {
-        heatmapTopic1 = $("#heatmap1Menu").find("option:selected").val();
-        replaceHeatmap(1, heatmapTopic1);
+        replaceHeatmap(1, $("#heatmap1Menu").find("option:selected").val());
     });
     $( "#heatmap2Menu" ).change(function () {
-        heatmapTopic2 = $("#heatmap2Menu").find("option:selected").val();
-        replaceHeatmap(2, heatmapTopic2);
+        replaceHeatmap(2, $("#heatmap2Menu").find("option:selected").val());
     });
     $( "#heatmap3Menu" ).change(function () {
-        heatmapTopic3 = $("#heatmap3Menu").find("option:selected").val();
-        replaceHeatmap(3, heatmapTopic3);
+        replaceHeatmap(3, $("#heatmap3Menu").find("option:selected").val());
     });
     $( "#an-text-scrollbar-select" ).change(function () {
-        heatmapTopic4 = $("#an-text-scrollbar-select").find("option:selected").val();
+        replaceHeatmap(4, $("#an-text-scrollbar-select").find("option:selected").val());
         loadAnnotatedText();
     });
     /**
@@ -689,15 +714,15 @@ $(document).ready(function() {
         function(){
             if ($(this).is(':checked')) {
                 heatmapSmoothing = parseInt($("#smoothingSelect").val());
-                replaceHeatmap(1,heatmapTopic1);
-                replaceHeatmap(2,heatmapTopic2);
-                replaceHeatmap(3,heatmapTopic3);
+                replaceHeatmap(1,heatmap1Topic);
+                replaceHeatmap(2,heatmap2Topic);
+                replaceHeatmap(3,heatmap3Topic);
             }
             else {
                 heatmapSmoothing = 1;
-                replaceHeatmap(1,heatmapTopic1);
-                replaceHeatmap(2,heatmapTopic2);
-                replaceHeatmap(3,heatmapTopic3);
+                replaceHeatmap(1,heatmap1Topic);
+                replaceHeatmap(2,heatmap2Topic);
+                replaceHeatmap(3,heatmap3Topic);
             }
         });
     /**
@@ -706,9 +731,9 @@ $(document).ready(function() {
     $("#smoothingSelect").change(function () {
         if ($("#smoothingBox").is(':checked')) {
             heatmapSmoothing = parseInt($("#smoothingSelect").val());
-            replaceHeatmap(1, heatmapTopic1);
-            replaceHeatmap(2, heatmapTopic2);
-            replaceHeatmap(3, heatmapTopic3);
+            replaceHeatmap(1, heatmap1Topic);
+            replaceHeatmap(2, heatmap2Topic);
+            replaceHeatmap(3, heatmap3Topic);
         }
     });
 });
@@ -800,17 +825,13 @@ function initializeHeatmaps() {
     $('#heatmap2Menu').find('option')[2].selected = true;
     document.getElementById("heatmap3Menu").innerHTML = topicDropdownHTML;
     $('#heatmap3Menu').find('option')[3].selected = true;
-    heatmapTopic1 = 0;
-    heatmapTopic2 = 1;
-    heatmapTopic3 = 2;
-    heatmapTopic4 = 0;
     replaceHeatmap(1,0);
     replaceHeatmap(2,1);
     replaceHeatmap(3,2);
     replaceHeatmap(4, 0);
 
     for (let iter = 1; iter < 5; iter++){
-        let topic = eval("heatmapTopic" + iter);
+        let topic = eval("heatmap" + iter + "Topic");
 
         let svg = d3.select("#heatmapSVG" + iter);
 
@@ -843,7 +864,6 @@ function initializeHeatmaps() {
  */
 function changeTop5Words(heatmapNum, topic) {
     //var topic = eval("heatmapTopic" + heatmapNum);
-    console.log(topic);
     let topicWords = Object.keys(model.topicWordInstancesDict[topic]),
         sortedWords = topicWords.sort(function(a,b){
         return model.topicWordInstancesDict[topic][b] - model.topicWordInstancesDict[topic][a];
@@ -966,12 +986,28 @@ function drawRectangles(svg, dataset, heatmapNum) {
 function replaceHeatmap(heatmapNum, topic) {
     var svg = d3.select("#heatmapSVG" + heatmapNum);
     svg.html("");
+    switch(heatmapNum) {
+        case 1:
+            heatmap1Topic = topic;
+            break;
+        case 2:
+            heatmap2Topic = topic;
+            break;
+        case 3:
+            heatmap3Topic = topic;
+            break;
+        case 4:
+            heatmap3Topic = topic;
+            break;
+        default:
+            break;
+    }
     let heatmapArray = createPrevalenceArray(topic);
-    if(heatmapNum != 4) {
+    if(heatmapNum < 4) {
         heatmapArray = smoothArray(heatmapArray, heatmapSmoothing);
+        changeTop5Words(heatmapNum, topic);
     }
     drawRectangles(svg, heatmapArray, heatmapNum);
-    if (heatmapNum < 4) changeTop5Words(heatmapNum, topic);
 }
 
 function pageLeft() {
@@ -1085,22 +1121,15 @@ function createWordCloud(topicNum, width, height) {
 }
 
 function resizeWordCloud() {
-    let width = window.innerWidth - 270;
-    let height = window.innerHeight - 160;
+    let width = window.innerWidth - 270,
+        height = window.innerHeight - 160;
     let topic = $("#word-cloud-topic-select").find("option:selected").val();
-    if (topic == -1) {
+    if (topic === -1) {
         topic = 0;
     }
     createWordCloud(topic, width, height);
 }
 
-// function exportWordCloud() {
-//     console.log("export");
-//     let wordCloud = document.getElementById('word-cloud');
-//     let image = wordCloud.toDataURL();
-//     console.log(image);
-//     window.open('', image);
-// }
 /**
  * Loads new word cloud on dropdown change
  */
@@ -1114,23 +1143,6 @@ $(document).ready (function () {
 });
 
 window.addEventListener('resize', function() {
-    let metadataWidth = window.innerWidth - 270;
-    let metadataHeight = window.innerHeight - 500;
-    let textWidth = window.innerWidth - 300;
-    let textHeight = window.innerHeight - 270;
-    //document.getElementById('metadata-topic-preview-text').height(height);
-    $("#metadata-topic-preview-text").height(metadataHeight);
-    $("#metadata-topic-preview-text").width(metadataWidth);
-    $("#an-text-body").height(textHeight);
-    $("#an-text-body").width(textWidth);
-    /*
-    $("#word-cloud").empty();
-    let topic = $("#word-cloud-topic-select").find("option:selected").val();
-    if (topic == -1) topic = 0;
-    //let topic = document.getElementById("word-cloud-topic-select").val();
-    console.log("topic", topic);
-    //let size = parseInt($("#cloud-size").find("option:selected").val());
-    let width = window.innerWidth - 270;
-    let height = window.innerHeight - 160;
-    createWordCloud(topic, width, height);*/
+    resizeMetadata();
+    resizeAnnotatedText();
 }, true);
