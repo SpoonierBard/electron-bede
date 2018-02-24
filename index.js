@@ -1060,11 +1060,15 @@ $(document).ready (function () {
 });
 
 window.addEventListener('resize', function() {
-    let width = window.innerWidth - 270;
-    let height = window.innerHeight - 500;
+    let metadataWidth = window.innerWidth - 270;
+    let metadataHeight = window.innerHeight - 500;
+    let textWidth = window.innerWidth - 280;
+    let textHeight = window.innerHeight - 320;
     //document.getElementById('metadata-topic-preview-text').height(height);
-    $("#metadata-topic-preview-text").height(height);
-    $("#metadata-topic-preview-text").width(width);
+    $("#metadata-topic-preview-text").height(metadataHeight);
+    $("#metadata-topic-preview-text").width(metadataWidth);
+    $("#an-text-body").height(textHeight);
+    $("#an-text-body").width(textWidth);
     /*
     $("#word-cloud").empty();
     let topic = $("#word-cloud-topic-select").find("option:selected").val();
