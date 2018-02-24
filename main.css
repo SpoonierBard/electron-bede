@@ -257,3 +257,8 @@ input[type="number"] {
     display: inline-grid;
     padding: 5px;
 }
+
+#page-number {
+    display: inline-block;
+    width: 15em;
+}
