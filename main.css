@@ -159,10 +159,15 @@ input[type="number"] {
 
 #an-text-body {
     height: 300px;
-    //padding-top: 50px;
     width: 90%;
     float: left;
     display: block;
+    z-index: 2000;
+}
+
+#an-text-nav {
+    display: inline;
+    vertical-align: center;
 }
 
 #json-file-label {
