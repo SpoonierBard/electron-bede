@@ -1,4 +1,4 @@
-let fs = require("fs"),
+let //fs = require("fs"),
     model = {},
     input,
     currentPage = 0,
@@ -504,21 +504,11 @@ function loadAnnotatedText(pageNum) {
         document.getElementById("an-text-body").scrollTop = 0;
     }
     var getRekt = "#rect-"+pageNum;
+    replaceHeatmap(4, heatmapTopic4)
     d3.select(getRekt)
-        .style("fill", "red");
-
-        svg.selectAll("rect")
-            .style("fill", function (d) {
-                return colorScale(d);
-            })
-            .attr("width", 30)
-            .attr("x", 5)
-        d3.select(this)
-            .style("fill", "red")
-            .attr("x", 0)
-            .attr("width", 40)
-    
-    $("#tabs").tabs("option", "active", 2);
+        .style("fill", "red")
+        .attr("x", 0)
+        .attr("width", 40);
     onAnTextTopicSelect();
 }
 
