@@ -786,7 +786,7 @@ function initializeHeatmaps() {
             svg.style("width", function () {
                 return heatmapWidthPx * 1.5 + "px"
             });
-            svg.style("height", 50);
+            svg.style("height", 60);
             changeTop5Words(iter, (iter - 1));
         }
 
@@ -880,7 +880,7 @@ function drawRectangles(svg, dataset, heatmapNum) {
                 return heatmapResPx
             })
             .attr("height", 50)
-            .attr("y", 0)
+            .attr("y", 5)
             .attr("x", function (d, i) {
                 return i * heatmapResPx
             })
@@ -888,12 +888,19 @@ function drawRectangles(svg, dataset, heatmapNum) {
                 return colorScale(d);
             })
             .on("mouseover", function (d) {
-                d3.select(this).style("fill", "black");
+                d3.select(this)
+                    .style("fill", "black")
+                    .attr("height", 60)
+                    .attr("y", 0)
+                
             })
             .on("mouseout", function (d) {
-                d3.select(this).style("fill", function (d) {
-                    return colorScale(d);
-                })
+                d3.select(this)
+                    .style("fill", function (d) {
+                        return colorScale(d);
+                    })
+                    .attr("height", 50)
+                    .attr("y", 5);
             })
             .on("click", function (d, i) {
                 $("#tabs").tabs("option", "active", 2);
