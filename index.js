@@ -872,7 +872,10 @@ function drawRectangles(svg, dataset, heatmapNum) {
             .on("click", function(d, i){
                 $("#tabs").tabs("option", "active", 2);
                 currentPage = i;
-                loadAnnotatedText(i);
+                if (currentPage >= 500) {
+                    currentPage--;
+                }
+                loadAnnotatedText(currentPage);
             })
     } else {
         svg.selectAll("rect")
