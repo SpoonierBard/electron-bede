@@ -138,8 +138,6 @@ function createConfigFile(){
         usingcsv,
         alpha = parseFloat(document.getElementById("create-file-alpha").value),
         beta = parseFloat(document.getElementById("create-file-beta").value);
-        console.log(whitelist);
-        console.log(blacklist);
 
     if (document.getElementById("create-file-default-english-stopwords").value === "true"){
         blacklist.push.apply(blacklist, englishStopwords);
@@ -951,7 +949,7 @@ function initializeWordCloudTab() {
     }
     document.getElementById("word-cloud-topic-select").innerHTML = topicDropdownHTMLWordCloud;
     let width = window.innerWidth - 270;
-    let height = window.innerHeight - 160;
+    let height = window.innerHeight - 170;
     createWordCloud(0, width, height);
 }
 function createWordCloud(topicNum, width, height) {
@@ -1039,7 +1037,7 @@ $(document).ready (function () {
     $("#word-cloud-topic-select").change(function () {
         let topic = $("#word-cloud-topic-select").find("option:selected").val();
         let width = window.innerWidth - 270;
-        let height = window.innerHeight - 160;
+        let height = window.innerHeight - 170;
         createWordCloud(topic, width, height);
     });
 });
