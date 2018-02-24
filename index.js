@@ -615,7 +615,8 @@ function onAnTextTopicSelect() {
     //reset all spans to unselected
     d3.selectAll("span")
         .style("background-color", "white")
-        .attr("value",0);
+        .attr("value",0)
+        .style("cursor", "text");
 
     //iterate through selectors and change background color for all spans with the corresponding class name
     for (let i = 0; i < 3; i++) {
@@ -623,7 +624,8 @@ function onAnTextTopicSelect() {
         let topic = ".topic-" + document.getElementById(selector).value;
         d3.selectAll(topic)
             .attr("value", 1)
-            .style("background-color", function() { return colors[i]; });
+            .style("background-color", function() { return colors[i]; })
+            .style("cursor", "pointer");
     }
 }
 
