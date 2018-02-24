@@ -649,9 +649,7 @@ function indexByPage() {
     let binnedPages = [],
         curPage = [-1,-1],
         totalLength = 0,
-        locTracker = 0, //where in text
-        newlineTracker = 0, //index of newlines
-        wordToApp = "";
+        locTracker = 0;
     for (let i = 0; i < model.wordsByLocationWithStopwords.length; i++) {
         totalLength += model.wordsByLocationWithStopwords[i].length;
     }
@@ -660,6 +658,7 @@ function indexByPage() {
     for (let i = 0; i < model.wordsByLocationWithStopwords.length; i++) {
         for (let j = 0; j < model.wordsByLocationWithStopwords[i].length; j++) {
             countDown--;
+            locTracker++;
             if (curPage[0] === -1) {
                 curPage[0] = locTracker;
             } else {
@@ -672,7 +671,6 @@ function indexByPage() {
             } else if (locTracker === totalLength){
                 binnedPages.push(curPage);
             }
-            locTracker++;
         }
     }
     return binnedPages;
