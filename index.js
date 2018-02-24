@@ -1,5 +1,5 @@
-let fs = require("fs");
-let model = {},
+let fs = require("fs"),
+    model = {},
     input,
     currentPage = 0,
     pageRanges = [], //track from which word to which word we've loaded
@@ -503,6 +503,12 @@ function loadAnnotatedText(pageNum) {
     if (document.getElementById("an-text-body").scrollTop > 20){
         document.getElementById("an-text-body").scrollTop = 0;
     }
+    var getRekt = "#rect-"+pageNum;
+    replaceHeatmap(4, heatmapTopic4)
+    d3.select(getRekt)
+        .style("fill", "red")
+        .attr("x", 0)
+        .attr("width", 40);
     onAnTextTopicSelect();
 }
 
@@ -783,7 +789,7 @@ function initializeHeatmaps() {
             svg.style("width", function () {
                 return heatmapWidthPx * 1.5 + "px"
             });
-            svg.style("height", 50);
+            svg.style("height", 60);
             changeTop5Words(iter, (iter - 1));
         }
 
@@ -835,6 +841,11 @@ function drawRectangles(svg, dataset, heatmapNum) {
             .attr("width", 30)
             .attr("x", 5)
             .attr("y", function(d,i) {return i * heatmapResPx})
+            .attr("data-tooltip", function() {
+                let assocPage = parseInt(d3.select(this).attr("y")) + 1;
+                return "Page " + assocPage;
+            })
+            .attr("id", function(d,i) {return "rect-"+i})
             .style("fill", function(d) {return colorScale(d);})
             .on("mouseover", function(d){
                 if (d3.select(this).style("fill") !== "red"){
@@ -877,20 +888,31 @@ function drawRectangles(svg, dataset, heatmapNum) {
                 return heatmapResPx
             })
             .attr("height", 50)
-            .attr("y", 0)
+            .attr("y", 5)
             .attr("x", function (d, i) {
                 return i * heatmapResPx
+            })
+            .attr("data-tooltip", function() {
+                let assocPage = parseInt(d3.select(this).attr("y")) + 1;
+                return "Page " + assocPage;
             })
             .style("fill", function (d) {
                 return colorScale(d);
             })
             .on("mouseover", function (d) {
-                d3.select(this).style("fill", "black");
+                d3.select(this)
+                    .style("fill", "black")
+                    .attr("height", 60)
+                    .attr("y", 0)
+                
             })
             .on("mouseout", function (d) {
-                d3.select(this).style("fill", function (d) {
-                    return colorScale(d);
-                })
+                d3.select(this)
+                    .style("fill", function (d) {
+                        return colorScale(d);
+                    })
+                    .attr("height", 50)
+                    .attr("y", 5);
             })
             .on("click", function (d, i) {
                 $("#tabs").tabs("option", "active", 2);
