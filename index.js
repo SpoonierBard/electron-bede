@@ -626,7 +626,7 @@ function jumpToHeatmap() {
         if(document.getElementById("an-text-topic-select-" + i).value >= 0) {
             topicNum = document.getElementById("an-text-topic-select-" + i).value;
         } else {
-            topicNum = i;
+            topicNum = i - 1;
         }
         replaceHeatmap(i, topicNum);
         $('#heatmap' + i + 'Menu').val(topicNum);
@@ -965,13 +965,13 @@ function drawRectangles(svg, dataset, heatmapNum) {
             })
             .on("mouseout", function (d) {
                 //TODO: change color-scaling to take heatMap as param
-                replaceAllHeatmaps();
-                // d3.select(this)
-                //     .style("fill", function (d) {
-                //         return colorScale(d);
-                //     })
-                //     .attr("height", 50)
-                //     .attr("y", 5);
+                // replaceAllHeatmaps();
+                d3.selectAll("." + this.getAttribute("class"))
+                    .style("fill", function (d) {
+                        return colorScale(d);
+                    })
+                    .attr("height", 50)
+                    .attr("y", 5);
             })
             .on("click", function (d, i) {
                 $("#tabs").tabs("option", "active", 2);
