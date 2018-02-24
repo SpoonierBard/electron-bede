@@ -551,6 +551,7 @@ function loadAnnotatedText() {
 
     //select correct scrollbar rectangle
     let getRekt = "#rect-"+currentPage;
+    replaceHeatmap(4, heatmap4Topic);
     d3.select(getRekt)
         .style("fill", "red")
         .attr("x", 0)
