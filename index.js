@@ -1,4 +1,4 @@
-//let fs = require("fs"),
+let fs = require("fs");
 let model = {},
     input,
     currentPage = 0,
@@ -130,14 +130,16 @@ function createConfigFile(){
         outputname = document.getElementById("create-file-output").value,
         upperlimit = parseInt(document.getElementById("create-file-upperlimit").value) / 100,
         lowerlimit = parseInt(document.getElementById("create-file-lowerlimit").value) / 100,
-        whitelist = document.getElementById("create-file-whitelist").value.split(),
-        blacklist = document.getElementById("create-file-blacklist").value.split(),
+        whitelist = document.getElementById("create-file-whitelist").value.split(",").map(x => x.trim()),
+        blacklist = document.getElementById("create-file-blacklist").value.split(",").map(x => x.trim()),
         numberofdocuments,
         lengthofdocuments,
         splitstring,
         usingcsv,
         alpha = parseFloat(document.getElementById("create-file-alpha").value),
         beta = parseFloat(document.getElementById("create-file-beta").value);
+        console.log(whitelist);
+        console.log(blacklist);
 
     if (document.getElementById("create-file-default-english-stopwords").value === "true"){
         blacklist.push.apply(blacklist, englishStopwords);
@@ -248,7 +250,7 @@ function loadFile() {
     }
 }
 
-/**
+/*
  * Transitions from json file upload page to progress bar
  */
 function hideUploadScreen() {
@@ -959,7 +961,6 @@ function createWordCloud(topicNum, width, height) {
     if (mid) fill = fill.concat(d3.schemeCategory10);
     if (large) fill = fill.concat(d3.schemeCategory20c);
     if (biggest) fill = fill.concat(d3.schemeCategory20b);
-    console.log(fill.length);
     let xScale = d3.scaleLinear()
         .domain([0, d3.max(reduced_entries, function(d) {
             return d.value;
@@ -1006,7 +1007,6 @@ function resizeWordCloud() {
     if (topic == -1) {
         topic = 0;
     }
-    console.log(topic);
     createWordCloud(topic, width, height);
 }
 
@@ -1023,9 +1023,21 @@ function resizeWordCloud() {
 $(document).ready (function () {
     $("#word-cloud-topic-select").change(function () {
         let topic = $("#word-cloud-topic-select").find("option:selected").val();
-        //let size = parseInt($("#cloud-size").find("option:selected").val());
         let width = window.innerWidth - 270;
         let height = window.innerHeight - 160;
-        createWordCloud(topic, width, height)
+        createWordCloud(topic, width, height);
     });
 });
+
+/*window.addEventListener('resize', function() {
+    $("#word-cloud").empty();
+    console.log("resize :) ");
+    let topic = $("#word-cloud-topic-select").find("option:selected").val();
+    if (topic == -1) topic = 0;
+    //let topic = document.getElementById("word-cloud-topic-select").val();
+    console.log("topic", topic);
+    //let size = parseInt($("#cloud-size").find("option:selected").val());
+    let width = window.innerWidth - 270;
+    let height = window.innerHeight - 160;
+    createWordCloud(topic, width, height);
+}, true);*/
