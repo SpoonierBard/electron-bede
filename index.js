@@ -462,7 +462,8 @@ function createAnnotatedText() {
     document.getElementById("an-text-topic-select-3").innerHTML = topicDropdownHTML;
     document.getElementById("an-text-scrollbar-select").innerHTML = topicDropdownHTMLScroll;
     $('#an-text-scrollbar-select').find('option')[1].selected = true;
-
+    replaceHeatmap(4, 0);
+    
     for (let i = 1; i < 4; i++) {
         d3.select("#an-text-topic-select-" + i)
             .style("background", function () {
