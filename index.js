@@ -269,9 +269,8 @@ $(function() {
  * Transitions from progress bar to tabs once they have finished loading
  */
 function loadTabs() {
-    let tabs = document.getElementById("tabs");
     document.getElementById("progressbar").style.display = "none";
-    tabs.style.display = "block";
+    document.getElementById("tabs").style.display = "block";
 }
 
 /**
@@ -420,16 +419,18 @@ $( function() {
 
 function createAnnotatedText() {
     pageRanges = indexByPage();
-    let topicDropdownHTML = "<option disabled selected>Select Topic</option>";
+    let topicDropdownHTML = "<option selected>Select Topic</option>";
+    let topicDropdownHTMLScroll = "<option disabled selected>Select Topic</option>";
 
     //create three identical selectors for three possible topic comparisons
     for (let i = 0; i < model.topicWordInstancesDict.length; i++) {
         topicDropdownHTML = topicDropdownHTML + "<option class=\"select-topic-" + i + "\" value=\"" + i + "\">" + model.nicknames[i] + "</option>";
+        topicDropdownHTMLScroll = topicDropdownHTMLScroll + "<option class=\"select-topic-" + i + "\" value=\"" + i + "\">" + model.nicknames[i] + "</option>";
     }
     document.getElementById("an-text-topic-select-1").innerHTML = topicDropdownHTML;
     document.getElementById("an-text-topic-select-2").innerHTML = topicDropdownHTML;
     document.getElementById("an-text-topic-select-3").innerHTML = topicDropdownHTML;
-    document.getElementById("an-text-scrollbar-select").innerHTML = topicDropdownHTML;
+    document.getElementById("an-text-scrollbar-select").innerHTML = topicDropdownHTMLScroll;
     $('#an-text-scrollbar-select').find('option')[1].selected = true;
 
     for (let i = 1; i < 4; i++) {
@@ -445,11 +446,11 @@ function createAnnotatedText() {
     loadAnnotatedText(0);
 }
 
-function loadAnnotatedText(pageNum) {
+function loadAnnotatedText() {
     d3.select("#an-text-body").selectAll("span").remove();
 
-    let startIndex = pageRanges[pageNum][0],
-        endIndex = pageRanges[pageNum][1],
+    let startIndex = pageRanges[currentPage][0],
+        endIndex = pageRanges[currentPage][1],
         puncTracker = 0, //index of punctuation
         puncLocation = 0, //index of puncLocation
         puncLocTracker = 0, //where in text
@@ -503,7 +504,7 @@ function loadAnnotatedText(pageNum) {
     if (document.getElementById("an-text-body").scrollTop > 20){
         document.getElementById("an-text-body").scrollTop = 0;
     }
-    var getRekt = "#rect-"+pageNum;
+    var getRekt = "#rect-"+currentPage;
     replaceHeatmap(4, heatmapTopic4)
     d3.select(getRekt)
         .style("fill", "red")
@@ -574,6 +575,15 @@ function onAnTextTopicSelect() {
     }
 }
 
+function propagateDropdownChange() {
+    for (let j = 1; j < 4; j++) {
+        let menuName = "heatmap" + j + "Menu";
+        let topicSelected = parseInt(document.getElementById(menuName).value);
+        let selector = "#an-text-topic-select-" + j;
+        $(selector).val(topicSelected).change();
+    }
+}
+
 function jumpToHeatmap(topicNum) {
     if (topicNum != -1){
         heatmapTopic1 = topicNum;
@@ -624,8 +634,8 @@ function indexByPage() {
 let prevalenceArray = [], //this is an array that counts the number of topic words in a bin
     heatmapWidthPx = 500, //this is the total width of the heatmap bar as a whole
     heatmapResPx = 1, //this is the width of each individual rect making up the heatmap
-    heatmapSmoothing = 10,
-    heatmapTopic1 = 0,
+    heatmapSmoothing = 10, //this is how intense the smoothing applied to the heatmap is
+    heatmapTopic1 = 0, //the topic currently displayed in heatmap 1
     heatmapTopic2 = 1,
     heatmapTopic3 = 2,
     heatmapTopic4 = 0;
@@ -650,7 +660,7 @@ $(document).ready(function() {
     });
     $( "#an-text-scrollbar-select" ).change(function () {
         heatmapTopic4 = $("#an-text-scrollbar-select").find("option:selected").val();
-        replaceHeatmap(4, heatmapTopic4);
+        loadAnnotatedText();
     });
     /**
      * Reloads heatmaps taking into account whether a smoothing constant is being applied on checkbox change
@@ -870,7 +880,10 @@ function drawRectangles(svg, dataset, heatmapNum) {
             .on("click", function(d, i){
                 $("#tabs").tabs("option", "active", 2);
                 currentPage = i;
-                loadAnnotatedText(i);
+                if (currentPage >= 500) {
+                    currentPage--;
+                }
+                loadAnnotatedText(currentPage);
             })
     } else {
         svg.selectAll("rect")
@@ -909,6 +922,7 @@ function drawRectangles(svg, dataset, heatmapNum) {
             })
             .on("click", function (d, i) {
                 $("#tabs").tabs("option", "active", 2);
+                propagateDropdownChange();
                 currentPage = i;
                 loadAnnotatedText(i);
             })

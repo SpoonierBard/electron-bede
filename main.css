@@ -2,10 +2,6 @@
 
 :focus {outline:0 !important;}
 
-body {
-    width: 95vw;
-    height: 90vh;
-}
 #webview {
     position: absolute;
     top: 0;
@@ -15,6 +11,9 @@ body {
     display: inline-flex !important;
 }
 
+html {
+    overflow: hidden;
+}
 .ui-widget.ui-widget-content{
     border: none;
 }
@@ -60,11 +59,12 @@ input[type="number"] {
 
 #tabs {
     display: none;
-    position: relative;
+    /*position: relative;*/
 }
 
 #progressbar {
     display: none;
+    width: 80%;
 }
 
 #welcome-page {
@@ -84,7 +84,7 @@ input[type="number"] {
     width: 100%;
 }
 .ui-tabs-vertical .ui-tabs-nav {
-    padding: .2em .1em 3em .2em;
+    padding: .2em .1em 100em .2em;
     float: left;
     width: 10em;
     height: 100%;
@@ -122,7 +122,6 @@ input[type="number"] {
 
 .ui-tabs-vertical .ui-tabs-panel {
     padding: 1em;
-    margin-left: 11em;
     height: 100%;
     overflow: hidden;
     }
@@ -136,18 +135,18 @@ input[type="number"] {
     text-align: center;
 }
 
-#progressbar {
-    width: 80%;
-}
-
 #word-cloud {
     height: 80%;
     width: 100%;
 }
+
+#span {
+
+}
 #fixed-tools {
-    margin-top: 0;
+    /*margin-top: 0;
     position: fixed;
-    top: 0;
+    top: 0;*/
     display: block;
     width: auto;
     background-color: white;
@@ -156,11 +155,14 @@ input[type="number"] {
 }
 
 #an-text-scrollbar {
-    margin-top: 0;
-    position: fixed;
-    top: 0;
-    right: 0;
-    padding: 2em 0 2em 2em;
+    float: right;
+    display: inline;
+}
+
+#an-text-body {
+    height: 300px;
+    width: 90%;
+    float: left;
 }
 
 #json-file-label {
@@ -175,10 +177,7 @@ input[type="number"] {
     width: 130px;
     float: right;
 }
-#an-text-body {
-    height: 500px;
-    margin-top: 200px;
-}
+
 
 #metadata-topic-preview-text {
     min-height: 11em;
@@ -260,8 +259,4 @@ input[type="number"] {
 .config-form {
     display: inline-grid;
     padding: 5px;
-}
-
-#heatmapSVG4 {
-    margin-top:200px;
 }
