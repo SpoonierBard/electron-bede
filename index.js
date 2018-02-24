@@ -743,6 +743,10 @@ $(document).ready(function() {
     });
     $( "#an-text-scrollbar-select" ).change(function () {
         replaceHeatmap(4, $("#an-text-scrollbar-select").find("option:selected").val());
+        d3.select("#rect-" + currentPage)
+            .style("fill", "red")
+            .attr("x", 0)
+            .attr("width", 40);
     });
     /**
      * Reloads heatmaps taking into account whether a smoothing constant is being applied on checkbox change
