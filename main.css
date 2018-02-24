@@ -60,6 +60,7 @@ input[type="number"] {
 #tabs {
     display: none;
     /*position: relative;*/
+    margin: -.5em;
 }
 
 #progressbar {
@@ -261,4 +262,18 @@ input[type="number"] {
 #page-number {
     display: inline-block;
     width: 15em;
+}
+
+.margin-15 {
+    display: block; 
+    margin: 15px 0 15px 0
+}
+
+.grid-row {
+    grid-row: 1;
+}
+
+.float-left {
+    float:left;
+    margin: 1em;
 }
