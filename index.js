@@ -687,7 +687,10 @@ let prevalenceArray = [], //this is an array that counts the number of topic wor
     heatmap1Topic,//this is how intense the smoothing applied to the heatmap is
     heatmap2Topic,
     heatmap3Topic,
-    heatmap4Topic;
+    heatmap4Topic,
+    heatmap1ColorScale,
+    heatmap2ColorScale,
+    heatmap3ColorScale;
 
 
 
@@ -887,6 +890,7 @@ function drawRectangles(svg, dataset, heatmapNum) {
         .domain([d3.min(dataset),
             d3.max(dataset)])
         .range([scaledColors[heatmapNum - 1], scaledColors[heatmapNum + 3]]);
+    eval("heatmap" + heatmapNum + "ColorScale = colorScale;");
     if (heatmapNum === 4) {
         svg.selectAll("rect")
             .data(dataset)
@@ -946,6 +950,7 @@ function drawRectangles(svg, dataset, heatmapNum) {
                 return i * heatmapResPx
             })
             .attr("class", function(d,i) {return "rect-" + i; })
+            .attr("id", function(d,i) {return "rect-" + i + "-" + heatmapNum; })
             .attr("data-tooltip", function() {
                 let assocPage = parseInt(d3.select(this).attr("y")) + 1;
                 return "Page " + assocPage;
@@ -963,15 +968,18 @@ function drawRectangles(svg, dataset, heatmapNum) {
                     .attr("y", 0)
                 
             })
-            .on("mouseout", function (d) {
+            .on("mouseout", function () {
                 //TODO: change color-scaling to take heatMap as param
                 // replaceAllHeatmaps();
-                d3.selectAll("." + this.getAttribute("class"))
-                    .style("fill", function (d) {
-                        return colorScale(d);
-                    })
+                let className = this.getAttribute("class")
+                d3.selectAll("." + className)
                     .attr("height", 50)
                     .attr("y", 5);
+                for (let n = 1; n < 4; n++){
+                    d3.select("#" + className + "-" + n).style("fill", function (d) {
+                        return eval("heatmap" + n + "ColorScale")(d);
+                    })
+                }
             })
             .on("click", function (d, i) {
                 $("#tabs").tabs("option", "active", 2);
@@ -1001,7 +1009,7 @@ function replaceHeatmap(heatmapNum, topic) {
             heatmap3Topic = topic;
             break;
         case 4:
-            heatmap3Topic = topic;
+            heatmap4Topic = topic;
             break;
         default:
             break;
