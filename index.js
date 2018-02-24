@@ -1,4 +1,4 @@
-let fs = require("fs"),
+let //fs = require("fs"),
     model = {},
     input,
     currentPage = 0,
@@ -770,10 +770,14 @@ function initializeHeatmaps() {
     $('#heatmap2Menu').find('option')[2].selected = true;
     document.getElementById("heatmap3Menu").innerHTML = topicDropdownHTML;
     $('#heatmap3Menu').find('option')[3].selected = true;
-    replaceHeatmap(1,heatmapTopic1);
-    replaceHeatmap(2,heatmapTopic2);
-    replaceHeatmap(3,heatmapTopic3);
-    replaceHeatmap(4, heatmapTopic4);
+    heatmapTopic1 = 0;
+    heatmapTopic2 = 1;
+    heatmapTopic3 = 2;
+    heatmapTopic4 = 0;
+    replaceHeatmap(1,0);
+    replaceHeatmap(2,1);
+    replaceHeatmap(3,2);
+    replaceHeatmap(4, 0);
 
     for (let iter = 1; iter < 5; iter++){
         let topic = eval("heatmapTopic" + iter);
@@ -809,6 +813,7 @@ function initializeHeatmaps() {
  */
 function changeTop5Words(heatmapNum, topic) {
     //var topic = eval("heatmapTopic" + heatmapNum);
+    console.log(topic);
     let topicWords = Object.keys(model.topicWordInstancesDict[topic]),
         sortedWords = topicWords.sort(function(a,b){
         return model.topicWordInstancesDict[topic][b] - model.topicWordInstancesDict[topic][a];
@@ -863,18 +868,6 @@ function drawRectangles(svg, dataset, heatmapNum) {
                         .attr("width", 30)
             }})
             .on("click", function(d, i){
-                if (heatmapNum === 4) {
-                    svg.selectAll("rect")
-                        .style("fill", function (d) {
-                            return colorScale(d);
-                        })
-                        .attr("width", 30)
-                        .attr("x", 5)
-                    d3.select(this)
-                        .style("fill", "red")
-                        .attr("x", 0)
-                        .attr("width", 40)
-                }
                 $("#tabs").tabs("option", "active", 2);
                 currentPage = i;
                 loadAnnotatedText(i);
@@ -916,8 +909,8 @@ function drawRectangles(svg, dataset, heatmapNum) {
             })
             .on("click", function (d, i) {
                 $("#tabs").tabs("option", "active", 2);
-                loadAnnotatedText(i);
                 currentPage = i;
+                loadAnnotatedText(i);
             })
     }
 }
@@ -931,7 +924,9 @@ function replaceHeatmap(heatmapNum, topic) {
     var svg = d3.select("#heatmapSVG" + heatmapNum);
     svg.html("");
     let heatmapArray = createPrevalenceArray(topic);
-    heatmapArray = smoothArray(heatmapArray, heatmapSmoothing);
+    if(heatmapNum != 4) {
+        heatmapArray = smoothArray(heatmapArray, heatmapSmoothing);
+    }
     drawRectangles(svg, heatmapArray, heatmapNum);
     if (heatmapNum < 4) changeTop5Words(heatmapNum, topic);
 }
