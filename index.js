@@ -1067,7 +1067,7 @@ function initializeWordCloudTab() {
         sizeDropdownHTMLWordCloud = sizeDropdownHTMLWordCloud + "<option class=\select-size-" + i + "\" value=\"" + i + "\">" + size + "</option>"
     }
     document.getElementById("word-cloud-topic-select").innerHTML = topicDropdownHTMLWordCloud;
-    let width = window.innerWidth - 270;
+    let width = window.innerWidth - 230;
     let height = window.innerHeight - 170;
     createWordCloud(0, width, height);
 }
@@ -1128,18 +1128,23 @@ function createWordCloud(topicNum, width, height) {
             })
             .text(function(d) { return d.key; });
     }
-
     d3.layout.cloud().stop();
 }
 
 function resizeWordCloud() {
-    let width = window.innerWidth - 270,
+    $("#word-cloud").empty();
+    $("#resize-button").attr("disabled", true);
+    setTimeout(function(){
+        $('#resize-button').prop('disabled',false);
+        }, 750);
+    let width = window.innerWidth - 230,
         height = window.innerHeight - 160;
     let topic = $("#word-cloud-topic-select").find("option:selected").val();
     if (topic == -1) {
         topic = 0;
     }
     createWordCloud(topic, width, height);
+
 }
 
 /**
@@ -1148,7 +1153,7 @@ function resizeWordCloud() {
 $(document).ready (function () {
     $("#word-cloud-topic-select").change(function () {
         let topic = $("#word-cloud-topic-select").find("option:selected").val();
-        let width = window.innerWidth - 270;
+        let width = window.innerWidth - 230;
         let height = window.innerHeight - 170;
         createWordCloud(topic, width, height);
     });
