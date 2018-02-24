@@ -1064,9 +1064,14 @@ $(document).ready (function () {
     });
 });
 
-/*window.addEventListener('resize', function() {
+window.addEventListener('resize', function() {
+    let width = window.innerWidth - 270;
+    let height = window.innerHeight;
+    //document.getElementById('metadata-topic-preview-text').height(height);
+    $("#metadata-topic-preview-text").height(height);
+    $("#metadata-topic-preview-text").width(width);
+    /*
     $("#word-cloud").empty();
-    console.log("resize :) ");
     let topic = $("#word-cloud-topic-select").find("option:selected").val();
     if (topic == -1) topic = 0;
     //let topic = document.getElementById("word-cloud-topic-select").val();
@@ -1074,5 +1079,5 @@ $(document).ready (function () {
     //let size = parseInt($("#cloud-size").find("option:selected").val());
     let width = window.innerWidth - 270;
     let height = window.innerHeight - 160;
-    createWordCloud(topic, width, height);
-}, true);*/
+    createWordCloud(topic, width, height);*/
+}, true);
