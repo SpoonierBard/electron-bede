@@ -772,10 +772,14 @@ function initializeHeatmaps() {
     $('#heatmap2Menu').find('option')[2].selected = true;
     document.getElementById("heatmap3Menu").innerHTML = topicDropdownHTML;
     $('#heatmap3Menu').find('option')[3].selected = true;
-    replaceHeatmap(1,heatmapTopic1);
-    replaceHeatmap(2,heatmapTopic2);
-    replaceHeatmap(3,heatmapTopic3);
-    replaceHeatmap(4, heatmapTopic4);
+    heatmapTopic1 = 0;
+    heatmapTopic2 = 1;
+    heatmapTopic3 = 2;
+    heatmapTopic4 = 0;
+    replaceHeatmap(1,0);
+    replaceHeatmap(2,1);
+    replaceHeatmap(3,2);
+    replaceHeatmap(4, 0);
 
     for (let iter = 1; iter < 5; iter++){
         let topic = eval("heatmapTopic" + iter);
@@ -811,6 +815,7 @@ function initializeHeatmaps() {
  */
 function changeTop5Words(heatmapNum, topic) {
     //var topic = eval("heatmapTopic" + heatmapNum);
+    console.log(topic);
     let topicWords = Object.keys(model.topicWordInstancesDict[topic]),
         sortedWords = topicWords.sort(function(a,b){
         return model.topicWordInstancesDict[topic][b] - model.topicWordInstancesDict[topic][a];
