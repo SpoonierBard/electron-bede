@@ -1,8 +1,8 @@
 let //fs = require("fs"),
     model = {},
     input,
-    currentPage = 0,
-    pageRanges = []; //track from which word to which word we've loaded
+    currentPage = 0, //what page of the text are we on?
+    pageRanges = []; //an array of 2-item arrays containing indeces of first and last words of the page
 const colors  = ["#66c2a5", "#fc8d62", "#8da0cb"],
     scaledColors = ["hsl(161, 30%, 90%)", "hsl(17, 30%, 90%)", "hsl(222, 30%, 90%)", "hsl(70, 0%, 90%)", "hsl(161, 63%, 38%)", "hsl(17, 86%, 49%)", "hsl(222, 57%, 47%)", "hsl(70, 0%, 20%)"];
 
@@ -475,6 +475,13 @@ function createAnnotatedText() {
             return document.getElementById("heatmapSVG4").height
         });
     loadAnnotatedText(0);
+
+    //if "Enter" presssed in jumpNum input box, click on jumpTrigger button
+    $("#jumpNum").keyup(function(event) {
+        if (event.keyCode === 13) {
+            $("#jumpTrigger").click();
+        }
+    });
 }
 
 /* Loads the current page of the text in to the annotated text body */
