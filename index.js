@@ -1076,8 +1076,8 @@ $(document).ready (function () {
 window.addEventListener('resize', function() {
     let metadataWidth = window.innerWidth - 270;
     let metadataHeight = window.innerHeight - 500;
-    let textWidth = window.innerWidth - 280;
-    let textHeight = window.innerHeight - 320;
+    let textWidth = window.innerWidth - 300;
+    let textHeight = window.innerHeight - 270;
     //document.getElementById('metadata-topic-preview-text').height(height);
     $("#metadata-topic-preview-text").height(metadataHeight);
     $("#metadata-topic-preview-text").width(metadataWidth);
