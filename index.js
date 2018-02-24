@@ -503,6 +503,22 @@ function loadAnnotatedText(pageNum) {
     if (document.getElementById("an-text-body").scrollTop > 20){
         document.getElementById("an-text-body").scrollTop = 0;
     }
+    var getRekt = "#rect-"+pageNum;
+    d3.select(getRekt)
+        .style("fill", "red");
+
+        svg.selectAll("rect")
+            .style("fill", function (d) {
+                return colorScale(d);
+            })
+            .attr("width", 30)
+            .attr("x", 5)
+        d3.select(this)
+            .style("fill", "red")
+            .attr("x", 0)
+            .attr("width", 40)
+    
+    $("#tabs").tabs("option", "active", 2);
     onAnTextTopicSelect();
 }
 
@@ -838,6 +854,7 @@ function drawRectangles(svg, dataset, heatmapNum) {
             .attr("width", 30)
             .attr("x", 5)
             .attr("y", function(d,i) {return i * heatmapResPx})
+            .attr("id", function(d,i) {return "rect-"+i})
             .style("fill", function(d) {return colorScale(d);})
             .on("mouseover", function(d){
                 if (d3.select(this).style("fill") !== "red"){
