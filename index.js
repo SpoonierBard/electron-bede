@@ -486,12 +486,14 @@ function loadAnnotatedText() {
                 d3.select("#an-text-body")
                     .append("span")
                     .html(wordToApp)
-                    // .text(wordToApp)
                     .attr("class", "topic-" + model.topicsByLocationWithStopwords[docInText][word])
+                    .attr("value", 0)
                     .on("mouseover", onHover)
                     .on("mouseout", offHover)
                     .on("click", function() {
-                        jumpToHeatmap(model.topicsByLocationWithStopwords[docInText][word]);
+                        if(d3.select(this).attr("value") == 1) {
+                            jumpToHeatmap();
+                        }
                     });
                 d3.select('#an-text-body')
                     .append("span")
@@ -565,13 +567,15 @@ function offHover() {
 function onAnTextTopicSelect() {
     //reset all spans to unselected
     d3.selectAll("span")
-        .style("background-color", "white");
+        .style("background-color", "white")
+        .attr("value",0);
 
     //iterate through selectors and change background color for all spans with the corresponding class name
     for (let i = 0; i < 3; i++) {
         let selector = "an-text-topic-select-" + (i + 1);
         let topic = ".topic-" + document.getElementById(selector).value;
         d3.selectAll(topic)
+            .attr("value", 1)
             .style("background-color", function() { return colors[i]; });
     }
 }
@@ -585,14 +589,14 @@ function propagateDropdownChange() {
     }
 }
 
-function jumpToHeatmap(topicNum) {
-    if (topicNum != -1){
-        heatmapTopic1 = topicNum;
-        replaceHeatmap(1,heatmapTopic1);
-        //TODO: change #heatmap1Menu selection
-        $("#heatmap1Menu").val(topicNum)
-        $("#tabs").tabs("option", "active", 1);
+function jumpToHeatmap() {
+    let topicNum;
+    for(let i = 1; i < 4; i++) {
+        topicNum = document.getElementById("an-text-topic-select-" + i).value;
+        replaceHeatmap(i, topicNum);
+        $('#heatmap' + i + 'Menu').val(topicNum);
     }
+    $("#tabs").tabs("option", "active", 1);
 }
 
 function indexByPage() {
@@ -960,6 +964,17 @@ function pageRight() {
         currentPage = pageRanges.length - 1;
     }
     loadAnnotatedText(currentPage);
+}
+
+function jumpPage() {
+    let newPage = parseInt(document.getElementById("jumpNum").value);
+    if (0 < newPage && newPage <= pageRanges.length) {
+        currentPage = parseInt(document.getElementById("jumpNum").value) - 1;
+        loadAnnotatedText(currentPage);
+    } else {
+        let errorMessage = "Please input a number between 1 and " + (pageRanges.length) + "."
+        alert(errorMessage);
+    }
 }
 
 
