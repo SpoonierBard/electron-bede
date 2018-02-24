@@ -463,7 +463,7 @@ function createAnnotatedText() {
     document.getElementById("an-text-scrollbar-select").innerHTML = topicDropdownHTMLScroll;
     $('#an-text-scrollbar-select').find('option')[1].selected = true;
     replaceHeatmap(4, 0);
-    
+
     for (let i = 1; i < 4; i++) {
         d3.select("#an-text-topic-select-" + i)
             .style("background", function () {
@@ -709,7 +709,6 @@ $(document).ready(function() {
     });
     $( "#an-text-scrollbar-select" ).change(function () {
         replaceHeatmap(4, $("#an-text-scrollbar-select").find("option:selected").val());
-        loadAnnotatedText();
     });
     /**
      * Reloads heatmaps taking into account whether a smoothing constant is being applied on checkbox change
@@ -923,11 +922,18 @@ function drawRectangles(svg, dataset, heatmapNum) {
                         .attr("width", 30)
             }})
             .on("click", function(d, i){
-                $("#tabs").tabs("option", "active", 2);
                 currentPage = i;
                 if (currentPage >= 500) {
                     currentPage--;
                 }
+                svg.selectAll("rect")
+                    .style("fill", function(d) {return colorScale(d);})
+                    .attr("width", 30)
+                    .attr("x", 5);
+                d3.select(this)
+                    .style("fill", "red")
+                    .attr("width", 40)
+                    .attr("x", 0);
                 loadAnnotatedText(currentPage);
             })
     } else {
@@ -1130,7 +1136,7 @@ function resizeWordCloud() {
     let width = window.innerWidth - 270,
         height = window.innerHeight - 160;
     let topic = $("#word-cloud-topic-select").find("option:selected").val();
-    if (topic === -1) {
+    if (topic == -1) {
         topic = 0;
     }
     createWordCloud(topic, width, height);
