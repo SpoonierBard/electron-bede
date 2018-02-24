@@ -60,6 +60,7 @@ input[type="number"] {
 #tabs {
     display: none;
     /*position: relative;*/
+    margin: -.5em;
 }
 
 #progressbar {
@@ -160,6 +161,13 @@ input[type="number"] {
     height: 300px;
     width: 90%;
     float: left;
+    display: block;
+    z-index: 2000;
+}
+
+#an-text-nav {
+    display: inline;
+    vertical-align: center;
 }
 
 #json-file-label {
@@ -261,4 +269,14 @@ input[type="number"] {
 #page-number {
     display: inline-block;
     width: 15em;
+}
+
+.margin-15 {
+    display: block; 
+    margin: 15px 0 15px 0
+}
+
+.float-left {
+    float:left;
+    margin: 1em;
 }
