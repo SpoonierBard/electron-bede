@@ -138,8 +138,6 @@ function createConfigFile(){
         usingcsv,
         alpha = parseFloat(document.getElementById("create-file-alpha").value),
         beta = parseFloat(document.getElementById("create-file-beta").value);
-        console.log(whitelist);
-        console.log(blacklist);
 
     if (document.getElementById("create-file-default-english-stopwords").value === "true"){
         blacklist.push.apply(blacklist, englishStopwords);
@@ -422,16 +420,18 @@ $( function() {
 
 function createAnnotatedText() {
     pageRanges = indexByPage();
-    let topicDropdownHTML = "<option disabled selected>Select Topic</option>";
+    let topicDropdownHTML = "<option selected>Select Topic</option>";
+    let topicDropdownHTMLScroll = "<option disabled selected>Select Topic</option>";
 
     //create three identical selectors for three possible topic comparisons
     for (let i = 0; i < model.topicWordInstancesDict.length; i++) {
         topicDropdownHTML = topicDropdownHTML + "<option class=\"select-topic-" + i + "\" value=\"" + i + "\">" + model.nicknames[i] + "</option>";
+        topicDropdownHTMLScroll = topicDropdownHTMLScroll + "<option class=\"select-topic-" + i + "\" value=\"" + i + "\">" + model.nicknames[i] + "</option>";
     }
     document.getElementById("an-text-topic-select-1").innerHTML = topicDropdownHTML;
     document.getElementById("an-text-topic-select-2").innerHTML = topicDropdownHTML;
     document.getElementById("an-text-topic-select-3").innerHTML = topicDropdownHTML;
-    document.getElementById("an-text-scrollbar-select").innerHTML = topicDropdownHTML;
+    document.getElementById("an-text-scrollbar-select").innerHTML = topicDropdownHTMLScroll;
     $('#an-text-scrollbar-select').find('option')[1].selected = true;
 
     for (let i = 1; i < 4; i++) {
@@ -626,8 +626,8 @@ function indexByPage() {
 let prevalenceArray = [], //this is an array that counts the number of topic words in a bin
     heatmapWidthPx = 500, //this is the total width of the heatmap bar as a whole
     heatmapResPx = 1, //this is the width of each individual rect making up the heatmap
-    heatmapSmoothing = 10,
-    heatmapTopic1 = 0,
+    heatmapSmoothing = 10, //this is how intense the smoothing applied to the heatmap is
+    heatmapTopic1 = 0, //the topic currently displayed in heatmap 1
     heatmapTopic2 = 1,
     heatmapTopic3 = 2,
     heatmapTopic4 = 0;
@@ -872,7 +872,10 @@ function drawRectangles(svg, dataset, heatmapNum) {
             .on("click", function(d, i){
                 $("#tabs").tabs("option", "active", 2);
                 currentPage = i;
-                loadAnnotatedText(i);
+                if (currentPage >= 500) {
+                    currentPage--;
+                }
+                loadAnnotatedText(currentPage);
             })
     } else {
         svg.selectAll("rect")
@@ -968,7 +971,7 @@ function initializeWordCloudTab() {
     }
     document.getElementById("word-cloud-topic-select").innerHTML = topicDropdownHTMLWordCloud;
     let width = window.innerWidth - 270;
-    let height = window.innerHeight - 160;
+    let height = window.innerHeight - 170;
     createWordCloud(0, width, height);
 }
 function createWordCloud(topicNum, width, height) {
@@ -1056,14 +1059,19 @@ $(document).ready (function () {
     $("#word-cloud-topic-select").change(function () {
         let topic = $("#word-cloud-topic-select").find("option:selected").val();
         let width = window.innerWidth - 270;
-        let height = window.innerHeight - 160;
+        let height = window.innerHeight - 170;
         createWordCloud(topic, width, height);
     });
 });
 
-/*window.addEventListener('resize', function() {
+window.addEventListener('resize', function() {
+    let width = window.innerWidth - 270;
+    let height = window.innerHeight - 500;
+    //document.getElementById('metadata-topic-preview-text').height(height);
+    $("#metadata-topic-preview-text").height(height);
+    $("#metadata-topic-preview-text").width(width);
+    /*
     $("#word-cloud").empty();
-    console.log("resize :) ");
     let topic = $("#word-cloud-topic-select").find("option:selected").val();
     if (topic == -1) topic = 0;
     //let topic = document.getElementById("word-cloud-topic-select").val();
@@ -1071,5 +1079,5 @@ $(document).ready (function () {
     //let size = parseInt($("#cloud-size").find("option:selected").val());
     let width = window.innerWidth - 270;
     let height = window.innerHeight - 160;
-    createWordCloud(topic, width, height);
-}, true);*/
+    createWordCloud(topic, width, height);*/
+}, true);
