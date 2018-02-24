@@ -422,16 +422,18 @@ $( function() {
 
 function createAnnotatedText() {
     pageRanges = indexByPage();
-    let topicDropdownHTML = "<option disabled selected>Select Topic</option>";
+    let topicDropdownHTML = "<option selected>Select Topic</option>";
+    let topicDropdownHTMLScroll = "<option disabled selected>Select Topic</option>";
 
     //create three identical selectors for three possible topic comparisons
     for (let i = 0; i < model.topicWordInstancesDict.length; i++) {
         topicDropdownHTML = topicDropdownHTML + "<option class=\"select-topic-" + i + "\" value=\"" + i + "\">" + model.nicknames[i] + "</option>";
+        topicDropdownHTMLScroll = topicDropdownHTMLScroll + "<option class=\"select-topic-" + i + "\" value=\"" + i + "\">" + model.nicknames[i] + "</option>";
     }
     document.getElementById("an-text-topic-select-1").innerHTML = topicDropdownHTML;
     document.getElementById("an-text-topic-select-2").innerHTML = topicDropdownHTML;
     document.getElementById("an-text-topic-select-3").innerHTML = topicDropdownHTML;
-    document.getElementById("an-text-scrollbar-select").innerHTML = topicDropdownHTML;
+    document.getElementById("an-text-scrollbar-select").innerHTML = topicDropdownHTMLScroll;
     $('#an-text-scrollbar-select').find('option')[1].selected = true;
 
     for (let i = 1; i < 4; i++) {
@@ -626,8 +628,8 @@ function indexByPage() {
 let prevalenceArray = [], //this is an array that counts the number of topic words in a bin
     heatmapWidthPx = 500, //this is the total width of the heatmap bar as a whole
     heatmapResPx = 1, //this is the width of each individual rect making up the heatmap
-    heatmapSmoothing = 10,
-    heatmapTopic1 = 0,
+    heatmapSmoothing = 10, //this is how intense the smoothing applied to the heatmap is
+    heatmapTopic1 = 0, //the topic currently displayed in heatmap 1
     heatmapTopic2 = 1,
     heatmapTopic3 = 2,
     heatmapTopic4 = 0;
