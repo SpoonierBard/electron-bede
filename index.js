@@ -285,9 +285,9 @@ $( function() {
 //METADATA TAB
 
 function resizeMetadata() {
-    let metadataWidth = window.innerWidth - 270,
-        metadataHeight = window.innerHeight - 550;
-
+    let metadataWidth = window.innerWidth - 220,
+        metadataHeight = window.innerHeight - 400;
+    console.log(metadataHeight);
     $("#metadata-topic-preview-text")
         .height(metadataHeight)
         .width(metadataWidth);
