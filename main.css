@@ -159,9 +159,10 @@ input[type="number"] {
 
 #an-text-body {
     height: 300px;
-    padding-top: 50px;
+    //padding-top: 50px;
     width: 90%;
     float: left;
+    display: block;
 }
 
 #json-file-label {
@@ -268,10 +269,6 @@ input[type="number"] {
 .margin-15 {
     display: block; 
     margin: 15px 0 15px 0
-}
-
-.grid-row {
-    grid-row: 1;
 }
 
 .float-left {

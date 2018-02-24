@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="utf-8">
-    <title>Topic Model</title>
+    <title></title>
     <link href="main.css" rel="stylesheet">
     <script>if (typeof module === 'object') {window.module = module; module = undefined;}</script>
     <script type=text/javascript src="js/jquery-ui-1.12.1.custom/external/jquery/jquery.js"></script>
@@ -169,9 +169,9 @@
     </div>
     <div id="tab-3">
             <div style="display: grid;">
-                <div class="grid-row">
+                <div style="grid-row: 1">
             <div id = "an-text-title">
-             <h2 class="grid-row">Annotated Text</h2>
+             <h2 style="grid-row: 1">Annotated Text</h2>
             </div>
             <div id = "selector-div" class="margin-15">
                 <select name="an-text-topic-select" id="an-text-topic-select-1" value="-2" onchange="onAnTextTopicSelect();" class="styled-select slate">
@@ -186,7 +186,7 @@
             </div>
                     <div class="margin-15"><input id="check-highlight" type="checkbox" checked> <label for="check-highlight">Highlight Topic on Mouseover</label> </div>
                     <div class="margin-15"><label for="an-text-scrollbar-select">Scrollbar topic </label><select name="an-text-scrollbar-select" id="an-text-scrollbar-select" class="styled-select slate"></select></div>
-                    <div id = "an-text-body" class="scrollable" class="margin-15"></div>
+                    <div id="an-text-body" class="scrollable margin-15"></div>
                     <div class="text-centered" style="display: block;" id="an-text-nav">
                     <nobr>
                         <button class="ui-button ui-widget ui-corner-all" onclick="pageLeft();"><</button>
@@ -197,7 +197,7 @@
                     </nobr>
                 </div>
             </div>
-                <div id="an-text-scrollbar" class="grid-row;"><svg id="heatmapSVG4" style="padding-top: 2em;"></svg></div>
+                <div id="an-text-scrollbar" style="grid-row: 1"><svg id="heatmapSVG4" style="padding-top: 2em;"></svg></div>
 
             </div>
 
