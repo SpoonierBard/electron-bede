@@ -485,7 +485,7 @@ function loadAnnotatedText() {
         puncLocation = 0, //index of puncLocation
         puncLocTracker = 0, //where in text
         newlineTracker = 0, //index of newlines
-        startTracker = 0, //track how far into text we are
+        startTracker = 1, //track how far into text we are
         newlineSetback = 0,
         wordToApp;
 
