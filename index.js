@@ -1,4 +1,4 @@
-let //fs = require("fs"),
+let fs = require("fs"),
     model = {},
     input,
     currentPage = 0, //what page of the text are we on?
@@ -387,9 +387,8 @@ $( function() {
  */
 $( function() {
     let dialog, form,
-        topic = $( "#metadata-topic-select"),
-        nickname = $( "#nickname-input" );
-
+        topic = $("#metadata-topic-select"),
+        nickname = $("#nickname-input");
     dialog = $( "#nickname-dialog-form" ).dialog({
         open: function() {$("#ui-id-6").css("background-color", "transparent")},
         title: "Nickname",
@@ -416,6 +415,8 @@ $( function() {
 
     $( "#create-nickname").button().on( "click", function() {
         dialog.dialog("open");
+        let topic = parseInt($("#metadata-topic-select").find("option:selected").val());
+        document.getElementById("nickname-input").placeholder = model.nicknames[topic];
     });
 
     function addNickname() {
