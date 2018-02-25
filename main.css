@@ -269,9 +269,14 @@ input[type="number"] {
     padding: 5px;
 }
 
-#page-number {
+#page-num-div {
     display: inline-block;
     width: 15em;
+}
+
+#page-number {
+    position: relative;
+    top: -0.5em;
 }
 
 .margin-15 {
