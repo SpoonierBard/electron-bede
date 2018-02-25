@@ -148,7 +148,6 @@ input[type="number"] {
     display: block;
     width: auto;
     background-color: white;
-    z-index: 1000;
     padding-bottom: 12px;
 }
 
@@ -167,7 +166,10 @@ input[type="number"] {
 
 #an-text-nav {
     display: inline;
-    vertical-align: center;
+}
+
+#an-text-scrollbar-select {
+    z-index = -20;
 }
 
 #json-file-label {
@@ -247,6 +249,7 @@ input[type="number"] {
 [data-tooltip]:hover:before,
 [data-tooltip]:hover:after {
     visibility: visible;
+    z-index: 2000;
     -ms-filter: "progid:DXImageTransform.Microsoft.Alpha(Opacity=100)";
     filter: progid:DXImageTransform.Microsoft.Alpha(Opacity=100);
     opacity: 1;
