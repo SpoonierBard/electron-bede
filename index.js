@@ -1,4 +1,4 @@
-// let fs = require("fs"),
+let fs = require("fs");
 let  model = {},
     input,
     currentPage = 0, //what page of the text are we on?
