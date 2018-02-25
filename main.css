@@ -192,7 +192,6 @@ input[type="number"] {
 /* Tooltip styles developed by Chris Bracco*/
 [data-tooltip] {
     position: relative;
-    z-index: 2000;
     cursor: pointer;
 }
 
@@ -209,7 +208,8 @@ input[type="number"] {
 /* Position tooltip above the element */
 [data-tooltip]:before {
     position: absolute;
-    bottom: 150%;
+    z-index: 2000;
+    bottom: 100%;
     left: 50%;
     margin-bottom: 5px;
     margin-left: -80px;
@@ -230,7 +230,8 @@ input[type="number"] {
 /* Triangle hack to make tooltip look like a speech bubble */
 [data-tooltip]:after {
     position: absolute;
-    bottom: 150%;
+    z-index:2000;
+    bottom: 100%;
     left: 50%;
     margin-left: -5px;
     width: 0;
@@ -284,4 +285,9 @@ input[type="number"] {
 .float-left {
     float:left;
     margin: 1em;
+}
+
+.top-up-50 {
+    position: relative;
+    top: -45px;
 }
