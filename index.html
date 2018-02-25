@@ -41,7 +41,7 @@
         <textarea id="create-file-whitelist"></textarea><br>
         <label for="create-file-blacklist">Blacklist</label>
         <textarea id="create-file-blacklist"></textarea><br>
-        <nobr><input type="checkbox" id="create-file-default-english-stopwords" value="true">Add default English stopwords</nobr><br>
+        <nobr><input type="checkbox" id="create-file-default-english-stopwords" value="true">Add default English stopwords</nobr>
         <nobr><input type="checkbox" id="create-file-default-latin-stopwords" value="true">Add default Latin stopwords</nobr>
         <nobr><input type="checkbox" id="create-file-default-bede-stopwords" value="true">Add Latin stopwords for Bede</nobr>
     </div>
@@ -93,7 +93,7 @@
 <div id="progressbar" class="centered">
     Loading...
 </div>
-<div id="tabs" style="margin: -.5em;">
+<div id="tabs">
     <ul>
         <li><a href="#tab-1">Metadata</a></li>
         <li><a href="#tab-2">Heat Map</a></li>
@@ -101,10 +101,10 @@
         <li><a href="#tab-4">Word Cloud</a></li>
     </ul>
     <div style="position: fixed; bottom: 0; left: 0;">
-        <button class="ui-widget ui-button ui-corner-all" onclick="reloadMainMenu()" style="float: left; margin: 1em;">Main Menu</button>
+        <button class="ui-widget ui-button ui-corner-all float-left" onclick="reloadMainMenu()">Main Menu</button>
     </div>
     <div id="tab-1">
-        <h2 style="margin-top: 0;">Metadata</h2>
+        <h2>Metadata</h2>
         <div>
             <label><strong>Dataset: </strong></label> <label id="dataset"></label><br><br>
             <label><strong>Topics: </strong></label> <label id="topics"></label><br>
@@ -115,8 +115,8 @@
         <div>
             <nobr>
                 <button id="create-nickname">Nickname topic</button>
-                <button id="view-stopwords">View stopwords</button>
                 <button id="save-nicknames" class="ui-button ui-corner-all ui-widget" onclick="saveNicknames();">Save nicknames</button>
+                <button id="view-stopwords">View stopwords</button>
             </nobr>
         </div>
         <div id="metadata-topic-preview">
@@ -126,7 +126,7 @@
             <p id="metadata-topic-preview-text" class="scrollable"></p></div>
     </div>
     <div class="padLeft50" id="tab-2">
-        <h2 style="margin-top: 0;">Heat Map</h2>
+        <h2>Heat Map</h2>
         <div id="options">
             <input id="smoothingBox" type="checkbox" checked>
             <p class=inline>Smoothing: </p>
@@ -168,52 +168,63 @@
         </div>
     </div>
     <div id="tab-3">
-        <div id = "fixed-tools">
+            <div style="display: grid;">
+                <div style="grid-row: 1">
             <div id = "an-text-title">
-             <h2>Annotated Text</h2>
+             <h2 style="grid-row: 1">Annotated Text</h2>
             </div>
-            <div id = "selector-div">
-                <select name="an-text-topic-select" id="an-text-topic-select-1" onchange="highlightAnText();" class="styled-select slate">
+            <div id = "selector-div" class="margin-15">
+                <select name="an-text-topic-select" id="an-text-topic-select-1" value="-2" onchange="onAnTextTopicSelect();" class="styled-select slate">
                     <!-- this select tag will be filled with an <option> for each topic-->
                 </select>
-                <select name="an-text-topic-select" id="an-text-topic-select-2" onchange="highlightAnText();" class="styled-select slate">
+                <select name="an-text-topic-select" id="an-text-topic-select-2" value="-2" onchange="onAnTextTopicSelect();" class="styled-select slate">
                     <!-- this select tag will be filled with an <option> for each topic-->
                 </select>
-                <select name="an-text-topic-select" id="an-text-topic-select-3" onchange="highlightAnText();" class="styled-select slate">
+                <select name="an-text-topic-select" id="an-text-topic-select-3" value="-2" onchange="onAnTextTopicSelect();" class="styled-select slate">
                     <!-- this select tag will be filled with an <option> for each topic-->
                 </select>
-                <select name="an-text-scrollbar-select" id="an-text-scrollbar-select" class="styled-select slate"></select>
             </div>
-            <div><input id="check-highlight" type="checkbox" checked> <label for="check-highlight">Highlight Topic on Mouseover</label> </div>
-        </div>
-        <div id = "an-text-body">
-        </div>
-        <div id="an-text-scrollbar">
-            <svg id="heatmapSVG4"></svg>
-        </div>
+                    <div class="margin-15"><input id="check-highlight" type="checkbox" checked> <label for="check-highlight">Highlight Topic on Mouseover</label> </div>
+                    <div class="margin-15"><label for="an-text-scrollbar-select">Scrollbar topic </label><select name="an-text-scrollbar-select" id="an-text-scrollbar-select" class="styled-select slate"></select></div>
+                    <div id="an-text-body" class="scrollable margin-15"></div>
+                    <div class="text-centered" style="display: block;" id="an-text-nav">
+                    <nobr>
+                        <button class="ui-button ui-widget ui-corner-all" onclick="pageLeft();"><</button>
+                        <div id="page-num-div">
+                            <h5 id="page-number"></h5>
+                        </div>
+                        <button class="ui-button ui-widget ui-corner-all" onclick="pageRight();">></button>
+                        <button id = "jumpTrigger" class="ui-button ui-widget ui-corner-all" onclick="jumpPage()">Jump to</button>
+                        <input type="number" id="jumpNum" value="">
+                    </nobr>
+                </div>
+            </div>
+                <div id="an-text-scrollbar" style="grid-row: 1"><svg id="heatmapSVG4" style="padding-top: 2em;"></svg></div>
+
+            </div>
+
     </div>
     <div id="tab-4">
-        <h2 style="margin-top: 0;">Word Cloud</h2>
+        <h2>Word Cloud</h2>
         <select id="word-cloud-topic-select" class="styled-select slate">
         </select>
         </select>
-        <input type="button" id="resize-button" value="Resize" onclick="resizeWordCloud();" class="ui-button ui-corner-all ui-widget">
+        <input type="button" id="resize-button" value="Resize" onclick="resizeWordCloud();" class="ui-button ui-corner-all ui-widget" style="margin-bottom: 0;">
         <div id="word-cloud">
         </div>
     </div>
-</div>
 
-<div id="nickname-dialog-form" title="Nickname">
+<div id="nickname-dialog-form">
     <form>
         <fieldset>
-            <label for="nickname-input">Nickname</label>
+            <label for="nickname-input"></label>
             <input type="text" name="nickname" id="nickname-input" value="" class="text ui-widget-content ui-corner-all">
             <!-- Allow form submission with keyboard without duplicating the dialog button -->
             <input type="submit" tabindex="-1" style="position:absolute; top:-1000px">
         </fieldset>
     </form>
 </div>
-<div id="stopwords-dialog" title="Stopwords">
+<div id="stopwords-dialog">
     <!-- this div will be filled with the stopword list-->
 </div>
 </body>

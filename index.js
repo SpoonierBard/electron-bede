@@ -1,10 +1,8 @@
-//let fs = require("fs"),
-let model = {},
+// let fs = require("fs"),
+let  model = {},
     input,
-    // currentLoaded = [0, 0], //track from which word to which word we've loaded
-    currentPage = 0,
-    pageRanges = [], //track from which word to which word we've loaded
-    lastScrollPosition = 0;
+    currentPage = 0, //what page of the text are we on?
+    pageRanges = []; //an array of 2-item arrays containing indeces of first and last words of the page
 const colors  = ["#66c2a5", "#fc8d62", "#8da0cb"],
     scaledColors = ["hsl(161, 30%, 90%)", "hsl(17, 30%, 90%)", "hsl(222, 30%, 90%)", "hsl(70, 0%, 90%)", "hsl(161, 63%, 38%)", "hsl(17, 86%, 49%)", "hsl(222, 57%, 47%)", "hsl(70, 0%, 20%)"];
 
@@ -20,6 +18,7 @@ function reloadMainMenu(){
     document.getElementById("json-file").value="";
     document.getElementById("json-file-label").innerText = "Browse";
     document.getElementById("an-text-body").innerHTML = "";
+    $("#tabs").tabs("option", "active", 0);
     currentPage = 0;
     model = {};
 }
@@ -50,6 +49,8 @@ $(document).ready(function () {
             fileName = e.target.value.split('\\').pop();
         if (fileName)
             document.getElementById("json-file-label").innerText = fileName;
+        else
+            document.getElementById("json-file-label").innerText = "Browse";
     });
 });
 /**
@@ -131,8 +132,8 @@ function createConfigFile(){
         outputname = document.getElementById("create-file-output").value,
         upperlimit = parseInt(document.getElementById("create-file-upperlimit").value) / 100,
         lowerlimit = parseInt(document.getElementById("create-file-lowerlimit").value) / 100,
-        whitelist = document.getElementById("create-file-whitelist").value.split(),
-        blacklist = document.getElementById("create-file-blacklist").value.split(),
+        whitelist = document.getElementById("create-file-whitelist").value.split(",").map(x => x.trim()),
+        blacklist = document.getElementById("create-file-blacklist").value.split(",").map(x => x.trim()),
         numberofdocuments,
         lengthofdocuments,
         splitstring,
@@ -249,7 +250,7 @@ function loadFile() {
     }
 }
 
-/**
+/*
  * Transitions from json file upload page to progress bar
  */
 function hideUploadScreen() {
@@ -270,9 +271,8 @@ $(function() {
  * Transitions from progress bar to tabs once they have finished loading
  */
 function loadTabs() {
-    let tabs = document.getElementById("tabs");
     document.getElementById("progressbar").style.display = "none";
-    tabs.style.display = "block";
+    document.getElementById("tabs").style.display = "block";
 }
 
 /**
@@ -286,6 +286,15 @@ $( function() {
 
 //METADATA TAB
 
+function resizeMetadata() {
+    let metadataWidth = window.innerWidth - 220,
+        metadataHeight = window.innerHeight - 400;
+    console.log(metadataHeight);
+    $("#metadata-topic-preview-text")
+        .height(metadataHeight)
+        .width(metadataWidth);
+}
+
 /**
  * Loads data into metadata tab
  */
@@ -297,6 +306,8 @@ function createMetadata(){
     document.getElementById("beta").innerHTML = model["beta"];
     
     document.getElementById("stopwords-dialog").innerHTML = "<p>" + model.stopwords.join(", ") + "</p>";
+
+    resizeMetadata();
 
     //create nicknames data structure
     if (model["nicknames"] === null || model["nicknames"] === undefined) {
@@ -357,8 +368,11 @@ $(document).ready(function() {
 $( function() {
     let dialog = $( "#stopwords-dialog");
     dialog.dialog({
+            open: function() {$("#ui-id-5").css("background-color", "transparent")},
+            title: "Stopwords",
             autoOpen: false,
             height: 400,
+            draggable: false,
             modal: true,
             width: 350,
             overflow: scroll
@@ -375,13 +389,15 @@ $( function() {
  */
 $( function() {
     let dialog, form,
-        topic = $( "#metadata-topic-select"),
-        nickname = $( "#nickname-input" );
-
+        topic = $("#metadata-topic-select"),
+        nickname = $("#nickname-input");
     dialog = $( "#nickname-dialog-form" ).dialog({
+        open: function() {$("#ui-id-6").css("background-color", "transparent")},
+        title: "Nickname",
         autoOpen: false,
         height: 250,
         width: 350,
+        draggable: false,
         modal: true,
         buttons: {
             Cancel: function() {
@@ -401,13 +417,17 @@ $( function() {
 
     $( "#create-nickname").button().on( "click", function() {
         dialog.dialog("open");
+        let topic = parseInt($("#metadata-topic-select").find("option:selected").val());
+        document.getElementById("nickname-input").placeholder = model.nicknames[topic];
     });
 
     function addNickname() {
-        model.nicknames[topic.val()] = nickname.val();
-        let toUpdate = document.getElementsByClassName("select-topic-" + topic.val());
-        for (let i = 0; i < toUpdate.length; i++){
-            toUpdate[i].innerText = model.nicknames[topic.val()];
+        if ($.trim(nickname.val()).length > 0)  {
+            model.nicknames[topic.val()] = nickname.val();
+            let toUpdate = document.getElementsByClassName("select-topic-" + topic.val());
+            for (let i = 0; i < toUpdate.length; i++){
+                toUpdate[i].innerText = model.nicknames[topic.val()];
+            }
         }
         dialog.dialog("close");
     }
@@ -415,23 +435,37 @@ $( function() {
 
 //ANNOTATED TEXT TAB
 
+function resizeAnnotatedText() {
+    let textWidth = window.innerWidth - 300,
+        textHeight = window.innerHeight - 320;
+
+    $("#an-text-body")
+        .height(textHeight)
+        .width(textWidth);
+}
+
 /**
  * Initializes annotated text tab with no topics selected
  */
 
 function createAnnotatedText() {
     pageRanges = indexByPage();
-    let topicDropdownHTML = "<option disabled selected>Select Topic</option>";
+    let topicDropdownHTML = "<option selected value = \"-2\">Select Topic</option>";
+    let topicDropdownHTMLScroll = "<option disabled selected value = \"-2\">Select Topic</option>";
+
+    resizeAnnotatedText();
 
     //create three identical selectors for three possible topic comparisons
     for (let i = 0; i < model.topicWordInstancesDict.length; i++) {
         topicDropdownHTML = topicDropdownHTML + "<option class=\"select-topic-" + i + "\" value=\"" + i + "\">" + model.nicknames[i] + "</option>";
+        topicDropdownHTMLScroll = topicDropdownHTMLScroll + "<option class=\"select-topic-" + i + "\" value=\"" + i + "\">" + model.nicknames[i] + "</option>";
     }
     document.getElementById("an-text-topic-select-1").innerHTML = topicDropdownHTML;
     document.getElementById("an-text-topic-select-2").innerHTML = topicDropdownHTML;
     document.getElementById("an-text-topic-select-3").innerHTML = topicDropdownHTML;
-    document.getElementById("an-text-scrollbar-select").innerHTML = topicDropdownHTML;
+    document.getElementById("an-text-scrollbar-select").innerHTML = topicDropdownHTMLScroll;
     $('#an-text-scrollbar-select').find('option')[1].selected = true;
+    replaceHeatmap(4, 0);
 
     for (let i = 1; i < 4; i++) {
         d3.select("#an-text-topic-select-" + i)
@@ -439,36 +473,32 @@ function createAnnotatedText() {
                 return colors[i - 1];
             });
     }
-    
+    d3.select("#an-text-body")
+        .attr("height", function() {
+            return document.getElementById("heatmapSVG4").height
+        });
     loadAnnotatedText(0);
-    // loadAnnotatedText(currentLoaded[0]);
 
-    // document.getElementById("tab-3").addEventListener('mousewheel', mouseWheelEvent);
+    //if "Enter" presssed in jumpNum input box, click on jumpTrigger button
+    $("#jumpNum").keyup(function(event) {
+        if (event.keyCode === 13) {
+            $("#jumpTrigger").click();
+        }
+    });
 }
 
-function mouseWheelEvent(e) {
-    let delta = e.wheelDelta;
-    loadAnnotatedText(currentLoaded[0] + delta);
-    console.log(delta);
-}
-// function loadAnnotatedText(startIndex, endIndex=(startIndex + 500)) {
-function loadAnnotatedText(pageNum) {
-//     loadAnnotatedText(0, 0);
-// }
-
-// function loadAnnotatedText(startIndex, endIndex=(startIndex + 500)) {
+/* Loads the current page of the text in to the annotated text body */
+function loadAnnotatedText() {
     d3.select("#an-text-body").selectAll("span").remove();
-    //iterate through full text and add each word as own span with topic as class
-    // if (startIndex < 0) {
-    //     startIndex = 0;
-    // }
-    let startIndex = pageRanges[pageNum][0];
-    let endIndex = pageRanges[pageNum][1];
-    let puncTracker = 0, //index of punctuation
+
+    let startIndex = pageRanges[currentPage][0],
+        endIndex = pageRanges[currentPage][1],
+        puncTracker = 0, //index of punctuation
         puncLocation = 0, //index of puncLocation
         puncLocTracker = 0, //where in text
         newlineTracker = 0, //index of newlines
-        startTracker = 0, //track how far into text we are
+        startTracker = 1, //track how far into text we are
+        newlineSetback = 0,
         wordToApp;
     for (let docInText in model.wordsByLocationWithStopwords) {
         for (let word in model.wordsByLocationWithStopwords[docInText]) {
@@ -478,7 +508,17 @@ function loadAnnotatedText(pageNum) {
                 puncTracker += 1;
                 puncLocation += 1;
             }
-            while (puncLocTracker === model.newlineLocations[newlineTracker]) {
+            while (puncLocTracker + newlineSetback === model.newlineLocations[newlineTracker]) {
+                wordToApp += '<br/>';
+                newlineTracker += 1;
+            }
+            if (puncLocTracker == model.puncCapLocations[puncLocation] - 0.5) {
+                wordToApp += (' ' + model.puncAndCap[puncTracker]);
+                puncTracker += 1;
+                puncLocation += 1;
+                newlineSetback += 1;
+            }
+            while (puncLocTracker + newlineSetback === model.newlineLocations[newlineTracker]) {
                 wordToApp += '<br/>';
                 newlineTracker += 1;
             }
@@ -487,59 +527,41 @@ function loadAnnotatedText(pageNum) {
                 d3.select("#an-text-body")
                     .append("span")
                     .html(wordToApp)
-                    // .text(wordToApp)
                     .attr("class", "topic-" + model.topicsByLocationWithStopwords[docInText][word])
+                    //value = 1 if span is a selected topic, 0 otherwise
+                    .attr("value", 0)
                     .on("mouseover", onHover)
                     .on("mouseout", offHover)
-                    .on("click", function() {
-                        jumpToHeatmap(model.topicsByLocationWithStopwords[docInText][word]);
+                    //clicking on selected span triggers a jump to the heatmap
+                    .on("click", function () {
+                        if (parseInt(d3.select(this).attr("value")) === 1) {
+                            jumpToHeatmap();
+                        }
                     });
                 d3.select('#an-text-body')
                     .append("span")
                     .text(" ");
-
             }
             startTracker += 1;
         }
     }
-    onAnTextTopicSelect();
-    // currentLoaded[0] = startIndex;
-    // currentLoaded[1] = endIndex;
-}
-
-// function scrollAnnotatedText() {
-    //TODO: find a way for this to not always be 0 :(
-    // let newScrollPosition = window.scrollY;
-    // if (newScrollPosition >= lastScrollPosition){
-        //downward : load next text
-        // currentLoaded[0] += 11;
-        // currentLoaded[1] += 11;
-    // } else {
-        //upward : load previous text
-    //     currentLoaded[0] -= 11;
-    //     currentLoaded[1] -= 11;
-    // }
-    // lastScrollPosition = newScrollPosition;
-
-
-    // let direction = d3.event.wheelDelta < 0 ? 'down' : 'up';
-    // if (direction == 'up') {
-    //     currentLoaded[0] -= 11;
-    //     currentLoaded[1] -= 11;
-    // } else {
-    //     currentLoaded[0] += 11;
-    //     currentLoaded[1] += 11;
-    // }
-function updatePageNumber(clickDirection) {
-    if (clickDirection == 0 && currentPage != 0) {
-        currentPage -= 1;
-    } else if (clickDirection == 1 && currentPage != pageRanges.length) {
-        currentPage += 1;
+    //update page number indicator
+    document.getElementById("page-number").innerText = ("Page " + (currentPage + 1) + " of " + (pageRanges.length));
+    if (document.getElementById("an-text-body").scrollTop > 20){
+        document.getElementById("an-text-body").scrollTop = 0;
     }
-    loadAnnotatedText(currentPage);
+
+    //select correct scrollbar rectangle
+    let getRekt = "#rect-"+currentPage;
+    replaceHeatmap(4, heatmap4Topic);
+    d3.select(getRekt)
+        .style("fill", "red")
+        .attr("x", 0)
+        .attr("width", 40);
+
+    //make sure all topics get selected as necessary
+    onAnTextTopicSelect();
 }
-
-
 
 
 /**
@@ -592,58 +614,97 @@ function offHover() {
 function onAnTextTopicSelect() {
     //reset all spans to unselected
     d3.selectAll("span")
-        .style("background-color", "white");
+        .style("background-color", "white")
+        .attr("value",0)
+        .style("cursor", "text");
 
     //iterate through selectors and change background color for all spans with the corresponding class name
     for (let i = 0; i < 3; i++) {
         let selector = "an-text-topic-select-" + (i + 1);
         let topic = ".topic-" + document.getElementById(selector).value;
         d3.selectAll(topic)
-            .style("background-color", function() { return colors[i]; });
+            .attr("value", 1)
+            .style("background-color", function() { return colors[i]; })
+            .style("cursor", "pointer");
     }
 }
 
-function jumpToHeatmap(topicNum) {
-    if (topicNum != -1){
-        heatmapTopic1 = topicNum;
-        replaceHeatmap(1,heatmapTopic1);
-        //TODO: change #heatmap1Menu selection
-        $("#heatmap1Menu").val(topicNum)
-        $("#tabs").tabs("option", "active", 1);
+/*
+ Propagates topic selections in heatMap tab to anText tab
+ */
+function propagateDropdownChange() {
+    for (let j = 1; j < 4; j++) {
+        let menuName = "heatmap" + j + "Menu";
+        let topicSelected = parseInt(document.getElementById(menuName).value);
+        let selector = "#an-text-topic-select-" + j;
+        $(selector).val(topicSelected).change();
     }
 }
 
+/*
+On clicking a selected span in anText, switch to heat map tab with same topics selected
+If anText has unselected topics, use default values for each heatmap
+*/
+function jumpToHeatmap() {
+    console.log("jumped");
+    let topicNum;
+    for(let i = 1; i < 4; i++) {
+        if(document.getElementById("an-text-topic-select-" + i).value >= 0) {
+            topicNum = document.getElementById("an-text-topic-select-" + i).value;
+        } else {
+            topicNum = i - 1;
+        }
+        replaceHeatmap(i, topicNum);
+        $('#heatmap' + i + 'Menu').val(topicNum);
+    }
+    $("#tabs").tabs("option", "active", 1);
+
+    //add indicator in heatMap for position in annotatedText that we jumped from
+    let jumpedRect = ".rect-"  + currentPage;
+    d3.selectAll(jumpedRect)
+        .style("fill", "black");
+    //delay and then remove indicator
+    window.setTimeout(replaceAllHeatmaps, 2000);
+}
+
+/*
+Helper function for heatmap jump that removes indicators by overwriting every heatmap
+*/
+function replaceAllHeatmaps() {
+    for (let i = 1; i < 4; i++) {
+        let topicNum = document.getElementById("heatmap" + i + "Menu").value;
+        replaceHeatmap(i, topicNum);
+    }
+}
+
+/*
+Calculate the word ranges on each page and update pageRanges accordingly
+ */
 function indexByPage() {
     let binnedPages = [],
         curPage = [-1,-1],
         totalLength = 0,
-        locTracker = 0, //where in text
-        newlineTracker = 0, //index of newlines
-        wordToApp = "";
+        locTracker = 0;
     for (let i = 0; i < model.wordsByLocationWithStopwords.length; i++) {
         totalLength += model.wordsByLocationWithStopwords[i].length;
     }
-    console.log(totalLength);
     let binSize = Math.floor(totalLength/(heatmapWidthPx/heatmapResPx)),
         countDown = binSize;
-
-        console.log(binSize);
     for (let i = 0; i < model.wordsByLocationWithStopwords.length; i++) {
         for (let j = 0; j < model.wordsByLocationWithStopwords[i].length; j++) {
-            locTracker++;
             countDown--;
+            locTracker++;
             if (curPage[0] === -1) {
                 curPage[0] = locTracker;
             } else {
                 curPage[1] = locTracker;
             }
-            if ((countDown<=0) && (locTracker === model.newlineLocations[newlineTracker]))  {
+            if ((countDown<=0) && (totalLength - locTracker > binSize) /*&& (locTracker === model.newlineLocations[newlineTracker])*/)  {
                 countDown = binSize;
                 binnedPages.push(curPage);
                 curPage = [-1, -1];
-            }
-            while (locTracker === model.newlineLocations[newlineTracker]) {
-                newlineTracker += 1;
+            } else if (locTracker === totalLength){
+                binnedPages.push(curPage);
             }
         }
     }
@@ -657,10 +718,13 @@ let prevalenceArray = [], //this is an array that counts the number of topic wor
     heatmapWidthPx = 500, //this is the total width of the heatmap bar as a whole
     heatmapResPx = 1, //this is the width of each individual rect making up the heatmap
     heatmapSmoothing = 10,
-    heatmapTopic1 = 0,
-    heatmapTopic2 = 1,
-    heatmapTopic3 = 2,
-    heatmapTopic4 = 0;
+    heatmap1Topic,//this is how intense the smoothing applied to the heatmap is
+    heatmap2Topic,
+    heatmap3Topic,
+    heatmap4Topic,
+    heatmap1ColorScale,
+    heatmap2ColorScale,
+    heatmap3ColorScale;
 
 
 
@@ -669,20 +733,20 @@ $(document).ready(function() {
      * Reloads heatmap on corresponding dropdown change
      */
     $( "#heatmap1Menu" ).change(function () {
-        heatmapTopic1 = $("#heatmap1Menu").find("option:selected").val();
-        replaceHeatmap(1, heatmapTopic1);
+        replaceHeatmap(1, $("#heatmap1Menu").find("option:selected").val());
     });
     $( "#heatmap2Menu" ).change(function () {
-        heatmapTopic2 = $("#heatmap2Menu").find("option:selected").val();
-        replaceHeatmap(2, heatmapTopic2);
+        replaceHeatmap(2, $("#heatmap2Menu").find("option:selected").val());
     });
     $( "#heatmap3Menu" ).change(function () {
-        heatmapTopic3 = $("#heatmap3Menu").find("option:selected").val();
-        replaceHeatmap(3, heatmapTopic3);
+        replaceHeatmap(3, $("#heatmap3Menu").find("option:selected").val());
     });
     $( "#an-text-scrollbar-select" ).change(function () {
-        heatmapTopic4 = $("#an-text-scrollbar-select").find("option:selected").val();
-        replaceHeatmap(4, heatmapTopic4);
+        replaceHeatmap(4, $("#an-text-scrollbar-select").find("option:selected").val());
+        d3.select("#rect-" + currentPage)
+            .style("fill", "red")
+            .attr("x", 0)
+            .attr("width", 40);
     });
     /**
      * Reloads heatmaps taking into account whether a smoothing constant is being applied on checkbox change
@@ -691,15 +755,15 @@ $(document).ready(function() {
         function(){
             if ($(this).is(':checked')) {
                 heatmapSmoothing = parseInt($("#smoothingSelect").val());
-                replaceHeatmap(1,heatmapTopic1);
-                replaceHeatmap(2,heatmapTopic2);
-                replaceHeatmap(3,heatmapTopic3);
+                replaceHeatmap(1,heatmap1Topic);
+                replaceHeatmap(2,heatmap2Topic);
+                replaceHeatmap(3,heatmap3Topic);
             }
             else {
                 heatmapSmoothing = 1;
-                replaceHeatmap(1,heatmapTopic1);
-                replaceHeatmap(2,heatmapTopic2);
-                replaceHeatmap(3,heatmapTopic3);
+                replaceHeatmap(1,heatmap1Topic);
+                replaceHeatmap(2,heatmap2Topic);
+                replaceHeatmap(3,heatmap3Topic);
             }
         });
     /**
@@ -708,9 +772,9 @@ $(document).ready(function() {
     $("#smoothingSelect").change(function () {
         if ($("#smoothingBox").is(':checked')) {
             heatmapSmoothing = parseInt($("#smoothingSelect").val());
-            replaceHeatmap(1, heatmapTopic1);
-            replaceHeatmap(2, heatmapTopic2);
-            replaceHeatmap(3, heatmapTopic3);
+            replaceHeatmap(1, heatmap1Topic);
+            replaceHeatmap(2, heatmap2Topic);
+            replaceHeatmap(3, heatmap3Topic);
         }
     });
 });
@@ -802,13 +866,13 @@ function initializeHeatmaps() {
     $('#heatmap2Menu').find('option')[2].selected = true;
     document.getElementById("heatmap3Menu").innerHTML = topicDropdownHTML;
     $('#heatmap3Menu').find('option')[3].selected = true;
-    replaceHeatmap(1,heatmapTopic1);
-    replaceHeatmap(2,heatmapTopic2);
-    replaceHeatmap(3,heatmapTopic3);
-    replaceHeatmap(4, heatmapTopic4);
+    replaceHeatmap(1,0);
+    replaceHeatmap(2,1);
+    replaceHeatmap(3,2);
+    replaceHeatmap(4, 0);
 
     for (let iter = 1; iter < 5; iter++){
-        let topic = eval("heatmapTopic" + iter);
+        let topic = eval("heatmap" + iter + "Topic");
 
         let svg = d3.select("#heatmapSVG" + iter);
 
@@ -821,7 +885,7 @@ function initializeHeatmaps() {
             svg.style("width", function () {
                 return heatmapWidthPx * 1.5 + "px"
             });
-            svg.style("height", 50);
+            svg.style("height", 60);
             changeTop5Words(iter, (iter - 1));
         }
 
@@ -864,6 +928,7 @@ function drawRectangles(svg, dataset, heatmapNum) {
         .domain([d3.min(dataset),
             d3.max(dataset)])
         .range([scaledColors[heatmapNum - 1], scaledColors[heatmapNum + 3]]);
+    eval("heatmap" + heatmapNum + "ColorScale = colorScale;");
     if (heatmapNum === 4) {
         svg.selectAll("rect")
             .data(dataset)
@@ -873,6 +938,11 @@ function drawRectangles(svg, dataset, heatmapNum) {
             .attr("width", 30)
             .attr("x", 5)
             .attr("y", function(d,i) {return i * heatmapResPx})
+            .attr("data-tooltip", function() {
+                let assocPage = parseInt(d3.select(this).attr("y")) + 1;
+                return "Page " + assocPage;
+            })
+            .attr("id", function(d,i) {return "rect-"+i})
             .style("fill", function(d) {return colorScale(d);})
             .on("mouseover", function(d){
                 if (d3.select(this).style("fill") !== "red"){
@@ -890,20 +960,19 @@ function drawRectangles(svg, dataset, heatmapNum) {
                         .attr("width", 30)
             }})
             .on("click", function(d, i){
-                if (heatmapNum === 4) {
-                    svg.selectAll("rect")
-                        .style("fill", function (d) {
-                            return colorScale(d);
-                        })
-                        .attr("width", 30)
-                        .attr("x", 5)
-                    d3.select(this)
-                        .style("fill", "red")
-                        .attr("x", 0)
-                        .attr("width", 40)
+                currentPage = i;
+                if (currentPage >= 500) {
+                    currentPage--;
                 }
-                $("#tabs").tabs("option", "active", 2);
-                loadAnnotatedText(i);
+                svg.selectAll("rect")
+                    .style("fill", function(d) {return colorScale(d);})
+                    .attr("width", 30)
+                    .attr("x", 5);
+                d3.select(this)
+                    .style("fill", "red")
+                    .attr("width", 40)
+                    .attr("x", 0);
+                loadAnnotatedText(currentPage);
             })
     } else {
         svg.selectAll("rect")
@@ -914,25 +983,47 @@ function drawRectangles(svg, dataset, heatmapNum) {
                 return heatmapResPx
             })
             .attr("height", 50)
-            .attr("y", 0)
+            .attr("y", 5)
             .attr("x", function (d, i) {
                 return i * heatmapResPx
+            })
+            .attr("class", function(d,i) {return "rect-" + i; })
+            .attr("id", function(d,i) {return "rect-" + i + "-" + heatmapNum; })
+            .attr("data-tooltip", function() {
+                let assocPage = parseInt(d3.select(this).attr("y")) + 1;
+                return "Page " + assocPage;
             })
             .style("fill", function (d) {
                 return colorScale(d);
             })
             .on("mouseover", function (d) {
-                d3.select(this).style("fill", "black");
+                let rectClass = this.getAttribute("class");
+                let classSelector = "." + rectClass;
+                d3.selectAll(classSelector)
+                //d3.select(this)
+                    .style("fill", "black")
+                    .attr("height", 60)
+                    .attr("y", 0)
+                
             })
-            .on("mouseout", function (d) {
-                d3.select(this).style("fill", function (d) {
-                    return colorScale(d);
-                })
+            .on("mouseout", function () {
+                //TODO: change color-scaling to take heatMap as param
+                // replaceAllHeatmaps();
+                let className = this.getAttribute("class")
+                d3.selectAll("." + className)
+                    .attr("height", 50)
+                    .attr("y", 5);
+                for (let n = 1; n < 4; n++){
+                    d3.select("#" + className + "-" + n).style("fill", function (d) {
+                        return eval("heatmap" + n + "ColorScale")(d);
+                    })
+                }
             })
             .on("click", function (d, i) {
                 $("#tabs").tabs("option", "active", 2);
-                loadAnnotatedText(i);
+                propagateDropdownChange();
                 currentPage = i;
+                loadAnnotatedText(i);
             })
     }
 }
@@ -945,11 +1036,66 @@ function drawRectangles(svg, dataset, heatmapNum) {
 function replaceHeatmap(heatmapNum, topic) {
     var svg = d3.select("#heatmapSVG" + heatmapNum);
     svg.html("");
+    switch(heatmapNum) {
+        case 1:
+            heatmap1Topic = topic;
+            break;
+        case 2:
+            heatmap2Topic = topic;
+            break;
+        case 3:
+            heatmap3Topic = topic;
+            break;
+        case 4:
+            heatmap4Topic = topic;
+            break;
+        default:
+            break;
+    }
     let heatmapArray = createPrevalenceArray(topic);
-    heatmapArray = smoothArray(heatmapArray, heatmapSmoothing);
+    if(heatmapNum < 4) {
+        heatmapArray = smoothArray(heatmapArray, heatmapSmoothing);
+        changeTop5Words(heatmapNum, topic);
+    }
     drawRectangles(svg, heatmapArray, heatmapNum);
-    if (heatmapNum < 4) changeTop5Words(heatmapNum, topic);
 }
+
+/*
+Check to make sure we aren't on the first page, and update page number to previous
+ */
+function pageLeft() {
+    currentPage--;
+    if (currentPage < 0) {
+        currentPage = 0;
+    }
+    loadAnnotatedText(currentPage);
+}
+
+/*
+Check to make sure we're not on the last page, and update page number to next
+ */
+function pageRight() {
+    currentPage++;
+    if (currentPage > (pageRanges.length - 1)) {
+        currentPage = pageRanges.length - 1;
+    }
+    loadAnnotatedText(currentPage);
+}
+
+/*
+Check that page number input is in defined page range, update current page, and reload text from that page
+ */
+function jumpPage() {
+    let newPage = parseInt(document.getElementById("jumpNum").value);
+    if (0 < newPage && newPage <= pageRanges.length) {
+        currentPage = parseInt(document.getElementById("jumpNum").value) - 1;
+        loadAnnotatedText(currentPage);
+    } else {
+        let errorMessage = "Please input a number between 1 and " + (pageRanges.length) + "."
+        alert(errorMessage);
+    }
+}
+
 
 //WORD CLOUD TAB
 
@@ -968,8 +1114,8 @@ function initializeWordCloudTab() {
         sizeDropdownHTMLWordCloud = sizeDropdownHTMLWordCloud + "<option class=\select-size-" + i + "\" value=\"" + i + "\">" + size + "</option>"
     }
     document.getElementById("word-cloud-topic-select").innerHTML = topicDropdownHTMLWordCloud;
-    let width = window.innerWidth - 270;
-    let height = window.innerHeight - 160;
+    let width = window.innerWidth - 230;
+    let height = window.innerHeight - 170;
     createWordCloud(0, width, height);
 }
 function createWordCloud(topicNum, width, height) {
@@ -994,7 +1140,6 @@ function createWordCloud(topicNum, width, height) {
     if (mid) fill = fill.concat(d3.schemeCategory10);
     if (large) fill = fill.concat(d3.schemeCategory20c);
     if (biggest) fill = fill.concat(d3.schemeCategory20b);
-    console.log(fill.length);
     let xScale = d3.scaleLinear()
         .domain([0, d3.max(reduced_entries, function(d) {
             return d.value;
@@ -1030,42 +1175,38 @@ function createWordCloud(topicNum, width, height) {
             })
             .text(function(d) { return d.key; });
     }
-
     d3.layout.cloud().stop();
 }
 
 function resizeWordCloud() {
-    let width = window.innerWidth - 270;
-    let height = window.innerHeight - 160;
+    $("#word-cloud").empty();
+    $("#resize-button").attr("disabled", true);
+    setTimeout(function(){
+        $('#resize-button').prop('disabled',false);
+        }, 750);
+    let width = window.innerWidth - 230,
+        height = window.innerHeight - 160;
     let topic = $("#word-cloud-topic-select").find("option:selected").val();
     if (topic == -1) {
         topic = 0;
     }
-    console.log(topic);
     createWordCloud(topic, width, height);
+
 }
 
-// function exportWordCloud() {
-//     console.log("export");
-//     let wordCloud = document.getElementById('word-cloud');
-//     let image = wordCloud.toDataURL();
-//     console.log(image);
-//     window.open('', image);
-// }
 /**
  * Loads new word cloud on dropdown change
  */
 $(document).ready (function () {
     $("#word-cloud-topic-select").change(function () {
         let topic = $("#word-cloud-topic-select").find("option:selected").val();
-        //let size = parseInt($("#cloud-size").find("option:selected").val());
-        let width = window.innerWidth - 270;
-        let height = window.innerHeight - 160;
-        createWordCloud(topic, width, height)
+        let width = window.innerWidth - 230;
+        let height = window.innerHeight - 170;
+        createWordCloud(topic, width, height);
     });
 });
 
 window.addEventListener('resize', function() {
-
-    console.log('addEventListener - resize');
+    resizeMetadata();
+    resizeAnnotatedText();
 }, true);
