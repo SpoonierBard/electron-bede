@@ -183,6 +183,11 @@ input[type="number"] {
     float: right;
 }
 
+textarea {
+    resize: vertical;
+    overflow: scroll;
+    min-height: 5em;
+}
 
 #metadata-topic-preview-text {
     min-height: 11em;
