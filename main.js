@@ -1,3 +1,7 @@
+/**
+ * Electron boilerplate that creates window and runs index.html
+ */
+
 const {app, BrowserWindow} = require('electron');
 const url = require('url');
 const path = require('path');
@@ -6,9 +10,9 @@ let win;
 
 function createWindow () {
     win = new BrowserWindow({
-        width:800,
+        width:830,
         height: 600,
-        minWidth: 800,
+        minWidth: 830,
         minHeight: 600
     });
 
