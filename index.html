@@ -185,9 +185,13 @@
                 </select>
             </div>
                     <div class="margin-15"><input id="check-highlight" type="checkbox" checked> <label for="check-highlight">Highlight Topic on Mouseover</label> </div>
-                    <div class="margin-15"><label for="an-text-scrollbar-select">Scrollbar topic </label><select name="an-text-scrollbar-select" id="an-text-scrollbar-select" class="styled-select slate"></select></div>
-                    <div id="an-text-body" class="scrollable margin-15"></div>
-                    <div class="text-centered" style="display: block;" id="an-text-nav">
+                    <div class="margin-15" style="position:relative; z-index: 1500; background-color:white; padding-bottom:10px;">
+                        <label for="an-text-scrollbar-select">Scrollbar topic </label><select name="an-text-scrollbar-select" id="an-text-scrollbar-select" class="styled-select slate"></select>
+                    </div>    
+                    <div class="scrollable margin-15 top-up-50">
+                        <div id="an-text-body" style="padding-top:45px"></div>
+                    </div>
+                    <div class="text-centered top-up-50" style="display: block;" id="an-text-nav">
                     <nobr>
                         <button class="ui-button ui-widget ui-corner-all" onclick="pageLeft();"><</button>
                         <div id="page-num-div">
@@ -195,7 +199,7 @@
                         </div>
                         <button class="ui-button ui-widget ui-corner-all" onclick="pageRight();">></button>
                         <button id = "jumpTrigger" class="ui-button ui-widget ui-corner-all" onclick="jumpPage()">Jump to</button>
-                        <input type="number" id="jumpNum" value="">
+                        <input style="position:relative; top:-6px" type="number" id="jumpNum" value="">
                     </nobr>
                     </div>
             </div>
@@ -226,6 +230,7 @@
 </div>
 <div id="stopwords-dialog">
     <!-- this div will be filled with the stopword list-->
+</div>
 </div>
 </body>
 </html>

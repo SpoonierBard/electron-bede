@@ -1,4 +1,4 @@
-// let fs = require("fs"),
+let fs = require("fs");
 let  model = {},
     input,
     currentPage = 0, //what page of the text are we on?
@@ -250,7 +250,7 @@ function loadFile() {
     }
 }
 
-/*
+/**
  * Transitions from json file upload page to progress bar
  */
 function hideUploadScreen() {
@@ -286,6 +286,9 @@ $( function() {
 
 //METADATA TAB
 
+/**
+ * Resizes the topic preview portion of the metadata tab based on window size
+ */
 function resizeMetadata() {
     let metadataWidth = window.innerWidth - 220,
         metadataHeight = window.innerHeight - 400;
@@ -435,6 +438,9 @@ $( function() {
 
 //ANNOTATED TEXT TAB
 
+/**
+ * Resizes the text preview portion of the annotated text tab based on window size
+ */
 function resizeAnnotatedText() {
     let textWidth = window.innerWidth - 300,
         textHeight = window.innerHeight - 320;
@@ -487,8 +493,11 @@ function createAnnotatedText() {
     });
 }
 
-/* Loads the current page of the text in to the annotated text body */
+/**
+ * Loads the current page of the text in to the annotated text body
+ */
 function loadAnnotatedText() {
+    //removes currently loaded text
     d3.select("#an-text-body").selectAll("span").remove();
 
     let startIndex = pageRanges[currentPage][0],
@@ -500,29 +509,39 @@ function loadAnnotatedText() {
         startTracker = 1, //track how far into text we are
         newlineSetback = 0,
         wordToApp;
+
+    //iterate over all words
     for (let docInText in model.wordsByLocationWithStopwords) {
         for (let word in model.wordsByLocationWithStopwords[docInText]) {
+
             wordToApp = model.wordsByLocationWithStopwords[docInText][word];
+
+            //if word originally had punctuation or capitalization, prepare its punctuated / capitalized form
             if (puncLocTracker === model.puncCapLocations[puncLocation]) {
                 wordToApp = model.puncAndCap[puncTracker];
                 puncTracker += 1;
                 puncLocation += 1;
             }
+            //if word originally had newlines after it, add them to the prepared word
             while (puncLocTracker + newlineSetback === model.newlineLocations[newlineTracker]) {
                 wordToApp += '<br/>';
                 newlineTracker += 1;
             }
+            //if there is punctuation without a word attached, add it to the prepared word
             if (puncLocTracker == model.puncCapLocations[puncLocation] - 0.5) {
                 wordToApp += (' ' + model.puncAndCap[puncTracker]);
                 puncTracker += 1;
                 puncLocation += 1;
                 newlineSetback += 1;
             }
+            //check for newlines again after loading that punctuation
             while (puncLocTracker + newlineSetback === model.newlineLocations[newlineTracker]) {
                 wordToApp += '<br/>';
                 newlineTracker += 1;
             }
             puncLocTracker += 1;
+
+            //if the prepared word is in the indices of the current page, load it in
             if (startIndex <= startTracker && startTracker <= endIndex) {
                 d3.select("#an-text-body")
                     .append("span")
@@ -629,8 +648,8 @@ function onAnTextTopicSelect() {
     }
 }
 
-/*
- Propagates topic selections in heatMap tab to anText tab
+/**
+ * Propagates topic selections in heatMap tab to anText tab
  */
 function propagateDropdownChange() {
     for (let j = 1; j < 4; j++) {
@@ -641,10 +660,10 @@ function propagateDropdownChange() {
     }
 }
 
-/*
-On clicking a selected span in anText, switch to heat map tab with same topics selected
-If anText has unselected topics, use default values for each heatmap
-*/
+/**
+ * On clicking a selected span in annotated text, switch to heat map tab with same topics selected
+ * If annotated text has unselected topics, use default values for the corresponding heatmap
+ */
 function jumpToHeatmap() {
     console.log("jumped");
     let topicNum;
@@ -667,8 +686,8 @@ function jumpToHeatmap() {
     window.setTimeout(replaceAllHeatmaps, 2000);
 }
 
-/*
-Helper function for heatmap jump that removes indicators by overwriting every heatmap
+/**
+* Overwrites every heatmap
 */
 function replaceAllHeatmaps() {
     for (let i = 1; i < 4; i++) {
@@ -677,8 +696,9 @@ function replaceAllHeatmaps() {
     }
 }
 
-/*
-Calculate the word ranges on each page and update pageRanges accordingly
+/**
+ * Calculates the word ranges for each page and saves them to pageRanges
+ * @return {number[][]} binnedPages -- array of 2-element arrays representing each page by its first and last index
  */
 function indexByPage() {
     let binnedPages = [],
@@ -699,11 +719,14 @@ function indexByPage() {
             } else {
                 curPage[1] = locTracker;
             }
+            //as long as the page is not the last page, make the page binSize words long and save it
             if ((countDown<=0) && (totalLength - locTracker > binSize) /*&& (locTracker === model.newlineLocations[newlineTracker])*/)  {
                 countDown = binSize;
                 binnedPages.push(curPage);
                 curPage = [-1, -1];
-            } else if (locTracker === totalLength){
+            }
+            //if the page is the last page, wait until all remaining words have been added to it before saving its ranges
+            else if (locTracker === totalLength){
                 binnedPages.push(curPage);
             }
         }
@@ -721,10 +744,7 @@ let prevalenceArray = [], //this is an array that counts the number of topic wor
     heatmap1Topic,//this is how intense the smoothing applied to the heatmap is
     heatmap2Topic,
     heatmap3Topic,
-    heatmap4Topic,
-    heatmap1ColorScale,
-    heatmap2ColorScale,
-    heatmap3ColorScale;
+    heatmap4Topic;
 
 
 
@@ -782,9 +802,11 @@ $(document).ready(function() {
 /**
  * Creates an array representing the distribution of a particular topic across corpus
  * @param {number} topic -- topic whose distribution array will represent
- * @returns number[] -- array representing topic distribution across corpus
+ * @returns {number[]} -- array representing topic distribution across corpus
  */
 function createPrevalenceArray(topic) {
+
+    //create 2D array representing the corpus, each element is 1 if the corresponding word is in the topic, 0 otherwise
     let innerArray = [];
     for (let i = 0; i < model.wordsByLocationWithStopwords.length; i++) {
         for (let j = 0; j < model.wordsByLocationWithStopwords[i].length; j++) {
@@ -798,6 +820,7 @@ function createPrevalenceArray(topic) {
         innerArray = [];
     }
 
+    //separate the values into heatmapWidthPx/heatmapResPx bins, each of which is the sum of the values it contains
     let binnedArray = [0],
         totalLength = 0;
     for (let i = 0; i < prevalenceArray.length; i++) {
@@ -852,10 +875,7 @@ function smoothArray(originalArray, smoothingRadius) {
  * Initializes heatmap tab
  */
 function initializeHeatmaps() {
-//    d3.select("#heatmap1Menu").selectAll("option")
-//    .data(model.topicList).enter()
-//    .append("option")
-//        .text(function (d) {return d})
+
     let topicDropdownHTML = "<option disabled>Select Topic</option>";
     for (let i = 0; i < model.topicWordInstancesDict.length; i++) {
         topicDropdownHTML = topicDropdownHTML + "<option class=\"select-topic-" + i + "\" value=\"" + i + "\">" + model.nicknames[i] + "</option>";
@@ -894,8 +914,6 @@ function initializeHeatmaps() {
 
         drawRectangles(svg, binnedArray, iter);
     }
-
-
 }
 
 /**
@@ -904,7 +922,6 @@ function initializeHeatmaps() {
  * @param {number} topic -- which topic to load
  */
 function changeTop5Words(heatmapNum, topic) {
-    //var topic = eval("heatmapTopic" + heatmapNum);
     let topicWords = Object.keys(model.topicWordInstancesDict[topic]),
         sortedWords = topicWords.sort(function(a,b){
         return model.topicWordInstancesDict[topic][b] - model.topicWordInstancesDict[topic][a];
@@ -929,6 +946,7 @@ function drawRectangles(svg, dataset, heatmapNum) {
             d3.max(dataset)])
         .range([scaledColors[heatmapNum - 1], scaledColors[heatmapNum + 3]]);
     eval("heatmap" + heatmapNum + "ColorScale = colorScale;");
+    //annotated text scrollbar
     if (heatmapNum === 4) {
         svg.selectAll("rect")
             .data(dataset)
@@ -974,7 +992,9 @@ function drawRectangles(svg, dataset, heatmapNum) {
                     .attr("x", 0);
                 loadAnnotatedText(currentPage);
             })
-    } else {
+    }
+    //heatmaps on heatmap tab
+    else {
         svg.selectAll("rect")
             .data(dataset)
             .enter()
@@ -1009,7 +1029,7 @@ function drawRectangles(svg, dataset, heatmapNum) {
             .on("mouseout", function () {
                 //TODO: change color-scaling to take heatMap as param
                 // replaceAllHeatmaps();
-                let className = this.getAttribute("class")
+                let className = this.getAttribute("class");
                 d3.selectAll("." + className)
                     .attr("height", 50)
                     .attr("y", 5);
@@ -1034,7 +1054,7 @@ function drawRectangles(svg, dataset, heatmapNum) {
  * @param {number} topic -- which topic to load
  */
 function replaceHeatmap(heatmapNum, topic) {
-    var svg = d3.select("#heatmapSVG" + heatmapNum);
+    let svg = d3.select("#heatmapSVG" + heatmapNum);
     svg.html("");
     switch(heatmapNum) {
         case 1:
@@ -1060,8 +1080,8 @@ function replaceHeatmap(heatmapNum, topic) {
     drawRectangles(svg, heatmapArray, heatmapNum);
 }
 
-/*
-Check to make sure we aren't on the first page, and update page number to previous
+/**
+ * Decrements current page and reloads annotated text, never going below 0
  */
 function pageLeft() {
     currentPage--;
@@ -1071,8 +1091,8 @@ function pageLeft() {
     loadAnnotatedText(currentPage);
 }
 
-/*
-Check to make sure we're not on the last page, and update page number to next
+/**
+ * Increments current page and reloads annotated text, never going beyond last page
  */
 function pageRight() {
     currentPage++;
@@ -1082,8 +1102,8 @@ function pageRight() {
     loadAnnotatedText(currentPage);
 }
 
-/*
-Check that page number input is in defined page range, update current page, and reload text from that page
+/**
+ * Checks that page number input is in defined page range, updates current page, and reloads text
  */
 function jumpPage() {
     let newPage = parseInt(document.getElementById("jumpNum").value);
@@ -1091,7 +1111,7 @@ function jumpPage() {
         currentPage = parseInt(document.getElementById("jumpNum").value) - 1;
         loadAnnotatedText(currentPage);
     } else {
-        let errorMessage = "Please input a number between 1 and " + (pageRanges.length) + "."
+        let errorMessage = "Please input a number between 1 and " + (pageRanges.length) + ".";
         alert(errorMessage);
     }
 }
@@ -1118,19 +1138,24 @@ function initializeWordCloudTab() {
     let height = window.innerHeight - 170;
     createWordCloud(0, width, height);
 }
-function createWordCloud(topicNum, width, height) {
+
 /**
  * Reloads word cloud based on a new topic
  * @param {number} topicNum -- topic to be displayed
+ * @param {number} width -- new width of word cloud
+ * @param {number} height -- new height of word cloud
  */
+function createWordCloud(topicNum, width, height) {
     $("#word-cloud").empty();
-    let svg_location = "#word-cloud", topic = topicNum;
-    let word_entries = model.topicWordInstancesDict[topic];
+    let svg_location = "#word-cloud";
+    let word_entries = model.topicWordInstancesDict[topicNum];
+
     //filtered_entries contains every element of word_entries with a count greater than 1
     let reduced_entries = d3.entries(Object.keys(word_entries).reduce(function (new_dict, key) {
         if (word_entries[key] > 1 && key.length > 2) new_dict[key] = word_entries[key];
         return new_dict;
     }, {}));
+
     let fill = d3.schemeCategory20;
     let size = width * height;
     let len = reduced_entries.length;
@@ -1178,6 +1203,9 @@ function createWordCloud(topicNum, width, height) {
     d3.layout.cloud().stop();
 }
 
+/**
+ * Resizes the word cloud, then begins a cooldown on the button to give the word cloud time to load before reclicking
+ */
 function resizeWordCloud() {
     $("#word-cloud").empty();
     $("#resize-button").attr("disabled", true);
@@ -1191,7 +1219,6 @@ function resizeWordCloud() {
         topic = 0;
     }
     createWordCloud(topic, width, height);
-
 }
 
 /**
@@ -1206,6 +1233,9 @@ $(document).ready (function () {
     });
 });
 
+/**
+ * Resizes metadata and annotated text when window is resized
+ */
 window.addEventListener('resize', function() {
     resizeMetadata();
     resizeAnnotatedText();

@@ -2,6 +2,10 @@
 
 :focus {outline:0 !important;}
 
+html {
+    overflow: hidden;
+}
+
 #webview {
     position: absolute;
     top: 0;
@@ -11,30 +15,60 @@
     display: inline-flex !important;
 }
 
-html {
-    overflow: hidden;
-}
+
 .ui-widget.ui-widget-content{
     border: none;
-}
-
-input[type="file"] {
-    display: none;
-}
-
-input[type="number"] {
-    width: 50px;
-}
-.centered {
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
 }
 
 .ui-button {
     margin-bottom: 1em;
 }
+
+.ui-tabs{
+    padding: 0;
+    height: 100%;
+    width: 100%;
+}
+.ui-tabs-vertical .ui-tabs-nav {
+    padding: .2em .1em 100em .2em;
+    float: left;
+    width: 10em;
+    height: 100%;
+}
+
+.ui-tabs-vertical .ui-tabs-nav li {
+    clear: left;
+    width: 100%;
+    /*border-bottom-width: 1px !important;*/
+    border-right-width: 0 !important;
+    /*margin: 0 -1px .2em 0;*/
+    height: 120px;
+}
+
+.ui-tabs-vertical .ui-tabs-nav li a {
+    display:block;
+    width: 80%;
+    height: 100px;
+}
+
+.ui-tabs .ui-tabs-nav .ui-tabs-anchor{
+    padding-top: 50px;
+    padding-bottom: 50px;
+    padding-left: 1em;
+}
+
+.ui-tabs-vertical .ui-tabs-nav li.ui-tabs-active {
+    padding-bottom: 0;
+    padding-right: .1em;
+    border-right-width: 1px;
+}
+
+.ui-tabs-vertical .ui-tabs-panel {
+    padding: 1em;
+    height: 100%;
+    overflow: hidden;
+}
+
 .styled-select {
     background: #e6e6e6 url("js/jquery-ui-1.12.1.custom/images/ui-bg_glass_75_e6e6e6_1x400.png") 50% 50% repeat-x;
     height: 29px;
@@ -57,153 +91,10 @@ input[type="number"] {
     width: 268px;
 }
 
-#tabs {
-    display: none;
-    /*position: relative;*/
-    margin: -.5em;
-}
-
-#progressbar {
-    display: none;
-    width: 80%;
-}
-
-#welcome-page {
-    display: block;
-}
-
-#file-upload {
-    display: none;
-}
-#create-file-form {
-    display: none;
-}
-
-.ui-tabs{
-    padding: 0;
-    height: 100%;
-    width: 100%;
-}
-.ui-tabs-vertical .ui-tabs-nav {
-    padding: .2em .1em 100em .2em;
-    float: left;
-    width: 10em;
-    height: 100%;
-    }
-
-#ui-id-4 {
-    padding-bottom: 0;
-}
-.ui-tabs-vertical .ui-tabs-nav li {
-    clear: left;
-    width: 100%;
-    /*border-bottom-width: 1px !important;*/
-    border-right-width: 0 !important;
-    /*margin: 0 -1px .2em 0;*/
-    height: 120px;
-    }
-
-.ui-tabs-vertical .ui-tabs-nav li a {
-    display:block;
-    width: 80%;
-    height: 100px;
-    }
-
-.ui-tabs .ui-tabs-nav .ui-tabs-anchor{
-    padding-top: 50px;
-    padding-bottom: 50px;
-    padding-left: 1em;
-}
-
-.ui-tabs-vertical .ui-tabs-nav li.ui-tabs-active {
-    padding-bottom: 0;
-    padding-right: .1em;
-    border-right-width: 1px;
-    }
-
-.ui-tabs-vertical .ui-tabs-panel {
-    padding: 1em;
-    height: 100%;
-    overflow: hidden;
-    }
-
-
-.scrollable {
-    overflow: scroll;
-}
-
-.text-centered {
-    text-align: center;
-}
-
-#word-cloud {
-    height: 80%;
-    width: 100%;
-}
-
-#fixed-tools {
-    /*margin-top: 0;
-    position: fixed;
-    top: 0;*/
-    display: block;
-    width: auto;
-    background-color: white;
-    padding-bottom: 12px;
-}
-
-#an-text-scrollbar {
-    float: right;
-    display: inline;
-}
-
-#an-text-body {
-    height: 300px;
-    width: 90%;
-    float: left;
-    display: block;
-    z-index: 2000;
-}
-
-#an-text-nav {
-    display: inline;
-}
-
-#an-text-scrollbar-select {
-    z-index = -20;
-}
-
-#json-file-label {
-    width: 279px;
-}
-
-#json-file-main-menu{
-    width: 180px;
-}
-
-#upload {
-    width: 130px;
-    float: right;
-}
-
-textarea {
-    resize: vertical;
-    overflow: scroll;
-    min-height: 5em;
-}
-
-#metadata-topic-preview-text {
-    min-height: 11em;
-    /*height: 100%;*/
-}
-
-/*#tab-4 {
-    width: 90%;
-}*/
 
 /* Tooltip styles developed by Chris Bracco*/
 [data-tooltip] {
     position: relative;
-    z-index: 2000;
     cursor: pointer;
 }
 
@@ -220,7 +111,8 @@ textarea {
 /* Position tooltip above the element */
 [data-tooltip]:before {
     position: absolute;
-    bottom: 150%;
+    z-index: 2000;
+    bottom: 100%;
     left: 50%;
     margin-bottom: 5px;
     margin-left: -80px;
@@ -241,7 +133,8 @@ textarea {
 /* Triangle hack to make tooltip look like a speech bubble */
 [data-tooltip]:after {
     position: absolute;
-    bottom: 150%;
+    z-index:2000;
+    bottom: 100%;
     left: 50%;
     margin-left: -5px;
     width: 0;
@@ -264,6 +157,36 @@ textarea {
     opacity: 1;
 }
 
+.centered {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+}
+
+.scrollable {
+    overflow: scroll;
+}
+
+.text-centered {
+    text-align: center;
+}
+
+.margin-15 {
+    display: block;
+    margin: 15px 0 15px 0
+}
+
+.float-left {
+    float:left;
+    margin: 1em;
+}
+
+.top-up-50 {
+    position: relative;
+    top: -45px;
+}
+
 .inline {
     display:inline;
 }
@@ -278,6 +201,81 @@ textarea {
     padding: 5px;
 }
 
+input[type="file"] {
+    display: none;
+}
+
+input[type="number"] {
+    width: 50px;
+}
+
+#tabs {
+    display: none;
+    margin: -.5em;
+}
+
+#progressbar {
+    display: none;
+    width: 80%;
+}
+
+#welcome-page {
+    display: block;
+}
+
+#file-upload {
+    display: none;
+}
+#create-file-form {
+    display: none;
+}
+
+#ui-id-4 {
+    padding-bottom: 0;
+}
+
+#word-cloud {
+    height: 80%;
+    width: 100%;
+}
+
+#an-text-scrollbar {
+    float: right;
+    display: inline;
+}
+
+#an-text-body {
+    height: 300px;
+    width: 90%;
+    float: left;
+    display: block;
+    z-index: 2000;
+}
+
+#an-text-nav {
+    display: inline;
+    vertical-align: center;
+}
+
+#json-file-label {
+    width: 279px;
+}
+
+#json-file-main-menu{
+    width: 180px;
+}
+
+#upload {
+    width: 130px;
+    float: right;
+}
+
+textarea {
+    resize: vertical;
+    overflow: scroll;
+    min-height: 5em;
+}
+
 #page-num-div {
     display: inline-block;
     width: 15em;
@@ -288,12 +286,3 @@ textarea {
     top: -0.5em;
 }
 
-.margin-15 {
-    display: block; 
-    margin: 15px 0 15px 0
-}
-
-.float-left {
-    float:left;
-    margin: 1em;
-}
