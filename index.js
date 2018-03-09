@@ -1199,6 +1199,7 @@ function createWordCloud(topicNum, width, height) {
                 return "translate(" + [d.x, d.y] + ")rotate(" + d.rotate + ")";
             })
             .text(function(d) { return d.key; });
+        $('#resize-button').prop('disabled',false);
     }
     d3.layout.cloud().stop();
 }
@@ -1209,9 +1210,6 @@ function createWordCloud(topicNum, width, height) {
 function resizeWordCloud() {
     $("#word-cloud").empty();
     $("#resize-button").attr("disabled", true);
-    setTimeout(function(){
-        $('#resize-button').prop('disabled',false);
-        }, 750);
     let width = window.innerWidth - 230,
         height = window.innerHeight - 160;
     let topic = $("#word-cloud-topic-select").find("option:selected").val();
