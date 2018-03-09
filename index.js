@@ -292,7 +292,6 @@ $( function() {
 function resizeMetadata() {
     let metadataWidth = window.innerWidth - 220,
         metadataHeight = window.innerHeight - 400;
-    console.log(metadataHeight);
     $("#metadata-topic-preview-text")
         .height(metadataHeight)
         .width(metadataWidth);
@@ -665,7 +664,6 @@ function propagateDropdownChange() {
  * If annotated text has unselected topics, use default values for the corresponding heatmap
  */
 function jumpToHeatmap() {
-    console.log("jumped");
     let topicNum;
     for(let i = 1; i < 4; i++) {
         if(document.getElementById("an-text-topic-select-" + i).value >= 0) {
