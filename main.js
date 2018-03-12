@@ -13,15 +13,14 @@ function createWindow () {
         width:830,
         height: 600,
         minWidth: 830,
-        minHeight: 600
+        minHeight: 600,
+        icon: path.join(__dirname, 'icons/png/64x64.png')
     });
 
     win.loadURL(url.format({
         pathname: path.join(__dirname, 'index.html'),
         protocol: 'file:',
     }));
-
-    win.webContents.openDevTools();
 
     win.on('closed', () => {
         win = null
