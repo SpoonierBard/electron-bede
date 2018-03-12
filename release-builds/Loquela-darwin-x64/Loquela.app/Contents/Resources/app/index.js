@@ -1,4 +1,6 @@
-// let fs = require("fs");
+const fs = require("fs");
+const remote = require("electron").remote;
+const dialog = remote.require("electron").dialog;
 let  model = {},
     input,
     currentPage = 0, //what page of the text are we on?
@@ -194,13 +196,19 @@ function createConfigFile(){
     config["chunking options"] = choptions;
     config["hyperparameters"] = hyperparameters;
 
-    let filename = "./" + outputname + "-config.json";
-    fs.writeFile(filename, JSON.stringify(config), (err) => {
-        if (err) {
-            console.error(err);
+    let defaultfilename = "~/" + outputname + "-config.json";
+    dialog.showSaveDialog({defaultPath: defaultfilename}, function (fileName){
+        if (fileName === undefined) {
+            return;
         }
+        fs.writeFile(fileName, JSON.stringify(config), (err) => {
+            if (err) {
+                console.error(err);
+            }
+        });
+        reloadMainMenu();
     });
-    reloadMainMenu();
+
 }
 
 /**
