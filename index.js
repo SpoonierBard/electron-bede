@@ -292,7 +292,6 @@ $( function() {
 function resizeMetadata() {
     let metadataWidth = window.innerWidth - 220,
         metadataHeight = window.innerHeight - 400;
-    console.log(metadataHeight);
     $("#metadata-topic-preview-text")
         .height(metadataHeight)
         .width(metadataWidth);
@@ -665,7 +664,6 @@ function propagateDropdownChange() {
  * If annotated text has unselected topics, use default values for the corresponding heatmap
  */
 function jumpToHeatmap() {
-    console.log("jumped");
     let topicNum;
     for(let i = 1; i < 4; i++) {
         if(document.getElementById("an-text-topic-select-" + i).value >= 0) {
@@ -1199,6 +1197,7 @@ function createWordCloud(topicNum, width, height) {
                 return "translate(" + [d.x, d.y] + ")rotate(" + d.rotate + ")";
             })
             .text(function(d) { return d.key; });
+        $('#resize-button').prop('disabled',false);
     }
     d3.layout.cloud().stop();
 }
@@ -1209,9 +1208,6 @@ function createWordCloud(topicNum, width, height) {
 function resizeWordCloud() {
     $("#word-cloud").empty();
     $("#resize-button").attr("disabled", true);
-    setTimeout(function(){
-        $('#resize-button').prop('disabled',false);
-        }, 750);
     let width = window.innerWidth - 230,
         height = window.innerHeight - 160;
     let topic = $("#word-cloud-topic-select").find("option:selected").val();

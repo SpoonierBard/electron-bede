@@ -14,7 +14,7 @@ function createWindow () {
         height: 600,
         minWidth: 830,
         minHeight: 600,
-        icon: path.join(__dirname, 'icons/png/64x64.png')
+        icon: path.join(__dirname, 'icons/64x64.png')
     });
 
     win.loadURL(url.format({
