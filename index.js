@@ -1,4 +1,4 @@
-let fs = require("fs");
+// let fs = require("fs");
 let  model = {},
     input,
     currentPage = 0, //what page of the text are we on?
@@ -527,7 +527,7 @@ function loadAnnotatedText() {
                 newlineTracker += 1;
             }
             //if there is punctuation without a word attached, add it to the prepared word
-            if (puncLocTracker == model.puncCapLocations[puncLocation] - 0.5) {
+            while (puncLocTracker == model.puncCapLocations[puncLocation] - 0.5) {
                 wordToApp += (' ' + model.puncAndCap[puncTracker]);
                 puncTracker += 1;
                 puncLocation += 1;
