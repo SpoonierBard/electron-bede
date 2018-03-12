@@ -95,15 +95,15 @@
 </div>
 <div id="tabs">
     <ul>
-        <li><a href="#tab-1">Metadata</a></li>
-        <li><a href="#tab-2">Heat Map</a></li>
-        <li><a href="#tab-3">Annotated Text</a></li>
-        <li><a href="#tab-4">Word Cloud</a></li>
+        <li><a href="#metadata-tab">Metadata</a></li>
+        <li><a href="#wordcloud-tab">Word Cloud</a></li>
+        <li><a href="#heatmap-tab">Heat Map</a></li>
+        <li><a href="#an-text-tab">Annotated Text</a></li>
     </ul>
     <div style="position: fixed; bottom: 0; left: 0;">
         <button class="ui-widget ui-button ui-corner-all float-left" onclick="reloadMainMenu()">Main Menu</button>
     </div>
-    <div id="tab-1">
+    <div id="metadata-tab">
         <h2>Metadata</h2>
         <div>
             <label><strong>Dataset: </strong></label> <label id="dataset"></label><br><br>
@@ -125,7 +125,7 @@
             </select>
             <p id="metadata-topic-preview-text" class="scrollable"></p></div>
     </div>
-    <div class="padLeft50" id="tab-2">
+    <div class="padLeft50" id="heatmap-tab">
         <h2>Heat Map</h2>
         <div id="options">
             <input id="smoothingBox" type="checkbox" checked>
@@ -167,7 +167,7 @@
             <svg id="heatmapSVG3"></svg>
         </div>
     </div>
-    <div id="tab-3">
+    <div id="an-text-tab">
             <div style="display: grid;">
                 <div style="grid-row: 1">
             <div id = "an-text-title">
@@ -208,7 +208,7 @@
             </div>
 
     </div>
-    <div id="tab-4">
+    <div id="wordcloud-tab">
         <h2>Word Cloud</h2>
         <select id="word-cloud-topic-select" class="styled-select slate">
         </select>
