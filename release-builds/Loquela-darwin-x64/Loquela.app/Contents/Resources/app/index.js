@@ -682,7 +682,7 @@ function jumpToHeatmap() {
         replaceHeatmap(i, topicNum);
         $('#heatmap' + i + 'Menu').val(topicNum);
     }
-    $("#tabs").tabs("option", "active", 1);
+    $("#tabs").tabs("option", "active", 2);
 
     //add indicator in heatMap for position in annotatedText that we jumped from
     let jumpedRect = ".rect-"  + currentPage;
@@ -1046,7 +1046,7 @@ function drawRectangles(svg, dataset, heatmapNum) {
                 }
             })
             .on("click", function (d, i) {
-                $("#tabs").tabs("option", "active", 2);
+                $("#tabs").tabs("option", "active", 3);
                 propagateDropdownChange();
                 currentPage = i;
                 loadAnnotatedText(i);
